@@ -1,5 +1,5 @@
 {
-  "description": "Stage 3 adversarial enterprise banking audit critique.",
+  "description": "Stage 3 adversarial enterprise banking audit critique (Committee 2C).",
   "properties": {
     "id": {
       "format": "uuid",
@@ -11,28 +11,22 @@
       "title": "Dossier Id",
       "type": "string"
     },
-    "topology_score": {
+    "security_score": {
       "maximum": 1.0,
       "minimum": 0.0,
-      "title": "Topology Score",
+      "title": "Security Score",
       "type": "number"
     },
-    "determinism_score": {
+    "cicd_score": {
       "maximum": 1.0,
       "minimum": 0.0,
-      "title": "Determinism Score",
+      "title": "Cicd Score",
       "type": "number"
     },
-    "privacy_score": {
+    "qe_score": {
       "maximum": 1.0,
       "minimum": 0.0,
-      "title": "Privacy Score",
-      "type": "number"
-    },
-    "auditability_score": {
-      "maximum": 1.0,
-      "minimum": 0.0,
-      "title": "Auditability Score",
+      "title": "Qe Score",
       "type": "number"
     },
     "composite_viability_score": {
@@ -55,6 +49,42 @@
       "title": "Prerequisites",
       "type": "array"
     },
+    "security_critique": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Security Critique"
+    },
+    "cicd_critique": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cicd Critique"
+    },
+    "qe_critique": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Qe Critique"
+    },
     "skeptic_critique": {
       "title": "Skeptic Critique",
       "type": "string"
@@ -67,10 +97,9 @@
   },
   "required": [
     "dossier_id",
-    "topology_score",
-    "determinism_score",
-    "privacy_score",
-    "auditability_score",
+    "security_score",
+    "cicd_score",
+    "qe_score",
     "composite_viability_score",
     "skeptic_critique"
   ],

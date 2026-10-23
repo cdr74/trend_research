@@ -70,13 +70,15 @@
 - [ ] **M3-T2: Stage 2 Deep Extractor Agent**
   - Extract technical claims, evidence tiers, reproducible artifacts, and domain pillar classifications from normalized signals.
   - Compute text embeddings using the pluggable provider and persist to `pgvector`.
-- [ ] **M3-T3: Stage 3 Enterprise Skeptic Agent**
-  - Adversarial prompt engineering simulating a Tier-1 Banking Chief Architect.
-  - Evaluate against the 4 gates: Deployment Topology (VPC/on-prem), Deterministic CI/CD, Data Privacy/Leakage, Auditability.
-  - Calculate anti-hype penalties and engineering bonuses.
-- [ ] **M3-T4: Stage 4 Radar Categorizer**
-  - Synthesize validity and viability scores into final Radar rings (`Adopt`, `Trial`, `Assess`, `Hold`).
-  - Calculate semantic similarity against existing entries via `pgvector` to identify and flag wrapper redundancy.
+- [ ] **M3-T3: Stage 3 Multi-Persona Adversarial Committee (Option 2C)**
+  - Implement 3 discrete critic agents with banking-grade constraint prompts:
+    1. CISO / Security Architect (Weight: 35% - data egress, air-gapped readiness, secret leakage)
+    2. CI/CD Platform Architect (Weight: 35% - seed determinism, runner footprint, flaky isolation)
+    3. Quality Engineering Director (Weight: 30% - real defect discovery vs vanity benchmarks)
+  - Generate structured committee scores, risk flags, prerequisites, and critiques.
+- [ ] **M3-T4: Stage 4 Radar Categorizer & Wrapper Detection (Option 3B)**
+  - Synthesize committee viability and validity scores into final Radar rings (`Adopt`, `Trial`, `Assess`, `Hold`).
+  - Execute `pgvector` cosine similarity query against existing dossiers; apply automated Wrapper Penalty ($-0.20$) if similarity $> 0.88$ with no distinct benchmark.
 - [ ] **M3-T5: Golden Benchmark Evaluation Test Suite**
   - Create regression benchmark with 10 high-signal verified papers vs. 10 hype products.
   - Assert deterministic scoring thresholds.

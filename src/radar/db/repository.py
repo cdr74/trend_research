@@ -68,13 +68,15 @@ class RadarRepository:
         record = EnterpriseEvaluationTable(
             id=evaluation.id,
             dossier_id=evaluation.dossier_id,
-            topology_score=evaluation.topology_score,
-            determinism_score=evaluation.determinism_score,
-            privacy_score=evaluation.privacy_score,
-            auditability_score=evaluation.auditability_score,
+            security_score=evaluation.security_score,
+            cicd_score=evaluation.cicd_score,
+            qe_score=evaluation.qe_score,
             composite_viability_score=evaluation.composite_viability_score,
             enterprise_risks=evaluation.enterprise_risks,
             prerequisites=evaluation.prerequisites,
+            security_critique=evaluation.security_critique,
+            cicd_critique=evaluation.cicd_critique,
+            qe_critique=evaluation.qe_critique,
             skeptic_critique=evaluation.skeptic_critique,
         )
         self.session.add(record)

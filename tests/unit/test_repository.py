@@ -72,29 +72,33 @@ def test_enterprise_evaluation_to_orm_mapping() -> None:
     dossier_id = uuid4()
     evaluation = EnterpriseEvaluation(
         dossier_id=dossier_id,
-        topology_score=1.0,
-        determinism_score=0.9,
-        privacy_score=1.0,
-        auditability_score=0.8,
-        composite_viability_score=0.925,
+        security_score=1.0,
+        cicd_score=0.9,
+        qe_score=0.85,
+        composite_viability_score=0.92,
         enterprise_risks=[],
         prerequisites=["Local GPU recommended"],
         skeptic_critique="Meets all Tier-1 banking constraints.",
+        security_critique="Air-gapped VPC compatible.",
+        cicd_critique="Seeded determinism.",
+        qe_critique="Strong contract assertions.",
     )
     table = EnterpriseEvaluationTable(
         id=evaluation.id,
         dossier_id=evaluation.dossier_id,
-        topology_score=evaluation.topology_score,
-        determinism_score=evaluation.determinism_score,
-        privacy_score=evaluation.privacy_score,
-        auditability_score=evaluation.auditability_score,
+        security_score=evaluation.security_score,
+        cicd_score=evaluation.cicd_score,
+        qe_score=evaluation.qe_score,
         composite_viability_score=evaluation.composite_viability_score,
         enterprise_risks=evaluation.enterprise_risks,
         prerequisites=evaluation.prerequisites,
+        security_critique=evaluation.security_critique,
+        cicd_critique=evaluation.cicd_critique,
+        qe_critique=evaluation.qe_critique,
         skeptic_critique=evaluation.skeptic_critique,
     )
-    assert table.composite_viability_score == 0.925
-    assert table.topology_score == 1.0
+    assert table.composite_viability_score == 0.92
+    assert table.security_score == 1.0
 
 
 def test_radar_item_to_orm_mapping() -> None:

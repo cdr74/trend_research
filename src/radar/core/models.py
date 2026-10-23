@@ -79,17 +79,21 @@ class SignalDossier(BaseModel):
 
 
 class EnterpriseEvaluation(BaseModel):
-    """Stage 3 adversarial enterprise banking audit critique."""
+    """Stage 3 adversarial enterprise banking audit critique (Committee 2C)."""
 
     id: UUID = Field(default_factory=uuid4)
     dossier_id: UUID
-    topology_score: float = Field(..., ge=0.0, le=1.0)
-    determinism_score: float = Field(..., ge=0.0, le=1.0)
-    privacy_score: float = Field(..., ge=0.0, le=1.0)
-    auditability_score: float = Field(..., ge=0.0, le=1.0)
+    # Persona sub-scores (Weights: Security 35%, CI/CD 35%, QE 30%)
+    security_score: float = Field(..., ge=0.0, le=1.0)
+    cicd_score: float = Field(..., ge=0.0, le=1.0)
+    qe_score: float = Field(..., ge=0.0, le=1.0)
     composite_viability_score: float = Field(..., ge=0.0, le=1.0)
     enterprise_risks: list[str] = Field(default_factory=list)
     prerequisites: list[str] = Field(default_factory=list)
+    # Detailed persona critiques
+    security_critique: str | None = None
+    cicd_critique: str | None = None
+    qe_critique: str | None = None
     skeptic_critique: str
     evaluated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 

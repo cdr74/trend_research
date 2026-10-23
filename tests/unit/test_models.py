@@ -49,27 +49,28 @@ def test_signal_dossier_creation() -> None:
 
 def test_enterprise_evaluation_score_bounds() -> None:
     dossier_id = uuid4()
-    # Valid evaluation
+    # Valid evaluation (Committee 2C: Security 35%, CI/CD 35%, QE 30%)
     eval_record = EnterpriseEvaluation(
         dossier_id=dossier_id,
-        topology_score=0.9,
-        determinism_score=0.85,
-        privacy_score=0.95,
-        auditability_score=0.8,
-        composite_viability_score=0.88,
+        security_score=0.95,
+        cicd_score=0.85,
+        qe_score=0.80,
+        composite_viability_score=0.87,
         enterprise_risks=["Requires self-hosted Ollama deployment."],
         skeptic_critique="Meets zero-egress banking criteria.",
+        security_critique="Zero data egress verified.",
+        cicd_critique="Deterministic seed execution verified.",
+        qe_critique="High defect mutation score.",
     )
-    assert eval_record.composite_viability_score == 0.88
+    assert eval_record.composite_viability_score == 0.87
 
     # Invalid score > 1.0
     with pytest.raises(ValidationError):
         EnterpriseEvaluation(
             dossier_id=dossier_id,
-            topology_score=1.5,
-            determinism_score=0.5,
-            privacy_score=0.5,
-            auditability_score=0.5,
+            security_score=1.5,
+            cicd_score=0.5,
+            qe_score=0.5,
             composite_viability_score=0.5,
             skeptic_critique="Out of bounds",
         )
@@ -78,10 +79,9 @@ def test_enterprise_evaluation_score_bounds() -> None:
     with pytest.raises(ValidationError):
         EnterpriseEvaluation(
             dossier_id=dossier_id,
-            topology_score=-0.2,
-            determinism_score=0.5,
-            privacy_score=0.5,
-            auditability_score=0.5,
+            security_score=-0.2,
+            cicd_score=0.5,
+            qe_score=0.5,
             composite_viability_score=0.5,
             skeptic_critique="Out of bounds",
         )

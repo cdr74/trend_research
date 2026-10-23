@@ -1,7 +1,7 @@
 # ADR 0000: Macro System Architecture & End-to-End Processing Topology
 
 ## Status
-Proposed (Under Active Deliberation)
+Accepted (Deliberated and locked with Engineering)
 
 ---
 
@@ -106,9 +106,39 @@ flowchart TD
 
 ---
 
-## 3. Decision Rationale & Proposed Architecture
+## 3. Decision Rationale & Selected Architecture
 
-We propose the **Decoupled 4-Stage DAG Architecture** with **Hybrid Heuristic-Adversarial Evaluation** and **Unified PostgreSQL + pgvector Persistence**:
+Following collaborative deliberation, the architecture formally locks into:
+- **Dimension 1:** **Option 1C** (Decoupled 4-Stage Directed Acyclic Graph with Deterministic Intermediate Checkpoints).
+- **Dimension 2:** **Option 2C** (Multi-Persona Adversarial Committee: CISO / Security Gate, CI/CD Platform Architect, Quality Engineering Director).
+- **Dimension 3:** **Option 3B** (Unified PostgreSQL + pgvector Persistence for Semantic Clustering and Automated Wrapper Penalization).
+
+### 3.1 The 3-Persona Adversarial Review Committee (Stage 3)
+Instead of a single monolithic prompt, Stage 3 executes three discrete adversarial evaluators, each assessing candidate innovations from distinct enterprise banking governance mandates:
+
+| Committee Persona | Mandate & Focus | Evaluation Criteria | Weight |
+| :--- | :--- | :--- | :--- |
+| **1. CISO / Security Architect** | Data egress boundaries, secrecy, credentials, compliance. | - Zero-egress VPC & on-prem / air-gapped readiness.<br>- Private source code, DB schema, or customer test data leakage.<br>- Secret / token scrubbing in synthetic fixtures. | **35%** |
+| **2. CI/CD Platform Architect** | Determinism, runner economics, build gate reliability. | - Deterministic seed replayability (zero flaky test introduction).<br>- Runner compute overhead & container execution model.<br>- Flaky test quarantine & failure isolation mechanisms. | **35%** |
+| **3. QE Director / Lead** | True defect discovery, test maintainability, resilience. | - Real-world defect detection vs synthetic vanity benchmarks.<br>- Assertion quality and locator robustness (anti-brittle).<br>- Test suite maintainability and contract/spec alignment. | **30%** |
+
+#### Enterprise Viability Composite Formula:
+$$E_v = 0.35 \cdot S_{\text{security}} + 0.35 \cdot S_{\text{cicd}} + 0.30 \cdot S_{\text{qe}}$$
+
+Each persona independently generates:
+1. Normalized score $S_i \in [0.0, 1.0]$.
+2. Explicit risk flags and vulnerabilities.
+3. Operational prerequisites for bank adoption.
+4. Detailed critique reasoning.
+
+### 3.2 Semantic Clustering & Wrapper Penalty (Stage 4 & pgvector)
+During Stage 2, technical claim embeddings (1536 dims) are stored in `signal_dossiers.embedding`.
+In Stage 4, before ring categorization:
+1. An asynchronous cosine distance search queries existing dossiers:
+   $$\text{Cosine Distance}(\vec{u}, \vec{v}) = 1 - \frac{\vec{u} \cdot \vec{v}}{\|\vec{u}\| \|\vec{v}\|}$$
+2. If similarity $> 0.88$ (`WRAPPER_SIMILARITY_THRESHOLD`) with an existing entry, and the candidate fails to provide an independent open benchmark or distinct architectural mechanism:
+   - An automatic **Wrapper Deduction ($-0.20$)** is applied to Signal Validity $S_v$.
+   - The item is flagged: `"Flagged as wrapper / duplicate of [Existing Tool/Paper]"`.
 
 ```mermaid
 flowchart TD
@@ -121,26 +151,33 @@ flowchart TD
     subgraph DB ["2. Unified Persistence (PostgreSQL 16 + pgvector)"]
         T_RAW[("ingested_sources\n(Raw Payloads + Noise Score)")]
         T_DOS[("signal_dossiers\n(Claims + pgvector Embeddings)")]
-        T_EVAL[("enterprise_evaluations\n(Adversarial Critiques + Scores)")]
+        T_EVAL[("enterprise_evaluations\n(CISO, CI/CD, QE Critiques)")]
         T_RADAR[("radar_items\n(Active Rings + Historical Deltas)")]
     end
 
-    subgraph DAG ["3. Deterministic 4-Stage DAG Pipeline"]
+    subgraph DAG ["3. Deterministic 4-Stage DAG Pipeline (1C)"]
         direction TB
         ST1["Stage 1: Noise Sieve\n(Heuristic filter; drops Hype > 0.60)"]
         ST2["Stage 2: Deep Extractor\n(Technical fact extraction + vectorization)"]
-        ST3["Stage 3: Enterprise Skeptic\n(Adversarial banking viability review)"]
-        ST4["Stage 4: Radar Categorizer\n(Adopt/Trial/Assess/Hold placement)"]
+        
+        subgraph Stage3 ["Stage 3: Multi-Persona Committee (2C)"]
+            direction LR
+            P_SEC["CISO / Security Gate\n(Weight: 35%)"]
+            P_CICD["CI/CD Architect\n(Weight: 35%)"]
+            P_QE["QE Director\n(Weight: 30%)"]
+        end
+
+        ST4["Stage 4: Radar Categorizer\n(Adopt/Trial/Assess/Hold placement +\npgvector Wrapper Detection (3B))"]
 
         ST1 -->|"Qualified Signals"| ST2
-        ST2 -->|"Signal Dossier"| ST3
-        ST3 -->|"Scored Critique"| ST4
+        ST2 -->|"Signal Dossier"| Stage3
+        Stage3 -->|"Synthesized Critique"| ST4
     end
 
     Sources --> ST1
     ST1 -.->|"Persist & Checkpoint"| T_RAW
     ST2 -.->|"Dossier & Embedding"| T_DOS
-    ST3 -.->|"Audit Trail"| T_EVAL
+    Stage3 -.->|"Audit Trail"| T_EVAL
     ST4 -.->|"Published State"| T_RADAR
 
     subgraph Presentation ["4. Decoupled Presentation Layer"]
@@ -180,16 +217,15 @@ flowchart TD
 
 ---
 
-## 6. Open Deliberation Points for the Design Session
+## 6. Deliberation Outcome & Active Discussion Points
 
-Before locking this architecture into full implementation, we invite discussion on the following structural choices:
+### Deliberation Resolution:
+- **Decision on 1C (DAG):** Adopted. Guarantees deterministic state checkpoints and bounded costs.
+- **Decision on 2C (Adversarial Committee):** Adopted. Replaces monolithic review with 3 banking personas (CISO: 35%, CI/CD: 35%, QE: 30%).
+- **Decision on 3B (pgvector Deduplication):** Adopted. Detects wrapper redundancy via cosine distance $> 0.88$ with automatic $-0.20$ penalty.
 
-1. **Enterprise Skeptic Composition (Single vs. Multi-Persona):**
-   - *Option A:* Single monolithic "Tier-1 Bank Chief Architect" prompt evaluating topology, determinism, privacy, and auditability in one pass.
-   - *Option B:* Three decoupled critic personas (Security/CISO, Platform/CI-CD Architect, QE Practitioner) whose individual scores are weighted and aggregated.
-2. **Scope Boundaries for Quality Engineering:**
-   - How aggressively should we exclude adjacent SDLC tools? (e.g., General code autocomplete vs. dedicated test synthesis; general log analyzers vs. test failure root-cause analysis).
-3. **Historical Trend Tracking & Ring Movements:**
-   - How should we capture tool movements over time (e.g., from *Assess* $\rightarrow$ *Trial* $\rightarrow$ *Adopt* or demotion to *Hold*)? Should rings be evaluated dynamically with change-vectors (e.g., $\Delta \text{score}$) recorded per bi-weekly release?
-4. **Interactive Dashboard View Modes:**
-   - Beyond the 4-quadrant radar and filterable data grid, what additional analytical perspectives are most valuable for leadership reviews? (e.g., Scatter matrix of Hype vs. Viability, Semantic Cluster map of overlapping tools, Timeline/Trend view).
+### Next Topics for Review:
+1. **Scope Boundaries for Quality Engineering:**
+   - Defining inclusion vs. exclusion boundaries for adjacent SDLC tools (e.g. general coding agents vs. QE-specialized agents).
+2. **Historical Trend Tracking & Ring Movements:**
+   - Tracking delta score movements across bi-weekly runs.

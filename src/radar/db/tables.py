@@ -71,7 +71,7 @@ class SignalDossierTable(Base):
 
 
 class EnterpriseEvaluationTable(Base):
-    """Stage 3 adversarial banking evaluation critique."""
+    """Stage 3 adversarial banking evaluation critique (Committee 2C)."""
 
     __tablename__ = "enterprise_evaluations"
 
@@ -79,13 +79,15 @@ class EnterpriseEvaluationTable(Base):
     dossier_id: Mapped[UUID] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("signal_dossiers.id"), unique=True, nullable=False
     )
-    topology_score: Mapped[float] = mapped_column(Float, nullable=False)
-    determinism_score: Mapped[float] = mapped_column(Float, nullable=False)
-    privacy_score: Mapped[float] = mapped_column(Float, nullable=False)
-    auditability_score: Mapped[float] = mapped_column(Float, nullable=False)
+    security_score: Mapped[float] = mapped_column(Float, nullable=False)
+    cicd_score: Mapped[float] = mapped_column(Float, nullable=False)
+    qe_score: Mapped[float] = mapped_column(Float, nullable=False)
     composite_viability_score: Mapped[float] = mapped_column(Float, nullable=False, index=True)
     enterprise_risks: Mapped[list[str]] = mapped_column(JSONB, default=list)
     prerequisites: Mapped[list[str]] = mapped_column(JSONB, default=list)
+    security_critique: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cicd_critique: Mapped[str | None] = mapped_column(Text, nullable=True)
+    qe_critique: Mapped[str | None] = mapped_column(Text, nullable=True)
     skeptic_critique: Mapped[str] = mapped_column(Text, nullable=False)
     evaluated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC)

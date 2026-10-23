@@ -24,15 +24,24 @@ flowchart TD
         DB[("PostgreSQL\nTables & Vector Index")]
     end
 
-    subgraph Pipeline ["4-Stage Processing DAG"]
+    subgraph Pipeline ["4-Stage Processing DAG (Option 1C)"]
         ING -->|"Raw Ingestion Payloads"| ST1["Stage 1: Noise Sieve\n(Rule-based heuristics)"]
-        ST1 -->|"Qualified Signals\n(Hype < 0.60)"| ST2["Stage 2: Deep Extractor\n(Fact & Claim Extraction)"]
-        ST2 -->|"Signal Dossier"| ST3["Stage 3: Enterprise Skeptic\n(Adversarial Banking Audit)"]
-        ST3 -->|"Scored Critique"| ST4["Stage 4: Radar Categorizer\n(Scoring & Ring Assignment)"]
+        ST1 -->|"Qualified Signals\n(Hype < 0.60)"| ST2["Stage 2: Deep Extractor\n(Fact & Claim Extraction + Vectors)"]
+        
+        subgraph Stage3 ["Stage 3: Multi-Persona Committee (Option 2C)"]
+            direction TB
+            P_SEC["CISO Gate (35%)"]
+            P_CICD["CI/CD Platform (35%)"]
+            P_QE["QE Director (30%)"]
+        end
+
+        ST2 -->|"Signal Dossier"| Stage3
+        Stage3 -->|"Synthesized Critique"| ST4["Stage 4: Radar Categorizer\n(Adopt/Trial/Assess/Hold +\npgvector Wrapper Detection (3B))"]
     end
 
     ING -.->|"Persist Raw"| DB
     ST2 -.->|"Vector Embeddings"| DB
+    Stage3 -.->|"Audit Trail"| DB
     ST4 -.->|"Persist Evaluated Signal"| DB
 
     subgraph Presentation ["Presentation & Publication Layer"]
@@ -81,12 +90,13 @@ flowchart LR
 The composite **Hype Score** is defined as $H = 1.0 - S_v$.
 
 ### 4.2 Enterprise Viability Score ($E_v$)
-The **Enterprise Skeptic** evaluates signals against 4 mandatory enterprise banking gates:
+The **Adversarial Banking Committee (Option 2C)** evaluates qualified signals across three governance mandates:
 
-1. **Deployment Topology (Weight: 30%):** Zero-egress VPC, self-hosted container, or air-gapped on-prem support.
-2. **Deterministic Reproducibility (Weight: 25%):** Predictable behavior, seeded test execution, zero flakiness introduced into CI/CD pipelines.
-3. **Data Security & Privacy (Weight: 25%):** Strict boundary enforcement; no leakage of proprietary source code, DB schemas, or test payloads to third-party SaaS endpoints.
-4. **Auditability & Traceability (Weight: 20%):** Produces machine- and human-verifiable reasoning trails, test proofs, and structured reports suitable for compliance auditors.
+1. **CISO / Security Gate (Weight: 35%):** Zero-egress VPC, air-gapped on-prem container compatibility, customer data boundary enforcement, credential scrubbing.
+2. **CI/CD Platform Architect (Weight: 35%):** Deterministic reproducibility (seeded execution, zero flakiness), runner resource economics, flaky test quarantine mechanisms.
+3. **Quality Engineering Director (Weight: 30%):** True defect discovery vs synthetic vanity metrics, locator resilience, mutation score improvement, contract/spec adherence.
+
+$$\text{Composite Viability: } E_v = 0.35 \cdot S_{\text{security}} + 0.35 \cdot S_{\text{cicd}} + 0.30 \cdot S_{\text{qe}}$$
 
 ### 4.3 Radar Ring Assignment Matrix
 
