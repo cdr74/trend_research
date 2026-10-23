@@ -11,8 +11,18 @@
       "title": "EvidenceTier",
       "type": "string"
     },
+    "LifecycleStage": {
+      "description": "Trend lifecycle trajectory based on engagement velocity and consensus.",
+      "enum": [
+        "Emerging",
+        "Consolidated",
+        "Fading"
+      ],
+      "title": "LifecycleStage",
+      "type": "string"
+    },
     "QECategory": {
-      "description": "The 6 core SDLC Quality Engineering pillars.",
+      "description": "The 6 core SDLC Quality Engineering pillars (Reference Domain Profile).",
       "enum": [
         "Spec & Model",
         "Test Synthesis",
@@ -25,7 +35,7 @@
       "type": "string"
     },
     "RadarRing": {
-      "description": "Tech Radar rings based on enterprise viability and signal validity.",
+      "description": "Tech Radar rings based on viability, validity, and operational ergonomics.",
       "enum": [
         "Adopt",
         "Trial",
@@ -42,6 +52,19 @@
       "format": "uuid",
       "title": "Id",
       "type": "string"
+    },
+    "topic_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Topic Id"
     },
     "name": {
       "title": "Name",
@@ -77,6 +100,27 @@
     },
     "recommended_ring": {
       "$ref": "#/$defs/RadarRing"
+    },
+    "lifecycle_stage": {
+      "$ref": "#/$defs/LifecycleStage",
+      "default": "Emerging"
+    },
+    "corroboration_count": {
+      "default": 1,
+      "title": "Corroboration Count",
+      "type": "integer"
+    },
+    "velocity_score": {
+      "default": 0.0,
+      "title": "Velocity Score",
+      "type": "number"
+    },
+    "corroborating_sources": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Corroborating Sources",
+      "type": "array"
     },
     "key_innovation": {
       "title": "Key Innovation",

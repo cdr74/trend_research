@@ -1,0 +1,89 @@
+{
+  "$defs": {
+    "LifecycleStage": {
+      "description": "Trend lifecycle trajectory based on engagement velocity and consensus.",
+      "enum": [
+        "Emerging",
+        "Consolidated",
+        "Fading"
+      ],
+      "title": "LifecycleStage",
+      "type": "string"
+    },
+    "QECategory": {
+      "description": "The 6 core SDLC Quality Engineering pillars (Reference Domain Profile).",
+      "enum": [
+        "Spec & Model",
+        "Test Synthesis",
+        "Execution & Optimization",
+        "Triage & Self-Healing",
+        "Agent Systems",
+        "Governance & Evals"
+      ],
+      "title": "QECategory",
+      "type": "string"
+    }
+  },
+  "description": "Synthesized cross-source trend topic entity (Option 3B).",
+  "properties": {
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "category": {
+      "$ref": "#/$defs/QECategory"
+    },
+    "summary": {
+      "title": "Summary",
+      "type": "string"
+    },
+    "corroboration_count": {
+      "default": 1,
+      "title": "Corroboration Count",
+      "type": "integer"
+    },
+    "sources": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Sources",
+      "type": "array"
+    },
+    "average_viability": {
+      "default": 0.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Average Viability",
+      "type": "number"
+    },
+    "average_validity": {
+      "default": 0.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Average Validity",
+      "type": "number"
+    },
+    "lifecycle_stage": {
+      "$ref": "#/$defs/LifecycleStage",
+      "default": "Emerging"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "category",
+    "summary"
+  ],
+  "title": "TrendTopic",
+  "type": "object",
+  "$id": "https://radar.internal/schemas/topic.schema.json"
+}

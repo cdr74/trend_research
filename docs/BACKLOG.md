@@ -1,7 +1,7 @@
-# Product & Engineering Backlog: AI Test Engineering Horizon Radar
+# Product & Engineering Backlog: Trend Horizon Radar
 
 ## Project Overview & Core Parameters
-- **Mission:** Autonomous intelligence engine filtering, evaluating, and clustering SDLC and Quality Engineering (QE) innovations with adversarial anti-hype skepticism and banking enterprise viability scoring.
+- **Mission:** Autonomous intelligence platform for professionals that continuously monitors, filters, corroborates, and evaluates emerging technology trends, enforcing deterministic anti-hype penalties, multi-source topic convergence, engagement velocity tracking, and multi-lens adversarial evaluation via pluggable domain profiles.
 - **Repository:** `https://github.com/cdr74/trend_research`
 - **Target Runtime:** Python 3.12 managed via `uv`, Node.js 20+ for web dashboard.
 - **Persistence:** Local PostgreSQL 16 + pgvector via Podman.
@@ -38,29 +38,28 @@
 
 ---
 
-## Milestone 2: Source Ingestion & Heuristic Noise Sieve
-**Goal:** Build asynchronous ingestion collectors and Stage 1 deterministic noise filter.
+## Milestone 2: Source Ingestion, Telemetry & Heuristic Noise Sieve
+**Goal:** Build asynchronous multi-channel ingestion collectors, capture audience engagement telemetry, and execute Stage 1 deterministic noise filtering.
 
 ### Stories & Tasks:
-- [ ] **M2-T1: Ingestion Engine Contract & Base Class**
+- [ ] **M2-T1: Ingestion Engine Contract & Telemetry Normalizer**
   - Implement `src/radar/ingestion/base.py` defining asynchronous `BaseIngestor` protocol.
-  - Add payload normalization, rate-limiting, and error handling.
-- [ ] **M2-T2: arXiv cs.SE Ingestion Collector**
-  - Implement arXiv API client querying `cs.SE` (Software Engineering) and related categories.
-  - Filter by keywords (mutation testing, test generation, LLM evaluation, agentic testing).
-- [ ] **M2-T3: GitHub Repository & Metrics Ingestor**
-  - Implement GitHub API / GraphQL client tracking star velocity, commit frequency, issue-to-resolution ratio, and open licenses.
-- [ ] **M2-T4: Curated RSS & Engineering Blog Ingestor**
-  - Implement RSS/Atom feed reader for Tier-1 engineering post-mortems and practitioner blogs.
+  - Normalize engagement metrics (citations, reader counts, viewer data, stars/forks) and compute baseline velocity.
+- [ ] **M2-T2: Academic Pre-Print Ingestion Collector (arXiv / Semantic Scholar)**
+  - Implement academic API client querying technical pre-prints with citation metadata.
+- [ ] **M2-T3: Open Source Repository & Metrics Ingestor (GitHub)**
+  - Implement GitHub API / GraphQL client tracking star velocity ($\Delta \text{stars}/\Delta t$), contributor counts, and issue resolution velocity.
+- [ ] **M2-T4: Practitioner Publication & Media Ingestor (RSS / Atom / Web)**
+  - Implement feed reader capturing engineering case studies, post-mortems, and community telemetry.
 - [ ] **M2-T5: Stage 1 Noise Sieve (Rule-based Filter)**
   - Implement heuristic classifier dropping marketing buzzwords, unsubstantiated claims, and affiliate links.
   - Calculate early `heuristic_noise_score`; immediately drop records with hype $> 0.60$.
-  - *Acceptance Criteria:* Stage 1 filter correctly filters out synthetic benchmark claims and sponsored listicles with > 90% precision.
+  - *Acceptance Criteria:* Stage 1 filter correctly drops synthetic benchmark claims and sponsored listicles with > 90% precision.
 
 ---
 
-## Milestone 3: Adversarial LLM Multi-Agent Evaluation Pipeline
-**Goal:** Implement deep fact extraction, adversarial banking skeptic review, and radar categorization.
+## Milestone 3: Topic Convergence, Adversarial Committee & Evaluation Pipeline
+**Goal:** Implement deep fact extraction, pgvector topic clustering, cross-source corroboration, multi-lens committee review, and radar categorization.
 
 ### Stories & Tasks:
 - [ ] **M3-T1: Pluggable LLM Provider Adapter**
@@ -68,19 +67,23 @@
   - Implement `GeminiProvider`, `OpenAICompatibleProvider` (Ollama/vLLM/OpenAI), and deterministic `MockProvider` for testing.
   - Implement structured output validation using Pydantic schemas.
 - [ ] **M3-T2: Stage 2 Deep Extractor Agent**
-  - Extract technical claims, evidence tiers, reproducible artifacts, and domain pillar classifications from normalized signals.
+  - Extract technical claims, evidence tiers, reproducible artifacts, and domain classifications from normalized signals.
   - Compute text embeddings using the pluggable provider and persist to `pgvector`.
-- [ ] **M3-T3: Stage 3 Multi-Persona Adversarial Committee (Option 2C)**
-  - Implement 3 discrete critic agents with banking-grade constraint prompts:
-    1. CISO / Security Architect (Weight: 35% - data egress, air-gapped readiness, secret leakage)
-    2. CI/CD Platform Architect (Weight: 35% - seed determinism, runner footprint, flaky isolation)
-    3. Quality Engineering Director (Weight: 30% - real defect discovery vs vanity benchmarks)
+- [ ] **M3-T3: pgvector Topic Convergence & Cross-Source Corroboration (Option 3B)**
+  - Implement semantic topic clustering: link signals across distinct source channels sharing similarity $> 0.82$ to a shared `TrendTopic`.
+  - Award positive consensus bonus for independent multi-source corroboration ($N_{\text{sources}} \ge 3$).
+  - Detect parasitic wrappers (similarity $> 0.88$ with no distinct dataset/code) and apply automated Wrapper Penalty ($-0.20$).
+- [ ] **M3-T4: Stage 3 Multi-Lens Evaluator Committee (Option 2C)**
+  - Implement 3 discrete critic agents with domain governance prompts:
+    1. Security & Privacy Lens (Weight: 35% - data egress boundaries, zero-trust, secret handling)
+    2. Operational Feasibility Lens (Weight: 35% - seed determinism, runner footprint, integration friction)
+    3. Technical Rigor Lens (Weight: 30% - empirical problem-solving vs synthetic vanity benchmarks)
   - Generate structured committee scores, risk flags, prerequisites, and critiques.
-- [ ] **M3-T4: Stage 4 Radar Categorizer & Wrapper Detection (Option 3B)**
-  - Synthesize committee viability and validity scores into final Radar rings (`Adopt`, `Trial`, `Assess`, `Hold`).
-  - Execute `pgvector` cosine similarity query against existing dossiers; apply automated Wrapper Penalty ($-0.20$) if similarity $> 0.88$ with no distinct benchmark.
-- [ ] **M3-T5: Golden Benchmark Evaluation Test Suite**
-  - Create regression benchmark with 10 high-signal verified papers vs. 10 hype products.
+- [ ] **M3-T5: Stage 4 Radar Categorizer & Lifecycle Trajectory**
+  - Synthesize committee viability, validity, and corroboration into final Radar rings (`Adopt`, `Trial`, `Assess`, `Hold`).
+  - Classify lifecycle trajectory (`Emerging`, `Consolidated`, `Fading`) based on time-decayed engagement velocity.
+- [ ] **M3-T6: Golden Benchmark Evaluation Test Suite**
+  - Create regression benchmark with 10 high-signal verified innovations vs. 10 hype products.
   - Assert deterministic scoring thresholds.
 
 ---

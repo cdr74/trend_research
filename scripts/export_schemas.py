@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from radar.core.models import EnterpriseEvaluation, RadarItem, SignalDossier
+from radar.core.models import EnterpriseEvaluation, RadarItem, SignalDossier, TrendTopic
 
 
 def export_schemas() -> None:
@@ -14,6 +14,11 @@ def export_schemas() -> None:
     signal_schema = RadarItem.model_json_schema()
     signal_schema["$id"] = "https://radar.internal/schemas/signal.schema.json"
     (schema_dir / "signal.schema.json").write_text(json.dumps(signal_schema, indent=2))
+
+    # Topic schema
+    topic_schema = TrendTopic.model_json_schema()
+    topic_schema["$id"] = "https://radar.internal/schemas/topic.schema.json"
+    (schema_dir / "topic.schema.json").write_text(json.dumps(topic_schema, indent=2))
 
     # Dossier schema
     dossier_schema = SignalDossier.model_json_schema()

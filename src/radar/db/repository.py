@@ -7,17 +7,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from radar.core.models import (
     EnterpriseEvaluation,
+    LifecycleStage,
     QECategory,
     RadarItem,
     RadarRing,
     SignalDossier,
     SourcePayload,
+    TrendTopic,
 )
 from radar.db.tables import (
     EnterpriseEvaluationTable,
     IngestedSourceTable,
     RadarItemTable,
     SignalDossierTable,
+    TrendTopicTable,
 )
 
 
@@ -28,7 +31,7 @@ class RadarRepository:
         self.session = session
 
     async def save_source_payload(self, payload: SourcePayload) -> IngestedSourceTable:
-        """Persist a raw ingested source payload."""
+        """Persist a raw ingested source payload with engagement metrics."""
         record = IngestedSourceTable(
             id=payload.id,
             source_type=payload.source_type.value,
@@ -38,6 +41,24 @@ class RadarRepository:
             author=payload.author,
             published_date=payload.published_date,
             meta=payload.metadata,
+            engagement_metrics=payload.engagement_metrics,
+        )
+        self.session.add(record)
+        await self.session.flush()
+        return record
+
+    async def save_topic(self, topic: TrendTopic) -> TrendTopicTable:
+        """Persist a multi-source synthesized trend topic cluster."""
+        record = TrendTopicTable(
+            id=topic.id,
+            name=topic.name,
+            category=topic.category.value,
+            summary=topic.summary,
+            corroboration_count=topic.corroboration_count,
+            sources=topic.sources,
+            average_viability=topic.average_viability,
+            average_validity=topic.average_validity,
+            lifecycle_stage=topic.lifecycle_stage.value,
         )
         self.session.add(record)
         await self.session.flush()
@@ -48,6 +69,7 @@ class RadarRepository:
         record = SignalDossierTable(
             id=dossier.id,
             source_id=dossier.source_id,
+            topic_id=dossier.topic_id,
             name=dossier.name,
             category=dossier.category.value,
             source_url=dossier.source_url,
@@ -58,13 +80,14 @@ class RadarRepository:
             has_open_source_repo=dossier.has_open_source_repo,
             is_superficial_wrapper=dossier.is_superficial_wrapper,
             embedding=dossier.embedding,
+            engagement_metrics=dossier.engagement_metrics,
         )
         self.session.add(record)
         await self.session.flush()
         return record
 
     async def save_evaluation(self, evaluation: EnterpriseEvaluation) -> EnterpriseEvaluationTable:
-        """Persist a Stage 3 adversarial banking evaluation."""
+        """Persist a Stage 3 multi-lens committee evaluation."""
         record = EnterpriseEvaluationTable(
             id=evaluation.id,
             dossier_id=evaluation.dossier_id,
@@ -84,10 +107,11 @@ class RadarRepository:
         return record
 
     async def save_radar_item(self, item: RadarItem) -> RadarItemTable:
-        """Persist a Stage 4 final radar item."""
+        """Persist a Stage 4 final radar publication entity."""
         record = RadarItemTable(
             id=item.id,
             evaluation_id=item.evaluation_id,
+            topic_id=item.topic_id,
             name=item.name,
             category=item.category.value,
             source_url=item.source_url,
@@ -96,6 +120,10 @@ class RadarRepository:
             viability_score=item.viability_score,
             validity_score=item.validity_score,
             recommended_ring=item.recommended_ring.value,
+            lifecycle_stage=item.lifecycle_stage.value,
+            corroboration_count=item.corroboration_count,
+            velocity_score=item.velocity_score,
+            corroborating_sources=item.corroborating_sources,
             key_innovation=item.key_innovation,
             enterprise_risks=item.enterprise_risks,
             prerequisites=item.prerequisites,
@@ -109,10 +137,11 @@ class RadarRepository:
         self,
         ring: RadarRing | None = None,
         category: QECategory | None = None,
+        lifecycle_stage: LifecycleStage | None = None,
         min_viability: float = 0.0,
         max_hype: float = 1.0,
     ) -> list[RadarItemTable]:
-        """Query active radar items with filters."""
+        """Query active radar items with multi-criteria filters."""
         stmt = (
             select(RadarItemTable)
             .where(RadarItemTable.active.is_(True))
@@ -123,6 +152,8 @@ class RadarRepository:
             stmt = stmt.where(RadarItemTable.recommended_ring == ring.value)
         if category is not None:
             stmt = stmt.where(RadarItemTable.category == category.value)
+        if lifecycle_stage is not None:
+            stmt = stmt.where(RadarItemTable.lifecycle_stage == lifecycle_stage.value)
 
         stmt = stmt.order_by(RadarItemTable.viability_score.desc())
         result = await self.session.execute(stmt)

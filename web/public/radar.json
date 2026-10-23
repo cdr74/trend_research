@@ -1,6 +1,6 @@
 {
-  "radar_title": "AI Test Engineering Horizon Radar",
-  "generated_at": "2026-10-23T17:00:00Z",
+  "radar_title": "Trend Horizon Radar",
+  "generated_at": "2026-10-23T18:00:00Z",
   "rings": ["Adopt", "Trial", "Assess", "Hold"],
   "categories": [
     "Spec & Model",
@@ -20,6 +20,14 @@
       "viability_score": 0.92,
       "validity_score": 0.85,
       "recommended_ring": "Adopt",
+      "lifecycle_stage": "Consolidated",
+      "corroboration_count": 4,
+      "velocity_score": 82.5,
+      "corroborating_sources": [
+        "https://arxiv.org/abs/2403.0001",
+        "https://github.com/cdr74/playwright-invariance",
+        "https://engineering.uber.com/deterministic-testing"
+      ],
       "key_innovation": "Deterministic DOM-invariant locator synthesis with zero-egress local visual diffing.",
       "enterprise_risks": [
         "Requires local Playwright browser container runtime."
@@ -36,6 +44,13 @@
       "viability_score": 0.89,
       "validity_score": 0.82,
       "recommended_ring": "Adopt",
+      "lifecycle_stage": "Consolidated",
+      "corroboration_count": 3,
+      "velocity_score": 64.0,
+      "corroborating_sources": [
+        "https://arxiv.org/abs/2405.00001",
+        "https://github.com/facebook/predictive-test"
+      ],
       "key_innovation": "Commit-graph GNN embeddings for sub-second test selection reducing CI compute by 68%.",
       "enterprise_risks": [
         "Requires historical CI test outcome database for training."
@@ -52,6 +67,12 @@
       "viability_score": 0.78,
       "validity_score": 0.72,
       "recommended_ring": "Trial",
+      "lifecycle_stage": "Emerging",
+      "corroboration_count": 2,
+      "velocity_score": 45.0,
+      "corroborating_sources": [
+        "https://github.com/cdr74/spec-property-gen"
+      ],
       "key_innovation": "OpenAPI and GraphQL schema transformation to Hypothesis property-based stateful models.",
       "enterprise_risks": [
         "Complex schema recursive models may require prompt tuning."
@@ -68,6 +89,12 @@
       "viability_score": 0.75,
       "validity_score": 0.68,
       "recommended_ring": "Trial",
+      "lifecycle_stage": "Emerging",
+      "corroboration_count": 2,
+      "velocity_score": 38.0,
+      "corroborating_sources": [
+        "https://github.com/cdr74/rca-tracer"
+      ],
       "key_innovation": "Correlates distributed OpenTelemetry traces with flaky test failure logs to pinpoint thread races.",
       "enterprise_risks": [
         "Requires OpenTelemetry trace instrumentation."
@@ -84,6 +111,10 @@
       "viability_score": 0.58,
       "validity_score": 0.55,
       "recommended_ring": "Assess",
+      "lifecycle_stage": "Emerging",
+      "corroboration_count": 1,
+      "velocity_score": 52.0,
+      "corroborating_sources": [],
       "key_innovation": "Autonomous multi-agent exploration discovering unmapped edge-case API state transitions.",
       "enterprise_risks": [
         "High token consumption; non-deterministic execution paths without fixed seeds."
@@ -100,6 +131,10 @@
       "viability_score": 0.22,
       "validity_score": 0.15,
       "recommended_ring": "Hold",
+      "lifecycle_stage": "Fading",
+      "corroboration_count": 1,
+      "velocity_score": 5.0,
+      "corroborating_sources": [],
       "key_innovation": "Claims automated bug repair across any codebase; un-augmented prompt wrapper over proprietary LLM.",
       "enterprise_risks": [
         "Transmits full private source code to vendor third-party endpoint.",

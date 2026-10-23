@@ -14,13 +14,14 @@ export const TableView: React.FC<TableViewProps> = ({ items, selectedItem, onSel
         <table className="w-full text-left text-sm text-slate-300">
           <thead className="bg-[#161f33] text-xs uppercase text-slate-400 font-semibold tracking-wider">
             <tr>
-              <th className="px-6 py-4">Tool / Paper</th>
-              <th className="px-6 py-4">Category</th>
+              <th className="px-6 py-4">Trend / Innovation</th>
+              <th className="px-6 py-4">Pillar</th>
               <th className="px-6 py-4">Ring</th>
+              <th className="px-6 py-4 text-center">Trajectory</th>
+              <th className="px-6 py-4 text-center">Corroboration</th>
               <th className="px-6 py-4 text-center">Viability</th>
               <th className="px-6 py-4 text-center">Hype</th>
               <th className="px-6 py-4">Evidence Tier</th>
-              <th className="px-6 py-4">Key Innovation</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#1f293d]">
@@ -35,6 +36,13 @@ export const TableView: React.FC<TableViewProps> = ({ items, selectedItem, onSel
                   ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
                   : "bg-red-500/20 text-red-400 border-red-500/30";
 
+              const trajColor =
+                item.lifecycle_stage === "Emerging"
+                  ? "text-sky-400 bg-sky-950/30 border-sky-500/30"
+                  : item.lifecycle_stage === "Consolidated"
+                  ? "text-emerald-400 bg-emerald-950/30 border-emerald-500/30"
+                  : "text-rose-400 bg-rose-950/30 border-rose-500/30";
+
               return (
                 <tr
                   key={item.id}
@@ -44,10 +52,20 @@ export const TableView: React.FC<TableViewProps> = ({ items, selectedItem, onSel
                   }`}
                 >
                   <td className="px-6 py-4 font-semibold text-slate-100">{item.name}</td>
-                  <td className="px-6 py-4">{item.category}</td>
+                  <td className="px-6 py-4 text-xs">{item.category}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${ringColor}`}>
                       {item.recommended_ring}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <span className={`px-2 py-0.5 text-xs font-medium rounded-md border ${trajColor}`}>
+                      {item.lifecycle_stage}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-center font-mono">
+                    <span className="px-2 py-0.5 rounded bg-[#161f33] text-blue-300 font-semibold text-xs border border-[#1f293d]">
+                      {item.corroboration_count} {item.corroboration_count === 1 ? "source" : "sources"}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center font-mono text-emerald-400">
@@ -57,9 +75,6 @@ export const TableView: React.FC<TableViewProps> = ({ items, selectedItem, onSel
                     {(item.hype_score * 100).toFixed(0)}%
                   </td>
                   <td className="px-6 py-4 text-xs text-slate-400">{item.evidence_tier}</td>
-                  <td className="px-6 py-4 text-xs text-slate-300 max-w-xs truncate">
-                    {item.key_innovation}
-                  </td>
                 </tr>
               );
             })}

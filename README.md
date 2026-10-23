@@ -1,4 +1,4 @@
-# AI Test Engineering Horizon Radar
+# Trend Horizon Radar
 
 [![CI Pipeline](https://github.com/cdr74/trend_research/actions/workflows/ci.yml/badge.svg)](https://github.com/cdr74/trend_research/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
@@ -6,62 +6,71 @@
 [![Type Checked: mypy](https://img.shields.io/badge/type%20checked-mypy-blue.svg)](https://mypy-lang.org/)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
 
-An autonomous intelligence engine that continuously monitors, filters, evaluates, and clusters software development life cycle (SDLC) and Quality Engineering (QE) innovations.
+An autonomous intelligence platform for professionals that continuously monitors, filters, corroborates, and evaluates emerging technology trends in times of rapid disruption.
 
-Engineered specifically for high-governance enterprise environments (e.g., Tier-1 investment banking and regulated industries), the Radar cuts through marketing claims, unverified benchmarks, and superficial wrappers by applying **algorithmic anti-hype penalties** and **adversarial banking viability scoring**.
+The platform cuts through vendor marketing, unverified benchmarks, and superficial wrapper tools by enforcing **algorithmic anti-hype penalties**, **cross-source topic corroboration**, **engagement velocity tracking**, and **multi-lens adversarial evaluation**.
 
 ---
 
-## 🎯 Key Objectives & Outgrowths
+## 🎯 Core Capabilities
 
-- **Zero-Hype Signal Isolation:** Algorithmic penalties for missing datasets, synthetic benchmarks, and wrapper architectures.
-- **Enterprise-First Vetting:** Rigorous evaluation against 4 mandatory banking gates:
-  1. *Deployment Topology* (zero-egress VPC, self-hosted, air-gapped container)
-  2. *Deterministic Reproducibility* (seeded execution, zero flakiness in CI/CD)
-  3. *Data Security & Privacy* (no proprietary code or schema leaks to third-party endpoints)
-  4. *Auditability & Traceability* (machine- and human-auditable reasoning traces)
-- **Actionable Decision Velocity:** Bi-weekly executive intelligence briefings and a dynamic, interactive ThoughtWorks-style Tech Radar (Adopt / Trial / Assess / Hold).
-- **Flexible Multi-View Exploration:** Interactive web dashboard supporting Quad-Quadrant Radar, Filterable Matrix Grid, Scatter Matrix (Hype vs. Viability), and Semantic Similarity Clustering via vector embeddings.
+- **Zero-Hype Signal Extraction:** Algorithmic penalties for missing empirical datasets, synthetic vanity metrics, and un-augmented wrapper architectures.
+- **Multi-Source Corroboration:** Semantic clustering (`pgvector`) identifies when independent trusted sources (pre-prints, open-source projects, engineering post-mortems) converge on the same core breakthrough, awarding a positive consensus boost.
+- **Audience Telemetry & Engagement Velocity:** Ingestion tracking of readers, viewers, citations, and repository stars with time-decayed velocity ($\Delta \text{metric}/\Delta t$) to differentiate real momentum from fading fads.
+- **Pluggable Domain Profiles:** Domain-agnostic core pipeline. Taxonomies, heuristics, and evaluation lenses are decoupled into modular profiles (Initial reference profile: *Software Quality Engineering & SDLC Innovations*).
+- **Multi-Lens Evaluator Committee:** Evaluates innovations across specialized lenses:
+  1. *Security & Privacy* (data boundaries, zero-egress, secret protection)
+  2. *Operational Feasibility* (deterministic reproducibility, execution footprint, integration ergonomics)
+  3. *Technical Rigor* (empirical problem-solving vs synthetic benchmarks)
+- **Actionable Decision Velocity:** Bi-weekly executive intelligence briefings and an interactive ThoughtWorks-style Tech Radar (Adopt / Trial / Assess / Hold) with multi-criteria filtering.
 
 ---
 
 ## 🏛️ System Architecture
 
-The Radar operates as a directed acyclic pipeline (DAG) with four decoupled processing stages:
-
 ```mermaid
 flowchart TD
-    subgraph Ingestion ["Source Ingestion Layer"]
-        A1["arXiv cs.SE API"] --> ING["Ingestion Engine"]
-        A2["GitHub Trending & Releases"] --> ING
-        A3["Tier-1 Curated RSS / Blogs"] --> ING
+    subgraph Ingestion ["1. Source Ingestion & Telemetry"]
+        A1["Academic Pre-prints\n(arXiv, Papers)"] --> ING["Ingestion Engine"]
+        A2["Open Source Velocity\n(GitHub Commits, Stars)"] --> ING
+        A3["Practitioner Publications\n(Engineering Blogs, Post-Mortems)"] --> ING
+        A4["Community Discussion\n(Telemetry, Views, Readers)"] --> ING
     end
 
-    subgraph Storage ["Local Storage (Podman)"]
+    subgraph Storage ["2. Unified Persistence (Podman)"]
         DB[("PostgreSQL 16\n+ pgvector")]
     end
 
-    subgraph Pipeline ["4-Stage Processing DAG"]
-        ING -->|"Raw Payloads"| S1["Stage 1: Noise Sieve\n(Heuristic & Pattern Drop: Hype < 0.6)"]
+    subgraph Pipeline ["3. 4-Stage Processing DAG"]
+        ING -->|"Raw Payloads + Metrics"| S1["Stage 1: Noise Sieve\n(Heuristic filter; drops Hype > 0.60)"]
         S1 -->|"Qualified Payloads"| S2["Stage 2: Deep Extractor\n(Fact & Claim Extraction + Embeddings)"]
-        S2 -->|"Signal Dossier"| S3["Stage 3: Enterprise Skeptic\n(Adversarial Banking Audit)"]
-        S3 -->|"Critique & Penalties"| S4["Stage 4: Radar Categorizer\n(Adopt / Trial / Assess / Hold)"]
+        
+        subgraph S3 ["Stage 3: Convergence & Multi-Lens Review"]
+            direction TB
+            CORR["pgvector Topic Convergence\n(Cross-Source Corroboration & Velocity)"]
+            COMM["Multi-Lens Evaluator Committee\n(Security 35%, Ops 35%, Rigor 30%)"]
+            CORR --> COMM
+        end
+
+        S2 -->|"Dossiers & Vectors"| S3
+        S3 -->|"Synthesized Topic & Critique"| S4["Stage 4: Radar Categorizer\n(Adopt / Trial / Assess / Hold +\nLifecycle: Emerging / Consolidated / Fading)"]
     end
 
     ING -.->|"Persist Raw"| DB
-    S2 -.->|"Store Embeddings"| DB
-    S4 -.->|"Store Evaluation"| DB
+    S2 -.->|"Store Vectors"| DB
+    S3 -.->|"Topic & Audit"| DB
+    S4 -.->|"Persist Published State"| DB
 
-    subgraph Presentation ["Presentation & Delivery"]
+    subgraph Presentation ["4. Presentation & Delivery"]
         S4 --> CLI["CLI Tool (`radar`)"]
-        S4 --> REP["Bi-Weekly Digest (`reports/`)"]
+        S4 --> REP["Executive Trend Digest (`reports/`)"]
         S4 --> WEB["Interactive Radar UI (`web/`)"]
     end
 ```
 
 ---
 
-## 🔬 Domain Scope: 6 QE Pillars
+## 🔬 Reference Profile: Software Quality Engineering (6 Pillars)
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -130,6 +139,7 @@ flowchart TD
 ## 📚 Documentation Index
 
 - [Architecture Decision Records (ADRs)](docs/adr/)
+  - [ADR 0000: Macro System Architecture & End-to-End Processing Topology](docs/adr/0000-overall-system-architecture.md)
   - [ADR 0001: Tooling and Runtime Environment (Python 3.12, uv, Ruff, Pytest)](docs/adr/0001-tooling-and-runtime-environment.md)
   - [ADR 0002: Persistence Layer with PostgreSQL and pgvector via Podman](docs/adr/0002-persistence-postgresql-pgvector.md)
   - [ADR 0003: Pluggable LLM Provider Adapter Architecture](docs/adr/0003-pluggable-llm-evaluation-engine.md)
@@ -145,8 +155,8 @@ flowchart TD
 ## 🗺️ Roadmap & Milestones
 
 - [x] **Milestone 1: Repository Baseline, Schemas & Tooling Harness**
-- [ ] **Milestone 2: Source Ingestion & Heuristic Noise Sieve**
-- [ ] **Milestone 3: Adversarial LLM Multi-Agent Evaluation Pipeline**
+- [ ] **Milestone 2: Multi-Channel Ingestion & Heuristic Noise Sieve**
+- [ ] **Milestone 3: Topic Convergence, Adversarial Committee & Evaluation Pipeline**
 - [ ] **Milestone 4: Presentation, CLI & Decoupled Interactive Web Dashboard**
 - [ ] **Milestone 5: Continuous Delivery, Release & Ops Automation**
 

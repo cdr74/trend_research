@@ -14,6 +14,8 @@ export type EvidenceTier =
   | "Engineering Post-Mortem"
   | "Vendor Announcement";
 
+export type LifecycleStage = "Emerging" | "Consolidated" | "Fading";
+
 export interface RadarItem {
   id: string;
   name: string;
@@ -23,6 +25,10 @@ export interface RadarItem {
   viability_score: number;
   validity_score: number;
   recommended_ring: RadarRing;
+  lifecycle_stage: LifecycleStage;
+  corroboration_count: number;
+  velocity_score: number;
+  corroborating_sources: string[];
   key_innovation: string;
   enterprise_risks: string[];
   prerequisites: string[];

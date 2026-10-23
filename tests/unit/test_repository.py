@@ -5,18 +5,21 @@ from uuid import uuid4
 from radar.core.models import (
     EnterpriseEvaluation,
     EvidenceTier,
+    LifecycleStage,
     QECategory,
     RadarItem,
     RadarRing,
     SignalDossier,
     SourcePayload,
     SourceType,
+    TrendTopic,
 )
 from radar.db.tables import (
     EnterpriseEvaluationTable,
     IngestedSourceTable,
     RadarItemTable,
     SignalDossierTable,
+    TrendTopicTable,
 )
 
 
@@ -111,6 +114,10 @@ def test_radar_item_to_orm_mapping() -> None:
         viability_score=0.925,
         validity_score=0.85,
         recommended_ring=RadarRing.ADOPT,
+        lifecycle_stage=LifecycleStage.EMERGING,
+        corroboration_count=3,
+        velocity_score=85.0,
+        corroborating_sources=["https://arxiv.org/abs/2401.001"],
         key_innovation="GNN-based test impact analysis.",
     )
     table = RadarItemTable(
@@ -123,7 +130,40 @@ def test_radar_item_to_orm_mapping() -> None:
         viability_score=item.viability_score,
         validity_score=item.validity_score,
         recommended_ring=item.recommended_ring.value,
+        lifecycle_stage=item.lifecycle_stage.value,
+        corroboration_count=item.corroboration_count,
+        velocity_score=item.velocity_score,
+        corroborating_sources=item.corroborating_sources,
         key_innovation=item.key_innovation,
     )
     assert table.recommended_ring == "Adopt"
     assert table.viability_score == 0.925
+    assert table.lifecycle_stage == "Emerging"
+    assert table.corroboration_count == 3
+
+
+def test_trend_topic_to_orm_mapping() -> None:
+    topic = TrendTopic(
+        name="Predictive Test Selection",
+        category=QECategory.EXECUTION_AND_OPTIMIZATION,
+        summary="GNN and ML-based selective test execution.",
+        corroboration_count=5,
+        sources=["https://arxiv.org/1", "https://github.com/2"],
+        average_viability=0.90,
+        average_validity=0.85,
+        lifecycle_stage=LifecycleStage.CONSOLIDATED,
+    )
+    table = TrendTopicTable(
+        id=topic.id,
+        name=topic.name,
+        category=topic.category.value,
+        summary=topic.summary,
+        corroboration_count=topic.corroboration_count,
+        sources=topic.sources,
+        average_viability=topic.average_viability,
+        average_validity=topic.average_validity,
+        lifecycle_stage=topic.lifecycle_stage.value,
+    )
+    assert table.name == "Predictive Test Selection"
+    assert table.lifecycle_stage == "Consolidated"
+    assert table.corroboration_count == 5

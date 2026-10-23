@@ -1,7 +1,7 @@
 # AGENTS.md / GEMINI.md - Agent Directives & Engineering Standards
 
 ## 1. Project Overview
-The **AI Test Engineering Horizon Radar** is an autonomous intelligence pipeline that ingests, filters, evaluates, and clusters SDLC and Quality Engineering (QE) innovations. It enforces deterministic anti-hype penalties and banking enterprise viability scoring.
+The **Trend Horizon Radar** is an autonomous intelligence platform for professionals that continuously monitors, filters, corroborates, and evaluates emerging technology trends. It enforces deterministic anti-hype penalties, multi-source topic convergence, audience engagement velocity tracking, and multi-lens adversarial evaluation via pluggable domain profiles.
 
 ## 2. Engineering Standards & Strict Protocol
 1. **Never Take Shortcuts:** Strictly adhere to test-driven and backlog-driven execution. Every code change must trace to a task in `docs/BACKLOG.md` and an accepted Architecture Decision Record (`docs/adr/`).

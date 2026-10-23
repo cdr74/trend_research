@@ -9,6 +9,13 @@ interface ItemDetailModalProps {
 export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose }) => {
   if (!item) return null;
 
+  const trajColor =
+    item.lifecycle_stage === "Emerging"
+      ? "text-sky-400 bg-sky-950/30 border-sky-500/30"
+      : item.lifecycle_stage === "Consolidated"
+      ? "text-emerald-400 bg-emerald-950/30 border-emerald-500/30"
+      : "text-rose-400 bg-rose-950/30 border-rose-500/30";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
       <div className="bg-[#121826] border border-[#1f293d] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl">
@@ -22,6 +29,9 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
             <div className="flex items-center space-x-3 mt-2">
               <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
                 Ring: {item.recommended_ring}
+              </span>
+              <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-md border ${trajColor}`}>
+                Trajectory: {item.lifecycle_stage}
               </span>
               <span className="text-xs text-slate-400">{item.evidence_tier}</span>
             </div>
@@ -37,23 +47,29 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
         {/* Content */}
         <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
           {/* Scores Overview */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-[#0b0f19] border border-[#1f293d] p-4 rounded-xl text-center">
-              <div className="text-xs text-slate-400 uppercase font-semibold">Viability Score</div>
-              <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
+          <div className="grid grid-cols-4 gap-3">
+            <div className="bg-[#0b0f19] border border-[#1f293d] p-3 rounded-xl text-center">
+              <div className="text-[11px] text-slate-400 uppercase font-semibold">Viability</div>
+              <div className="text-xl font-bold font-mono text-emerald-400 mt-1">
                 {(item.viability_score * 100).toFixed(0)}%
               </div>
             </div>
-            <div className="bg-[#0b0f19] border border-[#1f293d] p-4 rounded-xl text-center">
-              <div className="text-xs text-slate-400 uppercase font-semibold">Hype Index</div>
-              <div className="text-2xl font-bold font-mono text-amber-400 mt-1">
+            <div className="bg-[#0b0f19] border border-[#1f293d] p-3 rounded-xl text-center">
+              <div className="text-[11px] text-slate-400 uppercase font-semibold">Hype Index</div>
+              <div className="text-xl font-bold font-mono text-amber-400 mt-1">
                 {(item.hype_score * 100).toFixed(0)}%
               </div>
             </div>
-            <div className="bg-[#0b0f19] border border-[#1f293d] p-4 rounded-xl text-center">
-              <div className="text-xs text-slate-400 uppercase font-semibold">Validity Score</div>
-              <div className="text-2xl font-bold font-mono text-blue-400 mt-1">
+            <div className="bg-[#0b0f19] border border-[#1f293d] p-3 rounded-xl text-center">
+              <div className="text-[11px] text-slate-400 uppercase font-semibold">Validity</div>
+              <div className="text-xl font-bold font-mono text-blue-400 mt-1">
                 {(item.validity_score * 100).toFixed(0)}%
+              </div>
+            </div>
+            <div className="bg-[#0b0f19] border border-[#1f293d] p-3 rounded-xl text-center">
+              <div className="text-[11px] text-slate-400 uppercase font-semibold">Corroboration</div>
+              <div className="text-xl font-bold font-mono text-sky-400 mt-1">
+                {item.corroboration_count}x
               </div>
             </div>
           </div>
@@ -68,10 +84,33 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
             </p>
           </div>
 
-          {/* Enterprise Risks */}
+          {/* Independent Corroborating Sources */}
+          {item.corroborating_sources && item.corroborating_sources.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-sky-400 mb-2">
+                Multi-Source Topic Convergence ({item.corroborating_sources.length} sources)
+              </h3>
+              <ul className="space-y-1.5 bg-[#0b0f19] p-3 rounded-xl border border-[#1f293d]">
+                {item.corroborating_sources.map((url, i) => (
+                  <li key={i} className="text-xs truncate">
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-400 hover:text-blue-300 underline"
+                    >
+                      {url}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Operational Risks & Governance */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider text-red-400 mb-2">
-              Adversarial Enterprise Risks & Banking Constraints
+              Adversarial Risks & Governance Constraints
             </h3>
             <ul className="space-y-2">
               {item.enterprise_risks.map((risk, i) => (
@@ -113,7 +152,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
               rel="noreferrer"
               className="inline-block text-xs font-semibold text-blue-400 hover:text-blue-300 underline"
             >
-              Inspect Source Payload ↗
+              Inspect Primary Source Payload ↗
             </a>
           </div>
         </div>

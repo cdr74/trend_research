@@ -1,10 +1,10 @@
-# AI Test Engineering Horizon Radar: User Guide & Operator Manual
+# Trend Horizon Radar: User Guide & Operator Manual
 
 ## 1. Introduction
 
-The **AI Test Engineering Horizon Radar** provides engineering leadership, enterprise architects, and quality directors with deterministic, hype-filtered intelligence on AI-driven software testing innovations.
+The **Trend Horizon Radar** is an autonomous intelligence platform for professionals that continuously monitors, filters, corroborates, and evaluates emerging technology trends in times of rapid disruption.
 
-This manual outlines how to operate the radar pipeline, run local evaluations, explore findings through interactive filters, and interpret the scoring rubric.
+This manual outlines how to operate the radar pipeline, run local evaluations, explore findings through interactive filters, track multi-source topic convergence, and interpret the scoring rubric.
 
 ---
 
@@ -46,7 +46,7 @@ This manual outlines how to operate the radar pipeline, run local evaluations, e
 The `radar` CLI coordinates all pipeline actions:
 
 ### 3.1 Synchronize and Ingest Signals
-Fetch fresh records from configured feeds (arXiv SE, GitHub Trending, RSS):
+Fetch fresh records and engagement metrics from configured channels:
 ```bash
 uv run radar ingest --sources arxiv,github,rss
 ```
@@ -67,15 +67,15 @@ Query the local evaluated database from the terminal:
 # Filter by ring and category
 uv run radar query --ring Adopt --category "Test Synthesis"
 
-# Filter by enterprise viability threshold
+# Filter by viability threshold and velocity
 uv run radar query --min-viability 0.80 --max-hype 0.30
 
-# Show full adversarial skeptic critique for a signal
+# Show full multi-lens committee audit and corroborating sources
 uv run radar inspect --id <SIGNAL_UUID>
 ```
 
 ### 3.4 Export Data and Generate Reports
-Export the static dataset and generate bi-weekly executive briefings:
+Export the static dataset and generate executive trend briefings:
 ```bash
 # Export static JSON for web dashboard
 uv run radar export --format json --output web/public/radar.json
@@ -90,16 +90,19 @@ uv run radar digest --output reports/$(date +%Y-W%V).md
 
 ### 4.1 Tech Radar Rings
 Every evaluated signal is placed into one of four rings:
-- **Adopt:** Production-ready for enterprise pilots. Demonstrates high technical validity ($S_v \ge 0.80$), strong enterprise viability ($E_v \ge 0.85$), zero-egress compatibility, and deterministic behavior.
-- **Trial:** High viability ($E_v \ge 0.70$) and promising innovation ($S_v \ge 0.60$). Worthy of sandboxed project trials to evaluate developer ergonomics.
-- **Assess:** High research merit or technical novelty, but lacks proven enterprise hardening or requires cloud data-egress mitigations. Keep under active monitoring.
-- **Hold:** Excessive marketing hype, superficial LLM wrapper architecture, non-deterministic execution, or prohibitive data privacy risks. Not recommended.
+- **Adopt:** Proven technical validity ($S_v \ge 0.80$), strong viability ($E_v \ge 0.85$), verified operational ergonomics, and high cross-source corroboration. Recommended for production pilot.
+- **Trial:** High viability ($E_v \ge 0.70$) and promising innovation ($S_v \ge 0.60$). Worthy of sandboxed project trials to evaluate team workflows.
+- **Assess:** High research merit or technical novelty, but early in enterprise maturity or requiring integration mitigations. Keep under active monitoring.
+- **Hold:** Excessive marketing hype, superficial wrapper architecture, non-deterministic execution, or prohibitive privacy/security risks. Not recommended.
 
-### 4.2 The 4 Banking Enterprise Viability Gates
-1. **Deployment Topology:** Is the tool deployable within a zero-egress VPC or air-gapped on-premise container?
-2. **Deterministic Reproducibility:** Does execution produce deterministic, replayable results, or does it introduce flaky non-determinism into CI/CD gates?
-3. **Data Security & Privacy:** Does operation require transmitting proprietary code, database schemas, or production payloads to third-party endpoints?
-4. **Auditability & Traceability:** Does the tool generate machine- and human-auditable reasoning traces suitable for regulatory compliance review?
+### 4.2 Multi-Source Corroboration & Velocity Dynamics
+- **Corroboration Factor:** When independent sources (academic pre-prints, open-source repositories, practitioner engineering blogs) converge on the same pattern, the signal receives a positive consensus boost.
+- **Audience Velocity:** Tracks time-decayed metric changes (stars, views, citations) to classify trends into **Emerging**, **Consolidated**, or **Fading**.
+
+### 4.3 The 3 Multi-Lens Committee Evaluators
+1. **Security & Privacy Lens (35%):** Egress boundaries, zero-trust / on-premise execution, credential safety.
+2. **Operational Feasibility Lens (35%):** Deterministic reproducibility, runner compute footprint, integration ergonomics.
+3. **Technical Rigor Lens (30%):** True defect/problem resolution vs synthetic benchmarks, contract adherence.
 
 ---
 
@@ -116,14 +119,14 @@ The web dashboard (`web/`) offers dynamic multi-view exploration:
    Open `http://localhost:5173` in your browser.
 
 2. **Available Views:**
-   - **Radar Quadrant:** Traditional interactive radar with 4 rings segmented across the 6 QE pillars.
+   - **Radar Quadrant:** Traditional interactive radar with 4 rings segmented across domain pillars.
    - **Filterable Matrix Table:** Tabular view with instant keyword search, column sorting, and deep dossier inspection.
-   - **Scatter Matrix:** Interactive 2-axis scatter chart plotting Signal Validity vs. Enterprise Viability.
-   - **Semantic Cluster Map:** Visual representation of embedding similarity clusters to spot redundant wrapper tools.
+   - **Topic Convergence View:** Inspect clusters of interconnected signals and corroborating sources.
+   - **Scatter Matrix:** Interactive 2-axis scatter chart plotting Signal Validity vs. Viability.
 
 3. **Filter Controls:**
    - Ring toggles (Adopt / Trial / Assess / Hold).
-   - Pillar toggles (Spec & Model, Test Synth, Execution & Optimization, Triage & Fix, Agent Systems, Governance & Evals).
+   - Pillar toggles.
    - Evidence Tier selector (Academic Peer-Reviewed, Open Source, Post-Mortem, Vendor).
-   - Score sliders (Hype ceiling, Enterprise Viability floor).
-   - Risk tag filters (e.g., "Requires Cloud Egress", "Non-Deterministic").
+   - Score sliders (Hype ceiling, Viability floor).
+   - Lifecycle trajectory filter (Emerging / Consolidated / Fading).

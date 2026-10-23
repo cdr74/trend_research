@@ -8,12 +8,14 @@ from pydantic import ValidationError
 from radar.core.models import (
     EnterpriseEvaluation,
     EvidenceTier,
+    LifecycleStage,
     QECategory,
     RadarItem,
     RadarRing,
     SignalDossier,
     SourcePayload,
     SourceType,
+    TrendTopic,
 )
 
 
@@ -97,13 +99,38 @@ def test_radar_item_creation_and_json_serialization() -> None:
         viability_score=0.85,
         validity_score=0.75,
         recommended_ring=RadarRing.ADOPT,
+        lifecycle_stage=LifecycleStage.EMERGING,
+        corroboration_count=3,
+        velocity_score=42.5,
+        corroborating_sources=[
+            "https://arxiv.org/abs/2401.001",
+            "https://blog.eng.example.com/testgenius",
+        ],
         key_innovation="Differential unit test synthesis with property-based boundary search.",
         enterprise_risks=["Requires local repository indexing."],
     )
     assert item.recommended_ring == RadarRing.ADOPT
     assert item.hype_score == 0.25
+    assert item.corroboration_count == 3
+    assert item.lifecycle_stage == LifecycleStage.EMERGING
 
     # Check serialization
     json_data = item.model_dump_json()
     assert "TestGenius" in json_data
     assert "Adopt" in json_data
+    assert "Emerging" in json_data
+
+
+def test_trend_topic_creation() -> None:
+    topic = TrendTopic(
+        name="Property-Based LLM State Synthesis",
+        category=QECategory.SPEC_AND_MODEL,
+        summary="Automated synthesis of property-based stateful testing models from schemas.",
+        corroboration_count=4,
+        sources=["https://arxiv.org/abs/1", "https://github.com/tool"],
+        average_viability=0.88,
+        average_validity=0.82,
+        lifecycle_stage=LifecycleStage.EMERGING,
+    )
+    assert topic.corroboration_count == 4
+    assert topic.lifecycle_stage == LifecycleStage.EMERGING

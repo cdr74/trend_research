@@ -1,239 +1,172 @@
-# System Design & Architecture: AI Test Engineering Horizon Radar
+# System Design & Architecture: Trend Horizon Radar
 
 ## 1. System Overview & Problem Statement
 
-Engineering leadership in high-governance, regulated financial enterprise environments faces an overwhelming wave of AI-generated claims and marketing wrappers surrounding Software Development Life Cycle (SDLC) and Quality Engineering (QE) tools. Adopting non-viable, non-deterministic, or data-leaking tools incurs severe operational and compliance risks.
+In times of rapid technological and market disruption, professionals, researchers, and engineering leaders are overwhelmed by promotional marketing, ephemeral wrapper tools, non-reproducible benchmarks, and noisy social echo chambers. 
 
-The **AI Test Engineering Horizon Radar** is an automated, adversarial intelligence pipeline designed to ingest, filter, evaluate, and cluster QE innovations. It filters out marketing noise and scores innovations against banking-grade enterprise viability criteria, publishing structured intelligence briefings and an interactive Tech Radar.
+The **Trend Horizon Radar** is a generic, autonomous trend intelligence platform designed to replace manual, ad-hoc discovery with deterministic signal extraction, adversarial skepticism, and automated viability evaluation. 
+
+The platform separates the **Core Trend Engine** from domain-specific rules via pluggable **Domain Profiles**. The initial reference profile targets **Software Quality Engineering (QE) and SDLC Innovations**.
 
 ---
 
-## 2. High-Level Architecture & Pipeline DAG
+## 2. Core Architectural Pillars
 
-The system is structured as a directed acyclic pipeline (DAG) with clean separation of concerns across ingestion, heuristic filtering, deep extraction, adversarial critique, scoring synthesis, and presentation.
+1. **Domain-Agnostic Core Engine:** Modular ingestion, noise filtering, topic clustering, multi-lens committee evaluation, and visualization.
+2. **Pluggable Domain Profiles:** Configurable taxonomies, heuristic filters, and evaluation committee lenses (e.g., Security, Operational Reliability, Technical Rigor).
+3. **Multi-Source Corroboration & Topic Convergence:** Uses `pgvector` semantic distance to cluster related signals across independent channels (papers, repos, post-mortems). Independent cross-source convergence acts as a major positive signal of technological consensus.
+4. **Audience Telemetry & Engagement Velocity:** Ingestion collectors capture engagement data (stars, citations, readers, viewers, discussions) and compute time-decayed velocity ($\Delta \text{metric}/\Delta t$) to differentiate real momentum from fading fads.
+5. **Adversarial Multi-Lens Evaluation:** Evaluates candidate innovations across specialized lenses to produce an un-hyped viability assessment.
+
+---
+
+## 3. High-Level Architecture & Pipeline DAG
 
 ```mermaid
 flowchart TD
-    subgraph Ingestion ["Source Ingestion Layer"]
-        A1["arXiv cs.SE API"] --> ING["Ingestion Collector"]
-        A2["GitHub Trending & Metrics"] --> ING
-        A3["RSS Feeds & Curated Blogs"] --> ING
+    subgraph Ingestion ["1. Multi-Channel Source Ingestion & Telemetry"]
+        A1["Academic Pre-prints\n(arXiv, Papers)"] --> ING["Ingestion Collector"]
+        A2["Open Source Code\n(GitHub Commits, Stars, Releases)"] --> ING
+        A3["Practitioner Publications\n(Engineering Blogs, Case Studies)"] --> ING
+        A4["Community Channels\n(Discussions, Reader Telemetry)"] --> ING
     end
 
-    subgraph Storage ["PostgreSQL 16 + pgvector (Podman)"]
-        DB[("PostgreSQL\nTables & Vector Index")]
+    subgraph Storage ["2. PostgreSQL 16 + pgvector Persistence (Podman)"]
+        DB_RAW[("ingested_sources\n(Payloads + Engagement Metrics)")]
+        DB_DOS[("signal_dossiers\n(Claims + 1536-dim Embeddings)")]
+        DB_TOP[("trend_topics\n(Corroborated Multi-Source Clusters)")]
+        DB_EVAL[("evaluations\n(Multi-Lens Committee Audit)")]
+        DB_RADAR[("radar_items\n(Active Rings + Trajectory Deltas)")]
     end
 
-    subgraph Pipeline ["4-Stage Processing DAG (Option 1C)"]
-        ING -->|"Raw Ingestion Payloads"| ST1["Stage 1: Noise Sieve\n(Rule-based heuristics)"]
-        ST1 -->|"Qualified Signals\n(Hype < 0.60)"| ST2["Stage 2: Deep Extractor\n(Fact & Claim Extraction + Vectors)"]
+    subgraph Pipeline ["3. 4-Stage Processing DAG (Option 1C)"]
+        ING -->|"Raw Payloads + Metrics"| ST1["Stage 1: Noise Sieve\n(Domain Heuristic Filter; drops Hype > 0.60)"]
+        ST1 -->|"Qualified Signals"| ST2["Stage 2: Deep Extractor\n(Fact & Claim Extraction + Embeddings)"]
         
-        subgraph Stage3 ["Stage 3: Multi-Persona Committee (Option 2C)"]
+        subgraph Stage3 ["Stage 3: Convergence & Multi-Lens Committee (Option 2C)"]
             direction TB
-            P_SEC["CISO Gate (35%)"]
-            P_CICD["CI/CD Platform (35%)"]
-            P_QE["QE Director (30%)"]
+            CORR["pgvector Topic Convergence\n(Corroboration Factor & Velocity Tracking)"]
+            
+            subgraph Committee ["Multi-Lens Evaluator Committee"]
+                direction LR
+                L_SEC["Security & Privacy\n(Weight: 35%)"]
+                L_OPS["Operational Feasibility\n(Weight: 35%)"]
+                L_VAL["Technical Rigor\n(Weight: 30%)"]
+            end
+            
+            CORR --> Committee
         end
 
-        ST2 -->|"Signal Dossier"| Stage3
-        Stage3 -->|"Synthesized Critique"| ST4["Stage 4: Radar Categorizer\n(Adopt/Trial/Assess/Hold +\npgvector Wrapper Detection (3B))"]
+        ST2 -->|"Dossiers & Vectors"| Stage3
+        Stage3 -->|"Synthesized Topic & Critique"| ST4["Stage 4: Radar Categorizer\n(Adopt / Trial / Assess / Hold +\nLifecycle: Emerging / Consolidated / Fading)"]
     end
 
-    ING -.->|"Persist Raw"| DB
-    ST2 -.->|"Vector Embeddings"| DB
-    Stage3 -.->|"Audit Trail"| DB
-    ST4 -.->|"Persist Evaluated Signal"| DB
+    ING -.->|"Persist Raw"| DB_RAW
+    ST2 -.->|"Store Vectors"| DB_DOS
+    CORR -.->|"Cluster Topics"| DB_TOP
+    Committee -.->|"Persist Critique"| DB_EVAL
+    ST4 -.->|"Persist Published State"| DB_RADAR
 
-    subgraph Presentation ["Presentation & Publication Layer"]
+    subgraph Presentation ["4. Decoupled Presentation Layer"]
         ST4 --> EXP["Export Engine\n(radar.json & Markdown Digest)"]
         EXP --> CLI["CLI Query Tool\n(radar query / radar sync)"]
         EXP --> WEB["Interactive Radar UI\n(Vite/React SPA + Filters)"]
-        EXP --> REP["Bi-Weekly Digest Reports\n(reports/YYYY-WW.md)"]
+        EXP --> REP["Executive Trend Briefings\n(reports/YYYY-WW.md)"]
     end
 ```
 
 ---
 
-## 3. Domain Taxonomy & QE Pillars
-
-All signals are categorized into one of six core SDLC Quality Engineering pillars:
-
-| Pillar | Domain Scope | Example Targets |
-| :--- | :--- | :--- |
-| **1. Spec & Model** | Requirements-to-test generation, formal verification, model-based testing, edge-case generation. | Spec-driven test gen, property testing LLMs, OpenAPI-to-contract tests. |
-| **2. Test Synth** | Automated E2E, integration, and unit test generation, synthetic data synthesis, Test Data Management (TDM), API mocking. | Playwright/Cypress synthesizers, differential unit test generators, privacy-preserving synthetic TDM. |
-| **3. Execution & Optimization** | Mutation testing, predictive test selection (PTS), flaky test isolation, test suite minimization, parallel distributed scheduling. | ML-based test prioritization, mutation analysis agents, quarantine controllers. |
-| **4. Triage & Fix** | Root Cause Analysis (RCA), self-healing test scripts, automated PR repair patches, regression localization. | Failure log RCA agents, locator auto-healers, automated stack trace analyzers. |
-| **5. Agent Systems** | Autonomous browser-use testing agents, CLI-driven coding agents for QE, multi-agent cooperative testing workflows. | Browser-use agents, multi-agent adversarial test discovery, interactive exploratory agents. |
-| **6. Governance & Evals** | LLM-as-a-judge test suites, safety, red-teaming, prompt regression, determinism verification, audit logging. | Model evaluation harnesses, guardrail testing, zero-egress compliance checkers. |
-
----
-
-## 4. Evaluation Rubric & Scoring Engine
-
-Each signal receives two normalized scores in the range `[0.0, 1.0]`:
-
-### 4.1 Signal Validity Score ($S_v$)
-Baseline starts at $0.50$ and is adjusted based on verified technical characteristics:
+## 4. Multi-Source Corroboration & Topic Clustering
 
 ```mermaid
 flowchart LR
-    Base["Baseline: 0.50"] --> P1["-0.30: No raw dataset / no repo"]
-    Base --> P2["-0.25: Trivial synthetic benchmark only"]
-    Base --> P3["-0.20: Superficial LLM wrapper"]
-    Base --> P4["-0.15: Influencer / sponsored promo"]
-    Base --> B1["+0.30: Peer-reviewed (ACM/IEEE/arXiv SE) with artifacts"]
-    Base --> B2["+0.25: High OSS velocity & healthy community"]
-    Base --> B3["+0.20: Enterprise production post-mortem"]
+    S_ACAD["Academic Paper\n(Peer-Reviewed / arXiv)"] --> CLUST{"pgvector Clustering\nCosine Distance < 0.18\n(Sim > 0.82)"}
+    S_OSS["Open-Source Repo\n(GitHub Velocity)"] --> CLUST
+    S_BLOG["Practitioner Post-Mortem\n(Production Engineering)"] --> CLUST
+
+    CLUST -->|"Multi-Source Match"| TOPIC["Trend Topic Entity\nCorroboration Count = 3"]
+    TOPIC -->|"Cross-Source Momentum"| BOOST["Corroboration Boost (+0.25 to Validity)"]
+
+    CLUST -->|"Same Codebase / Redundant Brand"| WRAP["Parasitic Wrapper Detected\nNo Novel Architecture"]
+    WRAP -->|"Deduction"| PENALTY["Wrapper Penalty (-0.20 to Validity)"]
 ```
 
-The composite **Hype Score** is defined as $H = 1.0 - S_v$.
-
-### 4.2 Enterprise Viability Score ($E_v$)
-The **Adversarial Banking Committee (Option 2C)** evaluates qualified signals across three governance mandates:
-
-1. **CISO / Security Gate (Weight: 35%):** Zero-egress VPC, air-gapped on-prem container compatibility, customer data boundary enforcement, credential scrubbing.
-2. **CI/CD Platform Architect (Weight: 35%):** Deterministic reproducibility (seeded execution, zero flakiness), runner resource economics, flaky test quarantine mechanisms.
-3. **Quality Engineering Director (Weight: 30%):** True defect discovery vs synthetic vanity metrics, locator resilience, mutation score improvement, contract/spec adherence.
-
-$$\text{Composite Viability: } E_v = 0.35 \cdot S_{\text{security}} + 0.35 \cdot S_{\text{cicd}} + 0.30 \cdot S_{\text{qe}}$$
-
-### 4.3 Radar Ring Assignment Matrix
-
-Based on composite $(S_v, E_v)$:
-
-```
-           Viability (Ev)
-                ▲
-            1.0 ┼──────────────┬──────────────┐
-                │    TRIAL     │    ADOPT     │
-                │              │              │
-                │  Ev >= 0.70  │  Ev >= 0.85  │
-                │  Sv >= 0.60  │  Sv >= 0.80  │
-            0.5 ┼──────────────┼──────────────┤
-                │     HOLD     │    ASSESS    │
-                │              │              │
-                │  Ev < 0.50   │  Ev >= 0.50  │
-                │  or Sv < 0.4 │  Sv >= 0.50  │
-            0.0 ┴──────────────┴──────────────► Validity (Sv)
-               0.0            0.5            1.0
-```
-
-- **Adopt:** High validity, proven enterprise readiness, deterministic, zero-egress capable. Recommended for production pilot.
-- **Trial:** High viability and strong promise, worthy of sandboxed project trials to evaluate integration economics.
-- **Assess:** High research or technical validity, but early in enterprise maturity or requiring cloud egress mitigations. Keep on watchlist.
-- **Hold:** Excessive hype, superficial wrapper architecture, non-deterministic flakiness, or prohibitive data privacy risks. Not recommended.
+### 4.1 Corroboration Mechanics
+When a signal is processed, the system queries historical dossiers in `pgvector`:
+1. **Convergence Condition:** If an ingested signal shares semantic similarity $> 0.82$ with existing dossiers from **different source channels or distinct authors**, the items are linked to a shared `TrendTopic`.
+2. **Corroboration Factor:**
+   $$C_{\text{factor}} = \min\left(1.0, \frac{N_{\text{distinct\_sources}}}{4}\right)$$
+   A positive bonus ($+0.10$ to $+0.30$) is awarded to Signal Validity based on independent source convergence.
+3. **Wrapper Penalty:** If similarity $> 0.88$ with an existing tool/paper but the new submission introduces no new code, dataset, or empirical mechanism, a $-0.20$ wrapper deduction is applied.
 
 ---
 
-## 5. Component Breakdown & Boundaries
+## 5. Audience Engagement & Velocity Dynamics
 
-The codebase is organized into modular packages under `src/radar/`:
+To distinguish rising innovations from flash-in-the-pan hype:
 
-```
-src/radar/
-├── core/                  # Core abstractions, configs, and Pydantic schemas
-│   ├── config.py          # Settings management (pydantic-settings)
-│   ├── models.py          # Domain data models & JSON schema contracts
-│   └── exceptions.py      # Domain exceptions
-├── db/                    # Persistence layer (PostgreSQL + pgvector)
-│   ├── session.py         # Async engine & session lifecycle
-│   ├── tables.py          # SQLAlchemy ORM table definitions
-│   └── repository.py      # Async repository operations (CRUD & vector similarity)
-├── providers/             # Pluggable LLM and embedding adapters
-│   ├── base.py            # Abstract Provider interface (Protocol)
-│   ├── gemini.py          # Google Gemini provider adapter
-│   ├── openai_compat.py   # OpenAI / Ollama / vLLM provider adapter
-│   └── mock.py            # Offline deterministic test mock provider
-├── ingestion/             # Source ingestion modules
-│   ├── base.py            # Base ingestor contract
-│   ├── arxiv.py           # arXiv cs.SE paper ingestor
-│   ├── github.py          # GitHub repository and release ingestor
-│   └── rss.py             # Curated engineering blog and RSS ingestor
-├── pipeline/              # 4-stage DAG orchestration
-│   ├── stage1_sieve.py    # Rule-based heuristic noise filter
-│   ├── stage2_extract.py  # LLM-assisted deep technical extractor
-│   ├── stage3_skeptic.py  # LLM adversarial banking skeptic critique
-│   ├── stage4_radar.py    # Ring categorizer and scoring synthesizer
-│   └── orchestrator.py    # End-to-end DAG runner
-└── presentation/          # Output and presentation engines
-    ├── cli.py             # CLI entry points (radar sync, query, export)
-    ├── export.py          # radar.json serializer & static generator
-    └── digest.py          # Bi-weekly Markdown digest reporter
-```
+1. **Normalized Telemetry Metrics:**
+   - **Academic:** Citations, download rates.
+   - **Open Source:** Stars, forks, contributor velocity, issue resolution ratio.
+   - **Media & Articles:** Views, discussion comment volume, social upvotes.
+2. **Engagement Velocity:**
+   $$\text{Velocity} = \frac{\Delta \text{Engagement}}{\Delta t} \times \text{Source Authority}$$
+3. **Lifecycle Trajectories:**
+   - **Emerging:** High velocity, low cumulative volume, rapidly rising cross-source corroboration.
+   - **Consolidated:** High cumulative volume, steady velocity, proven production track record.
+   - **Fading:** Initial viral peak followed by rapid decline in velocity and zero follow-on implementations.
 
 ---
 
-## 6. Data Models & Schemas
+## 6. Evaluation Rubric & Multi-Lens Committee
 
-### 6.1 Database Schema (PostgreSQL 16 + pgvector)
+### 6.1 Signal Validity Score ($S_v$)
+Baseline starts at $0.50$:
+- **Anti-Hype Deductions:**
+  - $-0.30$: No reproducible benchmark, raw dataset, or source repository.
+  - $-0.25$: Trivial synthetic vanity benchmark only.
+  - $-0.20$: Superficial wrapper architecture.
+  - $-0.15$: Sponsored promotional placement without practitioner review.
+- **Engineering & Convergence Bonuses:**
+  - $+0.30$: Peer-reviewed publication with reproducible artifacts.
+  - $+0.25$: Independent multi-source corroboration ($N_{\text{sources}} \ge 3$).
+  - $+0.20$: High open-source contributor velocity.
+  - $+0.20$: Production post-mortem from a recognized engineering organization.
 
-```mermaid
-erDiagram
-    INGESTED_SOURCE ||--o| SIGNAL_DOSSIER : "extracts to"
-    SIGNAL_DOSSIER ||--|| ENTERPRISE_EVALUATION : "evaluated by"
-    ENTERPRISE_EVALUATION ||--|| RADAR_ITEM : "categorized as"
+Composite **Hype Score**: $H = 1.0 - S_v$.
 
-    INGESTED_SOURCE {
-        uuid id PK
-        string source_type "arxiv | github | rss"
-        string source_url
-        string title
-        text raw_payload
-        float heuristic_noise_score
-        string status "dropped | qualified"
-        timestamp ingested_at
-    }
+### 6.2 Multi-Lens Viability Score ($E_v$)
+The **Adversarial Committee (Option 2C)** evaluates qualified signals across three lenses:
+1. **Security & Privacy Lens (Weight: 35%):** Data egress boundaries, VPC/on-prem compatibility, secret scrubbing.
+2. **Operational Feasibility Lens (Weight: 35%):** Deterministic reproducibility, runner compute footprint, integration friction.
+3. **Technical Rigor Lens (Weight: 30%):** True defect/problem resolution vs vanity benchmarks, contract compliance.
 
-    SIGNAL_DOSSIER {
-        uuid id PK
-        uuid source_id FK
-        string name
-        string category
-        string evidence_tier
-        text key_innovation
-        jsonb claims
-        vector embedding "1536 dims"
-        timestamp extracted_at
-    }
-
-    ENTERPRISE_EVALUATION {
-        uuid id PK
-        uuid dossier_id FK
-        float topology_score
-        float determinism_score
-        float privacy_score
-        float auditability_score
-        jsonb enterprise_risks
-        text skeptic_critique
-        timestamp evaluated_at
-    }
-
-    RADAR_ITEM {
-        uuid id PK
-        uuid evaluation_id FK
-        string ring "Adopt | Trial | Assess | Hold"
-        float validity_score
-        float viability_score
-        float hype_score
-        boolean active
-        timestamp published_at
-    }
-```
+$$\text{Composite Viability: } E_v = 0.35 \cdot S_{\text{sec}} + 0.35 \cdot S_{\text{ops}} + 0.30 \cdot S_{\text{tech}}$$
 
 ---
 
-## 7. Interactive Visualization Architecture
+## 7. Reference Domain Profile: Software Quality Engineering (QE)
 
-To satisfy user needs for flexible views and dynamic filtering:
-1. **Radar JSON Contract (`data/export/radar.json`):**
-   Self-contained JSON artifact containing all active radar items, historical scores, tags, risk breakdowns, and 2D UMAP projection coordinates.
-2. **Frontend UI (`web/`):**
-   - Built with Vite, React, TypeScript, and Tailwind CSS.
-   - Decoupled from backend servers; can be deployed directly to GitHub Pages or run locally.
-   - **View Switcher:**
-     - **Radar View:** Traditional 4-quadrant / 4-ring radar visualization.
-     - **Matrix Table:** Searchable table with column sorting and deep dossier expansion.
-     - **Scatter Plot View:** Two-axis interactive scatter chart (Hype vs Enterprise Viability).
-     - **Cluster View:** Semantic similarity clustering visualizer based on `pgvector` embeddings.
-   - **Multi-Filter Sidebar:** Instant client-side filtering by Ring, Pillar, Evidence Tier, Score Thresholds, and Risk Tags.
+The reference profile categorizes SDLC Quality Engineering into 6 pillars:
+
+| Pillar | Domain Scope |
+| :--- | :--- |
+| **1. Spec & Model** | Requirements-to-test generation, formal verification, model-based testing, property generation. |
+| **2. Test Synth** | Automated E2E, integration, unit test generation, synthetic data synthesis, TDM, API mocking. |
+| **3. Execution & Optimization** | Mutation testing, predictive test selection (PTS), flaky test isolation, parallel scheduling. |
+| **4. Triage & Fix** | Root Cause Analysis (RCA), self-healing test scripts, automated PR repair patches. |
+| **5. Agent Systems** | Autonomous browser-use testing agents, CLI coding agents for QE, multi-agent test workflows. |
+| **6. Governance & Evals** | LLM-as-a-judge test suites, safety, red-teaming, prompt regression, determinism verification. |
+
+---
+
+## 8. Presentation & Delivery Architecture
+
+1. **Versioned Dataset (`radar.json`):** Self-contained JSON export containing active items, corroborating source counts, velocity metrics, lifecycle stages, and 2D UMAP projection coordinates.
+2. **Interactive Web Application (`web/`):**
+   - Quad-Quadrant / Multi-Ring Radar with zoomable blips.
+   - Matrix Table with instant search, sorting, and deep dossier inspection.
+   - Multi-Criteria Sidebar Filters (Rings, Categories, Evidence Tiers, Viability / Hype sliders, Lifecycle stage).
+   - Topic Cluster View showing interconnected corroborating sources.
+3. **Bi-Weekly Intelligence Digest:** Automated Markdown report summarizing new entrants, ring migrations, and rising trend topics.

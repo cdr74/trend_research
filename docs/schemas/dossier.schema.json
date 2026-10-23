@@ -12,7 +12,7 @@
       "type": "string"
     },
     "QECategory": {
-      "description": "The 6 core SDLC Quality Engineering pillars.",
+      "description": "The 6 core SDLC Quality Engineering pillars (Reference Domain Profile).",
       "enum": [
         "Spec & Model",
         "Test Synthesis",
@@ -36,6 +36,19 @@
       "format": "uuid",
       "title": "Source Id",
       "type": "string"
+    },
+    "topic_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Topic Id"
     },
     "name": {
       "title": "Name",
@@ -96,6 +109,13 @@
       ],
       "default": null,
       "title": "Embedding"
+    },
+    "engagement_metrics": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Engagement Metrics",
+      "type": "object"
     }
   },
   "required": [

@@ -1,4 +1,4 @@
-"""Domain data models and Pydantic v2 validation contracts."""
+"""Domain data models and Pydantic v2 validation contracts for Trend Horizon Radar."""
 
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 
 class QECategory(StrEnum):
-    """The 6 core SDLC Quality Engineering pillars."""
+    """The 6 core SDLC Quality Engineering pillars (Reference Domain Profile)."""
 
     SPEC_AND_MODEL = "Spec & Model"
     TEST_SYNTHESIS = "Test Synthesis"
@@ -29,12 +29,20 @@ class EvidenceTier(StrEnum):
 
 
 class RadarRing(StrEnum):
-    """Tech Radar rings based on enterprise viability and signal validity."""
+    """Tech Radar rings based on viability, validity, and operational ergonomics."""
 
     ADOPT = "Adopt"
     TRIAL = "Trial"
     ASSESS = "Assess"
     HOLD = "Hold"
+
+
+class LifecycleStage(StrEnum):
+    """Trend lifecycle trajectory based on engagement velocity and consensus."""
+
+    EMERGING = "Emerging"
+    CONSOLIDATED = "Consolidated"
+    FADING = "Fading"
 
 
 class SourceType(StrEnum):
@@ -58,6 +66,7 @@ class SourcePayload(BaseModel):
     published_date: datetime | None = None
     ingested_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     metadata: dict[str, Any] = Field(default_factory=dict)
+    engagement_metrics: dict[str, float] = Field(default_factory=dict)
 
 
 class SignalDossier(BaseModel):
@@ -65,6 +74,7 @@ class SignalDossier(BaseModel):
 
     id: UUID = Field(default_factory=uuid4)
     source_id: UUID
+    topic_id: UUID | None = None
     name: str
     category: QECategory
     source_url: str
@@ -76,21 +86,22 @@ class SignalDossier(BaseModel):
     is_superficial_wrapper: bool = False
     extracted_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     embedding: list[float] | None = None
+    engagement_metrics: dict[str, float] = Field(default_factory=dict)
 
 
 class EnterpriseEvaluation(BaseModel):
-    """Stage 3 adversarial enterprise banking audit critique (Committee 2C)."""
+    """Stage 3 multi-lens committee audit critique (Option 2C)."""
 
     id: UUID = Field(default_factory=uuid4)
     dossier_id: UUID
-    # Persona sub-scores (Weights: Security 35%, CI/CD 35%, QE 30%)
+    # Multi-lens sub-scores (Weights: Security 35%, Operations 35%, Technical 30%)
     security_score: float = Field(..., ge=0.0, le=1.0)
     cicd_score: float = Field(..., ge=0.0, le=1.0)
     qe_score: float = Field(..., ge=0.0, le=1.0)
     composite_viability_score: float = Field(..., ge=0.0, le=1.0)
     enterprise_risks: list[str] = Field(default_factory=list)
     prerequisites: list[str] = Field(default_factory=list)
-    # Detailed persona critiques
+    # Detailed lens critiques
     security_critique: str | None = None
     cicd_critique: str | None = None
     qe_critique: str | None = None
@@ -98,10 +109,26 @@ class EnterpriseEvaluation(BaseModel):
     evaluated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
+class TrendTopic(BaseModel):
+    """Synthesized cross-source trend topic entity (Option 3B)."""
+
+    id: UUID = Field(default_factory=uuid4)
+    name: str
+    category: QECategory
+    summary: str
+    corroboration_count: int = 1
+    sources: list[str] = Field(default_factory=list)
+    average_viability: float = Field(0.0, ge=0.0, le=1.0)
+    average_validity: float = Field(0.0, ge=0.0, le=1.0)
+    lifecycle_stage: LifecycleStage = LifecycleStage.EMERGING
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
 class RadarItem(BaseModel):
     """Stage 4 final radar publication entity."""
 
     id: UUID = Field(default_factory=uuid4)
+    topic_id: UUID | None = None
     name: str
     category: QECategory
     source_url: str
@@ -110,6 +137,10 @@ class RadarItem(BaseModel):
     viability_score: float = Field(..., ge=0.0, le=1.0)
     validity_score: float = Field(..., ge=0.0, le=1.0)
     recommended_ring: RadarRing
+    lifecycle_stage: LifecycleStage = LifecycleStage.EMERGING
+    corroboration_count: int = 1
+    velocity_score: float = 0.0
+    corroborating_sources: list[str] = Field(default_factory=list)
     key_innovation: str
     enterprise_risks: list[str] = Field(default_factory=list)
     prerequisites: list[str] = Field(default_factory=list)
