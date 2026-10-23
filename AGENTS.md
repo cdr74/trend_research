@@ -5,9 +5,10 @@ The **AI Test Engineering Horizon Radar** is an autonomous intelligence pipeline
 
 ## 2. Engineering Standards & Strict Protocol
 1. **Never Take Shortcuts:** Strictly adhere to test-driven and backlog-driven execution. Every code change must trace to a task in `docs/BACKLOG.md` and an accepted Architecture Decision Record (`docs/adr/`).
-2. **Type Safety & Linting:** Strict typing (`mypy --strict`) and Ruff formatting/linting are mandatory. Code with type errors or lint warnings will fail CI.
-3. **Test-First Discipline:** Write unit and integration tests alongside all implementations. Tests must run deterministically without internet dependencies (use mock providers and fixtures).
-4. **Synchronized Commits:** Every commit must follow Conventional Commits and reference the relevant ADR and backlog story (e.g., `feat(models): implement Pydantic v2 signal schemas (Ref: ADR-0004, Backlog M1-T3)`).
+2. **Architectural Deliberation & Context:** Foundational system architecture and design choices must be captured in dedicated ADRs and discussed interactively with the engineer at length before locking. ADRs must provide rich context, alternative topologies, failure modes, and trade-off analyses rather than treating initial briefs as unquestioned blueprints.
+3. **Type Safety & Linting:** Strict typing (`mypy --strict`) and Ruff formatting/linting are mandatory. Code with type errors or lint warnings will fail CI.
+4. **Test-First Discipline:** Write unit and integration tests alongside all implementations. Tests must run deterministically without internet dependencies (use mock providers and fixtures).
+5. **Synchronized Commits:** Every commit must follow Conventional Commits and reference the relevant ADR and backlog story (e.g., `feat(models): implement Pydantic v2 signal schemas (Ref: ADR-0004, Backlog M1-T3)`).
 
 ## 3. Essential Commands & Workflows
 - **Environment Sync:** `uv sync`
