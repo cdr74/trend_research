@@ -1,0 +1,164 @@
+version: "1.0"
+description: "Curated source catalog for Trend Horizon Radar (Reference Profile: Software Quality Engineering)"
+
+sources:
+  # ==========================================
+  # Academic & Pre-Print Feeds (Weight: 1.3)
+  # ==========================================
+  - id: "arxiv-cs-se"
+    name: "arXiv Software Engineering (cs.SE)"
+    channel: "academic"
+    endpoint_url: "http://export.arxiv.org/api/query"
+    authority_weight: 1.3
+    enabled: true
+    query_params:
+      search_query: "cat:cs.SE"
+      max_results: 50
+      sort_by: "submittedDate"
+      sort_order: "descending"
+    telemetry_fields: ["citations", "downloads"]
+    description: "Core academic pre-prints in automated testing, program analysis, repair, and LLM-assisted verification."
+
+  - id: "arxiv-cs-ai-pl"
+    name: "arXiv AI & Programming Languages (cs.AI / cs.PL)"
+    channel: "academic"
+    endpoint_url: "http://export.arxiv.org/api/query"
+    authority_weight: 1.25
+    enabled: true
+    query_params:
+      search_query: "cat:cs.AI OR cat:cs.PL"
+      max_results: 30
+      sort_by: "submittedDate"
+      sort_order: "descending"
+    telemetry_fields: ["citations", "downloads"]
+    description: "Foundational innovations in formal verification, property-based testing, and agent reasoning."
+
+  # ==========================================
+  # Open Source Ecosystems - GitHub (Weight: 1.1)
+  # ==========================================
+  - id: "github-topic-test-generation"
+    name: "GitHub Topic: Test Generation"
+    channel: "github"
+    endpoint_url: "https://api.github.com/search/repositories"
+    authority_weight: 1.1
+    enabled: true
+    query_params:
+      q: "topic:test-generation sort:updated"
+    telemetry_fields: ["stars", "forks", "open_issues"]
+    description: "Repositories tagging automated unit, integration, and E2E test synthesis."
+
+  - id: "github-topic-mutation-testing"
+    name: "GitHub Topic: Mutation Testing"
+    channel: "github"
+    endpoint_url: "https://api.github.com/search/repositories"
+    authority_weight: 1.15
+    enabled: true
+    query_params:
+      q: "topic:mutation-testing sort:stars"
+    telemetry_fields: ["stars", "forks"]
+    description: "Mutation analysis and test effectiveness optimization frameworks."
+
+  - id: "github-topic-llm-evals"
+    name: "GitHub Topic: LLM Evals & Testing"
+    channel: "github"
+    endpoint_url: "https://api.github.com/search/repositories"
+    authority_weight: 1.1
+    enabled: true
+    query_params:
+      q: "topic:evals OR topic:llm-evaluation sort:stars"
+    telemetry_fields: ["stars", "forks"]
+    description: "Evaluation harnesses, LLM-as-a-judge test suites, and prompt regression tools."
+
+  - id: "github-topic-browser-automation"
+    name: "GitHub Topic: Browser Automation & Agent Testing"
+    channel: "github"
+    endpoint_url: "https://api.github.com/search/repositories"
+    authority_weight: 1.1
+    enabled: true
+    query_params:
+      q: "topic:browser-automation OR topic:browser-use sort:updated"
+    telemetry_fields: ["stars", "forks"]
+    description: "Autonomous browser-use agents and exploratory testing controllers."
+
+  # ==========================================
+  # Practitioner Engineering Blogs (Weight: 1.2)
+  # ==========================================
+  - id: "netflix-tech-blog"
+    name: "Netflix Technology Blog"
+    channel: "rss"
+    endpoint_url: "https://netflixtechblog.com/feed"
+    authority_weight: 1.25
+    enabled: true
+    query_params:
+      keywords: ["testing", "canary", "chaos", "reliability", "verification"]
+    telemetry_fields: ["views", "shares"]
+    description: "Production case studies on chaos engineering, automated canary analysis, and continuous verification."
+
+  - id: "uber-eng-blog"
+    name: "Uber Engineering Blog"
+    channel: "rss"
+    endpoint_url: "https://www.uber.com/en-US/blog/engineering/rss/"
+    authority_weight: 1.25
+    enabled: true
+    query_params:
+      keywords: ["testing", "predictive", "flaky", "mock", "ci-cd"]
+    telemetry_fields: ["views"]
+    description: "High-scale engineering on predictive test selection and flaky test management."
+
+  - id: "meta-eng-blog"
+    name: "Meta Engineering Developer Tools"
+    channel: "rss"
+    endpoint_url: "https://engineering.fb.com/category/developer-tools/feed/"
+    authority_weight: 1.25
+    enabled: true
+    query_params:
+      keywords: ["testing", "sapienz", "reasoning", "developer"]
+    telemetry_fields: ["views"]
+    description: "Automated reasoning and large-scale testing toolkits."
+
+  - id: "google-testing-blog"
+    name: "Google Testing & Open Source Blog"
+    channel: "rss"
+    endpoint_url: "https://testing.googleblog.com/feeds/posts/default?alt=rss"
+    authority_weight: 1.2
+    enabled: true
+    query_params:
+      keywords: ["testing", "mutation", "hermetic", "flakiness"]
+    telemetry_fields: ["views"]
+    description: "Classic and modern testing practices, test sizing, and mutation testing."
+
+  - id: "martin-fowler-bliki"
+    name: "Martin Fowler Architecture & Testing"
+    channel: "rss"
+    endpoint_url: "https://martinfowler.com/feed.atom"
+    authority_weight: 1.2
+    enabled: true
+    query_params:
+      keywords: ["testing", "pyramid", "contract", "continuous delivery"]
+    telemetry_fields: ["views"]
+    description: "Practitioner insights on contract testing, test pyramids, and delivery pipelines."
+
+  # ==========================================
+  # Community & Media Feeds (Weight: 0.8)
+  # ==========================================
+  - id: "hackernews-test-topics"
+    name: "HackerNews Discussion Search"
+    channel: "community"
+    endpoint_url: "https://hn.algolia.com/api/v1/search_by_date"
+    authority_weight: 0.85
+    enabled: true
+    query_params:
+      query: "mutation testing OR test generation OR flaky tests OR LLM evals"
+      tags: "story"
+    telemetry_fields: ["points", "comments"]
+    description: "Live discussion velocity, community feedback, and sentiment on emerging tools."
+
+  - id: "software-testing-weekly"
+    name: "Software Testing Weekly"
+    channel: "rss"
+    endpoint_url: "https://softwaretestingweekly.com/feed"
+    authority_weight: 0.9
+    enabled: true
+    query_params: {}
+    telemetry_fields: ["readers"]
+    description: "Curated newsletter summarizing the week's key software testing tools and articles."

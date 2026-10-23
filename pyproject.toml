@@ -18,6 +18,7 @@ dependencies = [
     "click>=8.1.7",
     "rich>=13.7.1",
     "jinja2>=3.1.4",
+    "pyyaml>=6.0.3",
 ]
 
 [project.optional-dependencies]
@@ -75,3 +76,8 @@ minversion = "8.0"
 addopts = "-ra -q --strict-markers"
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+[dependency-groups]
+dev = [
+    "types-pyyaml>=6.0.12.20260906",
+]

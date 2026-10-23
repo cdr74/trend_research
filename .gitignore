@@ -35,9 +35,9 @@ htmlcov/
 *.env
 
 # Database & Local Data
-data/
+data/*
 !data/seeds/
-!data/seeds/.gitkeep
+!data/seeds/**
 pgdata/
 *.sqlite
 *.db

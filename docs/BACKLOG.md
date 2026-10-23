@@ -42,10 +42,11 @@
 **Goal:** Build asynchronous multi-channel ingestion collectors, capture audience engagement telemetry, and execute Stage 1 deterministic noise filtering.
 
 ### Stories & Tasks:
-- [x] **M2-T1: Ingestion Engine Contract & Telemetry Normalizer**
+- [x] **M2-T1: Ingestion Engine Contract, Registry & Telemetry Normalizer**
   - Implement `src/radar/ingestion/base.py` defining asynchronous `BaseIngestor` protocol.
   - Normalize engagement metrics (citations, reader counts, viewer data, stars/forks) and compute baseline velocity.
-  - *Acceptance Criteria:* Full test coverage for normalization formulas, protocol validation, and velocity decay.
+  - Establish curated multi-channel source catalog in `data/seeds/sources.yaml` and `docs/data_sources.md`.
+  - *Acceptance Criteria:* Full test coverage for normalization formulas, protocol validation, and source registry parsing.
 - [ ] **M2-T2: Academic Pre-Print Ingestion Collector (arXiv / Semantic Scholar)**
   - Implement academic API client querying technical pre-prints with citation metadata.
 - [ ] **M2-T3: Open Source Repository & Metrics Ingestor (GitHub)**
