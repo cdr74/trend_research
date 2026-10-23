@@ -10,13 +10,13 @@
 
 ---
 
-## Milestone 1: Repository Baseline, Schemas & Tooling Harness (Current)
+## Milestone 1: Repository Baseline, Schemas & Tooling Harness (Completed)
 **Goal:** Establish enterprise-grade tooling, data schema contracts, project documentation, and automated test runners.
 
 ### Stories & Tasks:
 - [x] **M1-T1: Documentation Architecture & Project Inception**
   - Establish `README.md`, `docs/design/architecture.md`, `docs/BACKLOG.md`, `docs/USER_GUIDE.md`, and `GEMINI.md`/`AGENTS.md`.
-  - Author foundational ADRs: ADR-0001 (Tooling), ADR-0002 (Postgres/pgvector), ADR-0003 (LLM Adapter), ADR-0004 (DAG & Schemas), ADR-0005 (Visualization).
+  - Author foundational ADRs: ADR-0000 (Macro Architecture), ADR-0001 (Tooling), ADR-0002 (Postgres/pgvector), ADR-0003 (LLM Adapter), ADR-0004 (DAG & Schemas), ADR-0005 (Visualization).
   - *Acceptance Criteria:* All Phase 1 documentation assets created and validated.
 - [x] **M1-T2: Python Project Setup & Tooling Configuration**
   - Initialize `pyproject.toml` targeting Python 3.12 using `uv`.
@@ -24,8 +24,8 @@
   - Configure root directory structure: `src/radar/`, `tests/`, `scripts/`, `data/`.
   - *Acceptance Criteria:* `uv sync`, `uv run ruff check .`, `uv run mypy src tests`, and `uv run pytest` pass cleanly.
 - [x] **M1-T3: Pydantic v2 Core Schemas & Validation Contracts**
-  - Implement `src/radar/core/models.py` with `SignalPayload`, `SignalDossier`, `EnterpriseEvaluation`, and `RadarItem`.
-  - Add JSON schema generation utility to emit `docs/schemas/signal.schema.json`.
+  - Implement `src/radar/core/models.py` with `SignalPayload`, `SignalDossier`, `EnterpriseEvaluation`, `TrendTopic`, and `RadarItem`.
+  - Add JSON schema generation utility to emit `docs/schemas/` contracts.
   - Write comprehensive unit tests for schema validation and edge cases.
   - *Acceptance Criteria:* Unit tests achieve 100% coverage on core data models.
 - [x] **M1-T4: Local Infrastructure via Podman Compose**
@@ -33,12 +33,12 @@
   - Create database bootstrap scripts and test connection harness in `src/radar/db/`.
   - *Acceptance Criteria:* `podman compose up -d` boots a healthy PostgreSQL instance with `pgvector` enabled.
 - [x] **M1-T5: Continuous Integration Pipeline (.github/workflows/ci.yml)**
-  - Configure GitHub Actions workflow running linting (`ruff`), type checking (`mypy`), and test suite (`pytest`) on push/PR.
+  - Configure GitHub Actions workflow running linting (`ruff`), type checking (`mypy`), test suite (`pytest`), and web dashboard build.
   - *Acceptance Criteria:* CI configuration adheres to remote parity requirements.
 
 ---
 
-## Milestone 2: Source Ingestion, Telemetry & Heuristic Noise Sieve
+## Milestone 2: Source Ingestion, Telemetry & Heuristic Noise Sieve (NEXT UP)
 **Goal:** Build asynchronous multi-channel ingestion collectors, capture audience engagement telemetry, and execute Stage 1 deterministic noise filtering.
 
 ### Stories & Tasks:
