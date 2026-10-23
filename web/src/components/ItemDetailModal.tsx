@@ -1,0 +1,123 @@
+import React from "react";
+import { RadarItem } from "../types";
+
+interface ItemDetailModalProps {
+  item: RadarItem | null;
+  onClose: () => void;
+}
+
+export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose }) => {
+  if (!item) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="bg-[#121826] border border-[#1f293d] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl">
+        {/* Header */}
+        <div className="flex justify-between items-start p-6 border-b border-[#1f293d]">
+          <div>
+            <span className="text-xs uppercase font-bold tracking-widest text-blue-400">
+              {item.category}
+            </span>
+            <h2 className="text-2xl font-bold text-slate-100 mt-1">{item.name}</h2>
+            <div className="flex items-center space-x-3 mt-2">
+              <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                Ring: {item.recommended_ring}
+              </span>
+              <span className="text-xs text-slate-400">{item.evidence_tier}</span>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-200 text-xl font-bold p-1"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+          {/* Scores Overview */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-[#0b0f19] border border-[#1f293d] p-4 rounded-xl text-center">
+              <div className="text-xs text-slate-400 uppercase font-semibold">Viability Score</div>
+              <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">
+                {(item.viability_score * 100).toFixed(0)}%
+              </div>
+            </div>
+            <div className="bg-[#0b0f19] border border-[#1f293d] p-4 rounded-xl text-center">
+              <div className="text-xs text-slate-400 uppercase font-semibold">Hype Index</div>
+              <div className="text-2xl font-bold font-mono text-amber-400 mt-1">
+                {(item.hype_score * 100).toFixed(0)}%
+              </div>
+            </div>
+            <div className="bg-[#0b0f19] border border-[#1f293d] p-4 rounded-xl text-center">
+              <div className="text-xs text-slate-400 uppercase font-semibold">Validity Score</div>
+              <div className="text-2xl font-bold font-mono text-blue-400 mt-1">
+                {(item.validity_score * 100).toFixed(0)}%
+              </div>
+            </div>
+          </div>
+
+          {/* Key Innovation */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-2">
+              Key Technical Innovation
+            </h3>
+            <p className="text-sm text-slate-200 leading-relaxed bg-[#0b0f19] p-4 rounded-xl border border-[#1f293d]">
+              {item.key_innovation}
+            </p>
+          </div>
+
+          {/* Enterprise Risks */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-red-400 mb-2">
+              Adversarial Enterprise Risks & Banking Constraints
+            </h3>
+            <ul className="space-y-2">
+              {item.enterprise_risks.map((risk, i) => (
+                <li
+                  key={i}
+                  className="text-xs text-red-300 bg-red-950/20 border border-red-900/30 px-3 py-2 rounded-lg flex items-start space-x-2"
+                >
+                  <span className="font-bold">•</span>
+                  <span>{risk}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Prerequisites */}
+          {item.prerequisites && item.prerequisites.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                Operational Prerequisites
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {item.prerequisites.map((prereq, i) => (
+                  <span
+                    key={i}
+                    className="text-xs bg-[#161f33] text-slate-300 px-3 py-1 rounded-md border border-[#1f293d]"
+                  >
+                    {prereq}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Source Link */}
+          <div>
+            <a
+              href={item.source_url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block text-xs font-semibold text-blue-400 hover:text-blue-300 underline"
+            >
+              Inspect Source Payload ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

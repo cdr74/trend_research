@@ -1,0 +1,150 @@
+{
+  "$defs": {
+    "EvidenceTier": {
+      "description": "Evidence backing tiers for technical claims.",
+      "enum": [
+        "Academic Peer-Reviewed",
+        "Open Source Repo",
+        "Engineering Post-Mortem",
+        "Vendor Announcement"
+      ],
+      "title": "EvidenceTier",
+      "type": "string"
+    },
+    "QECategory": {
+      "description": "The 6 core SDLC Quality Engineering pillars.",
+      "enum": [
+        "Spec & Model",
+        "Test Synthesis",
+        "Execution & Optimization",
+        "Triage & Self-Healing",
+        "Agent Systems",
+        "Governance & Evals"
+      ],
+      "title": "QECategory",
+      "type": "string"
+    },
+    "RadarRing": {
+      "description": "Tech Radar rings based on enterprise viability and signal validity.",
+      "enum": [
+        "Adopt",
+        "Trial",
+        "Assess",
+        "Hold"
+      ],
+      "title": "RadarRing",
+      "type": "string"
+    }
+  },
+  "description": "Stage 4 final radar publication entity.",
+  "properties": {
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "category": {
+      "$ref": "#/$defs/QECategory"
+    },
+    "source_url": {
+      "title": "Source Url",
+      "type": "string"
+    },
+    "evidence_tier": {
+      "$ref": "#/$defs/EvidenceTier"
+    },
+    "hype_score": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Hype Score",
+      "type": "number"
+    },
+    "viability_score": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Viability Score",
+      "type": "number"
+    },
+    "validity_score": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Validity Score",
+      "type": "number"
+    },
+    "recommended_ring": {
+      "$ref": "#/$defs/RadarRing"
+    },
+    "key_innovation": {
+      "title": "Key Innovation",
+      "type": "string"
+    },
+    "enterprise_risks": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Enterprise Risks",
+      "type": "array"
+    },
+    "prerequisites": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Prerequisites",
+      "type": "array"
+    },
+    "dossier_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dossier Id"
+    },
+    "evaluation_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Evaluation Id"
+    },
+    "published_at": {
+      "format": "date-time",
+      "title": "Published At",
+      "type": "string"
+    },
+    "active": {
+      "default": true,
+      "title": "Active",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "name",
+    "category",
+    "source_url",
+    "evidence_tier",
+    "hype_score",
+    "viability_score",
+    "validity_score",
+    "recommended_ring",
+    "key_innovation"
+  ],
+  "title": "RadarItem",
+  "type": "object",
+  "$id": "https://radar.internal/schemas/signal.schema.json"
+}

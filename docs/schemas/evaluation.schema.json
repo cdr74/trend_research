@@ -1,0 +1,80 @@
+{
+  "description": "Stage 3 adversarial enterprise banking audit critique.",
+  "properties": {
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "dossier_id": {
+      "format": "uuid",
+      "title": "Dossier Id",
+      "type": "string"
+    },
+    "topology_score": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Topology Score",
+      "type": "number"
+    },
+    "determinism_score": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Determinism Score",
+      "type": "number"
+    },
+    "privacy_score": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Privacy Score",
+      "type": "number"
+    },
+    "auditability_score": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Auditability Score",
+      "type": "number"
+    },
+    "composite_viability_score": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Composite Viability Score",
+      "type": "number"
+    },
+    "enterprise_risks": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Enterprise Risks",
+      "type": "array"
+    },
+    "prerequisites": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Prerequisites",
+      "type": "array"
+    },
+    "skeptic_critique": {
+      "title": "Skeptic Critique",
+      "type": "string"
+    },
+    "evaluated_at": {
+      "format": "date-time",
+      "title": "Evaluated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "dossier_id",
+    "topology_score",
+    "determinism_score",
+    "privacy_score",
+    "auditability_score",
+    "composite_viability_score",
+    "skeptic_critique"
+  ],
+  "title": "EnterpriseEvaluation",
+  "type": "object",
+  "$id": "https://radar.internal/schemas/evaluation.schema.json"
+}

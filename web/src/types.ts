@@ -1,0 +1,38 @@
+export type RadarRing = "Adopt" | "Trial" | "Assess" | "Hold";
+
+export type QECategory =
+  | "Spec & Model"
+  | "Test Synthesis"
+  | "Execution & Optimization"
+  | "Triage & Self-Healing"
+  | "Agent Systems"
+  | "Governance & Evals";
+
+export type EvidenceTier =
+  | "Academic Peer-Reviewed"
+  | "Open Source Repo"
+  | "Engineering Post-Mortem"
+  | "Vendor Announcement";
+
+export interface RadarItem {
+  id: string;
+  name: string;
+  category: QECategory;
+  evidence_tier: EvidenceTier;
+  hype_score: number;
+  viability_score: number;
+  validity_score: number;
+  recommended_ring: RadarRing;
+  key_innovation: string;
+  enterprise_risks: string[];
+  prerequisites: string[];
+  source_url: string;
+}
+
+export interface RadarData {
+  radar_title: string;
+  generated_at: string;
+  rings: RadarRing[];
+  categories: QECategory[];
+  items: RadarItem[];
+}

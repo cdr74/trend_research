@@ -1,0 +1,112 @@
+{
+  "$defs": {
+    "EvidenceTier": {
+      "description": "Evidence backing tiers for technical claims.",
+      "enum": [
+        "Academic Peer-Reviewed",
+        "Open Source Repo",
+        "Engineering Post-Mortem",
+        "Vendor Announcement"
+      ],
+      "title": "EvidenceTier",
+      "type": "string"
+    },
+    "QECategory": {
+      "description": "The 6 core SDLC Quality Engineering pillars.",
+      "enum": [
+        "Spec & Model",
+        "Test Synthesis",
+        "Execution & Optimization",
+        "Triage & Self-Healing",
+        "Agent Systems",
+        "Governance & Evals"
+      ],
+      "title": "QECategory",
+      "type": "string"
+    }
+  },
+  "description": "Stage 2 structured technical extraction dossier.",
+  "properties": {
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "source_id": {
+      "format": "uuid",
+      "title": "Source Id",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "category": {
+      "$ref": "#/$defs/QECategory"
+    },
+    "source_url": {
+      "title": "Source Url",
+      "type": "string"
+    },
+    "evidence_tier": {
+      "$ref": "#/$defs/EvidenceTier"
+    },
+    "key_innovation": {
+      "title": "Key Innovation",
+      "type": "string"
+    },
+    "technical_claims": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Technical Claims",
+      "type": "array"
+    },
+    "has_reproducible_benchmark": {
+      "default": false,
+      "title": "Has Reproducible Benchmark",
+      "type": "boolean"
+    },
+    "has_open_source_repo": {
+      "default": false,
+      "title": "Has Open Source Repo",
+      "type": "boolean"
+    },
+    "is_superficial_wrapper": {
+      "default": false,
+      "title": "Is Superficial Wrapper",
+      "type": "boolean"
+    },
+    "extracted_at": {
+      "format": "date-time",
+      "title": "Extracted At",
+      "type": "string"
+    },
+    "embedding": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "number"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Embedding"
+    }
+  },
+  "required": [
+    "source_id",
+    "name",
+    "category",
+    "source_url",
+    "evidence_tier",
+    "key_innovation"
+  ],
+  "title": "SignalDossier",
+  "type": "object",
+  "$id": "https://radar.internal/schemas/dossier.schema.json"
+}

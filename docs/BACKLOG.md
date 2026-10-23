@@ -18,21 +18,21 @@
   - Establish `README.md`, `docs/design/architecture.md`, `docs/BACKLOG.md`, `docs/USER_GUIDE.md`, and `GEMINI.md`/`AGENTS.md`.
   - Author foundational ADRs: ADR-0001 (Tooling), ADR-0002 (Postgres/pgvector), ADR-0003 (LLM Adapter), ADR-0004 (DAG & Schemas), ADR-0005 (Visualization).
   - *Acceptance Criteria:* All Phase 1 documentation assets created and validated.
-- [ ] **M1-T2: Python Project Setup & Tooling Configuration**
+- [x] **M1-T2: Python Project Setup & Tooling Configuration**
   - Initialize `pyproject.toml` targeting Python 3.12 using `uv`.
   - Configure `ruff` (linter & formatter), `mypy` (strict type-checking), and `pytest` with `pytest-asyncio`.
   - Configure root directory structure: `src/radar/`, `tests/`, `scripts/`, `data/`.
   - *Acceptance Criteria:* `uv sync`, `uv run ruff check .`, `uv run mypy src tests`, and `uv run pytest` pass cleanly.
-- [ ] **M1-T3: Pydantic v2 Core Schemas & Validation Contracts**
+- [x] **M1-T3: Pydantic v2 Core Schemas & Validation Contracts**
   - Implement `src/radar/core/models.py` with `SignalPayload`, `SignalDossier`, `EnterpriseEvaluation`, and `RadarItem`.
   - Add JSON schema generation utility to emit `docs/schemas/signal.schema.json`.
   - Write comprehensive unit tests for schema validation and edge cases.
   - *Acceptance Criteria:* Unit tests achieve 100% coverage on core data models.
-- [ ] **M1-T4: Local Infrastructure via Podman Compose**
+- [x] **M1-T4: Local Infrastructure via Podman Compose**
   - Create `compose.yaml` declaring PostgreSQL 16 with `pgvector` extension and persistent volume.
   - Create database bootstrap scripts and test connection harness in `src/radar/db/`.
   - *Acceptance Criteria:* `podman compose up -d` boots a healthy PostgreSQL instance with `pgvector` enabled.
-- [ ] **M1-T5: Continuous Integration Pipeline (.github/workflows/ci.yml)**
+- [x] **M1-T5: Continuous Integration Pipeline (.github/workflows/ci.yml)**
   - Configure GitHub Actions workflow running linting (`ruff`), type checking (`mypy`), and test suite (`pytest`) on push/PR.
   - *Acceptance Criteria:* CI configuration adheres to remote parity requirements.
 
