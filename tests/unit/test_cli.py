@@ -1,0 +1,74 @@
+"""Unit tests for the Radar command line interface."""
+
+import httpx
+import pytest
+from click.testing import CliRunner
+
+from radar.ingestion.arxiv import ArxivIngestor
+from radar.presentation.cli import _run_ingest, main
+
+
+def test_cli_version() -> None:
+    runner = CliRunner()
+    result = runner.invoke(main, ["--version"])
+    assert result.exit_code == 0
+    assert "radar" in result.output.lower() or "version" in result.output.lower()
+
+
+def test_cli_query_and_export_commands() -> None:
+    runner = CliRunner()
+
+    eval_res = runner.invoke(main, ["evaluate", "--batch-size", "10", "--mock"])
+    assert eval_res.exit_code == 0
+    assert "Evaluating signals" in eval_res.output
+
+    query_res = runner.invoke(main, ["query", "--ring", "Adopt"])
+    assert query_res.exit_code == 0
+    assert "Querying radar" in query_res.output
+
+    export_res = runner.invoke(main, ["export", "--format", "json"])
+    assert export_res.exit_code == 0
+    assert "Exporting radar data" in export_res.output
+
+
+@pytest.mark.asyncio
+async def test_run_ingest_arxiv(sample_arxiv_xml: str) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        _ = request
+        return httpx.Response(200, text=sample_arxiv_xml)
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        mock_ingestor = ArxivIngestor(client=client, rate_limit_delay=0.0)
+        records = await _run_ingest(
+            sources="arxiv",
+            limit=2,
+            query="cat:cs.SE",
+            save=False,
+            ingestor_override=mock_ingestor,
+        )
+        assert len(records) == 2
+        assert records[0].metadata["arxiv_id"] == "2410.18021"
+
+
+def test_cli_ingest_command_invocation(
+    monkeypatch: pytest.MonkeyPatch, sample_arxiv_xml: str
+) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        _ = request
+        return httpx.Response(200, text=sample_arxiv_xml)
+
+    transport = httpx.MockTransport(handler)
+    real_async_client = httpx.AsyncClient
+
+    def mock_client_factory(*_args: object, **kwargs: object) -> httpx.AsyncClient:
+        kwargs["transport"] = transport
+        return real_async_client(**kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(httpx, "AsyncClient", mock_client_factory)
+
+    runner = CliRunner()
+    result = runner.invoke(main, ["ingest", "--sources", "arxiv", "--limit", "2"])
+    assert result.exit_code == 0
+    assert "Automated Mutation Testing" in result.output
+    assert "Successfully retrieved 2 signal(s)" in result.output

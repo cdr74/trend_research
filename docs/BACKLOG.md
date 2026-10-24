@@ -47,8 +47,11 @@
   - Normalize engagement metrics (citations, reader counts, viewer data, stars/forks) and compute baseline velocity.
   - Establish curated multi-channel source catalog in `data/seeds/sources.yaml` and `docs/data_sources.md`.
   - *Acceptance Criteria:* Full test coverage for normalization formulas, protocol validation, and source registry parsing.
-- [ ] **M2-T2: Academic Pre-Print Ingestion Collector (arXiv / Semantic Scholar)**
+- [x] **M2-T2: Academic Pre-Print Ingestion Collector (arXiv / Semantic Scholar)**
   - Implement academic API client querying technical pre-prints with citation metadata.
+  - Implement `ArxivIngestor` protocol compliance, polite pacing (3s delay), exponential backoff, and Atom XML normalization.
+  - Wire CLI `radar ingest --sources=arxiv`.
+  - *Acceptance Criteria:* Full offline unit test coverage with fixtures, live connectivity validated, zero added dependencies. (Ref: ADR-0006)
 - [ ] **M2-T3: Open Source Repository & Metrics Ingestor (GitHub)**
   - Implement GitHub API / GraphQL client tracking star velocity ($\Delta \text{stars}/\Delta t$), contributor counts, and issue resolution velocity.
 - [ ] **M2-T4: Practitioner Publication & Media Ingestor (RSS / Atom / Web)**
