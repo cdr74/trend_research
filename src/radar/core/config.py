@@ -115,6 +115,29 @@ class Settings(BaseSettings):
         description="Evaluation weight for Technical Rigor & Empirical Problem Solving lens",
     )
 
+    # Radar Ring Thresholds (Stage 4)
+    ring_adopt_min_viability: float = Field(
+        default=0.75, ge=0.0, le=1.0, alias="RADAR_RING_ADOPT_MIN_VIABILITY"
+    )
+    ring_adopt_max_hype: float = Field(
+        default=0.35, ge=0.0, le=1.0, alias="RADAR_RING_ADOPT_MAX_HYPE"
+    )
+    ring_trial_min_viability: float = Field(
+        default=0.65, ge=0.0, le=1.0, alias="RADAR_RING_TRIAL_MIN_VIABILITY"
+    )
+    ring_trial_max_hype: float = Field(
+        default=0.50, ge=0.0, le=1.0, alias="RADAR_RING_TRIAL_MAX_HYPE"
+    )
+    ring_assess_min_viability: float = Field(
+        default=0.45, ge=0.0, le=1.0, alias="RADAR_RING_ASSESS_MIN_VIABILITY"
+    )
+    velocity_emerging_threshold: float = Field(
+        default=25.0, ge=0.0, alias="RADAR_VELOCITY_EMERGING_THRESHOLD"
+    )
+    velocity_fading_threshold: float = Field(
+        default=5.0, ge=0.0, alias="RADAR_VELOCITY_FADING_THRESHOLD"
+    )
+
     # Data paths
     export_dir: Path = Field(default=Path("data/export"))
     reports_dir: Path = Field(default=Path("reports"))

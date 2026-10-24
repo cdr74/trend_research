@@ -1,16 +1,27 @@
 """Radar Command Line Interface."""
 
 import asyncio
+import csv
+import json
+from pathlib import Path
 
 import click
 from rich.console import Console
 from rich.table import Table
 
 from radar.core.config import LLMProviderType
-from radar.core.models import QualifiedSignal, SignalDossier, SourcePayload, SourceType
+from radar.core.models import (
+    QECategory,
+    QualifiedSignal,
+    RadarRing,
+    SignalDossier,
+    SourcePayload,
+    SourceType,
+)
 from radar.ingestion.arxiv import ArxivIngestor
 from radar.ingestion.github import GithubIngestor
 from radar.ingestion.rss import RssFeedIngestor
+from radar.pipeline.categorizer import RadarCategorizer
 from radar.pipeline.convergence import TopicConvergenceEngine
 from radar.pipeline.evaluator import MultiLensEvaluator
 from radar.pipeline.extractor import DeepExtractor
@@ -376,6 +387,51 @@ async def _run_evaluate(
         f"[bold green]Completed adversarial audit for {len(evaluations)} dossier(s).[/bold green]"
     )
 
+    # Stage 4 Radar Categorizer & Lifecycle Trajectory (Option 4B)
+    console.print("[cyan]Running Stage 4 Radar Categorizer & Lifecycle Trajectory...[/cyan]")
+    categorizer = RadarCategorizer()
+    radar_items = categorizer.categorize_batch(dossiers, evaluations, topics=topic_map)
+
+    radar_table = Table(
+        title="Stage 4 Tech Horizon Radar Published Items",
+        show_header=True,
+        header_style="bold magenta",
+    )
+    radar_table.add_column("Ring", style="bold", justify="center", width=8)
+    radar_table.add_column("Technology", style="bold", width=22)
+    radar_table.add_column("QE Pillar", style="cyan", width=24)
+    radar_table.add_column("Trajectory", justify="center", width=12)
+    radar_table.add_column("Viability", justify="right", width=9)
+    radar_table.add_column("Hype", justify="right", width=7)
+    radar_table.add_column("Corrob", justify="center", width=7)
+    radar_table.add_column("Key Innovation", style="dim", width=36)
+
+    for item in radar_items:
+        ring_color = {
+            "Adopt": "green",
+            "Trial": "cyan",
+            "Assess": "yellow",
+            "Hold": "red",
+        }.get(item.recommended_ring.value, "white")
+
+        radar_table.add_row(
+            f"[{ring_color}]{item.recommended_ring.value}[/{ring_color}]",
+            item.name[:20],
+            item.category.value,
+            item.lifecycle_stage.value,
+            f"{item.viability_score:.2f}",
+            f"{item.hype_score:.2f}",
+            str(item.corroboration_count),
+            (item.key_innovation[:34] + "...")
+            if len(item.key_innovation) > 34
+            else item.key_innovation,
+        )
+
+    console.print(radar_table)
+    console.print(
+        f"[bold green]Published {len(radar_items)} item(s) to Horizon Radar.[/bold green]"
+    )
+
     try:
         from radar.db.repository import RadarRepository
         from radar.db.session import get_db_session
@@ -388,14 +444,125 @@ async def _run_evaluate(
                 await repo.save_dossier(d)
             for evaluation in evaluations:
                 await repo.save_evaluation(evaluation)
+            for item in radar_items:
+                await repo.save_radar_item(item)
         console.print(
-            f"[bold green]Persisted {len(topics)} topic(s), {len(dossiers)} dossier(s), and {len(evaluations)} evaluation(s) to PostgreSQL.[/bold green]"
+            f"[bold green]Persisted {len(topics)} topic(s), {len(dossiers)} dossier(s), and {len(radar_items)} radar item(s) to PostgreSQL.[/bold green]"
         )
     except Exception:
         # DB optional for offline/dry-run execution
         pass
 
     return dossiers
+
+
+async def _run_query(
+    ring: str | None,
+    category: str | None,
+    min_viability: float,
+    max_hype: float,
+) -> None:
+    """Query active radar items from database."""
+    console.print(
+        f"[bold cyan]Querying radar:[/bold cyan] ring={ring}, category={category}, min_viability={min_viability}, max_hype={max_hype}"
+    )
+    try:
+        from radar.db.repository import RadarRepository
+        from radar.db.session import get_db_session
+
+        parsed_ring = RadarRing(ring) if ring else None
+        parsed_cat = QECategory(category) if category else None
+
+        async with get_db_session() as session:
+            repo = RadarRepository(session)
+            items = await repo.query_radar_items(
+                ring=parsed_ring,
+                category=parsed_cat,
+                min_viability=min_viability,
+                max_hype=max_hype,
+            )
+
+        table = Table(
+            title=f"Radar Query Results ({len(items)} items)",
+            show_header=True,
+            header_style="bold magenta",
+        )
+        table.add_column("Ring", style="bold", justify="center", width=8)
+        table.add_column("Technology", style="bold", width=22)
+        table.add_column("QE Pillar", style="cyan", width=24)
+        table.add_column("Trajectory", justify="center", width=12)
+        table.add_column("Viability", justify="right", width=9)
+        table.add_column("Hype", justify="right", width=7)
+        table.add_column("Key Innovation", style="dim", width=40)
+
+        for it in items:
+            table.add_row(
+                it.recommended_ring,
+                it.name[:20],
+                it.category,
+                it.lifecycle_stage,
+                f"{it.viability_score:.2f}",
+                f"{it.hype_score:.2f}",
+                (it.key_innovation[:38] + "...")
+                if len(it.key_innovation) > 38
+                else it.key_innovation,
+            )
+        console.print(table)
+    except Exception as e:
+        console.print(f"[yellow]Could not execute query (DB running?): {e}[/yellow]")
+
+
+async def _run_export(export_format: str, output: str) -> None:
+    """Export radar items to JSON or CSV."""
+    console.print(
+        f"[bold magenta]Exporting radar data to:[/bold magenta] {output} ({export_format})"
+    )
+    out_path = Path(output)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        from radar.db.repository import RadarRepository
+        from radar.db.session import get_db_session
+
+        async with get_db_session() as session:
+            repo = RadarRepository(session)
+            db_items = await repo.query_radar_items()
+    except Exception as e:
+        console.print(f"[yellow]Could not fetch records from database: {e}[/yellow]")
+        db_items = []
+
+    data = [
+        {
+            "id": str(it.id),
+            "name": it.name,
+            "category": it.category,
+            "source_url": it.source_url,
+            "evidence_tier": it.evidence_tier,
+            "recommended_ring": it.recommended_ring,
+            "lifecycle_stage": it.lifecycle_stage,
+            "viability_score": it.viability_score,
+            "hype_score": it.hype_score,
+            "corroboration_count": it.corroboration_count,
+            "key_innovation": it.key_innovation,
+            "enterprise_risks": it.enterprise_risks,
+            "prerequisites": it.prerequisites,
+        }
+        for it in db_items
+    ]
+
+    if export_format == "json":
+        out_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    elif export_format == "csv":
+        if data:
+            fieldnames = list(data[0].keys())
+            with out_path.open("w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(data)
+        else:
+            out_path.write_text("", encoding="utf-8")
+
+    console.print(f"[bold green]Exported {len(data)} items to {out_path}[/bold green]")
 
 
 @main.command()
@@ -418,8 +585,13 @@ def query(
     max_hype: float,
 ) -> None:
     """Query evaluated radar signals."""
-    console.print(
-        f"[bold cyan]Querying radar:[/bold cyan] ring={ring}, category={category}, min_viability={min_viability}, max_hype={max_hype}"
+    asyncio.run(
+        _run_query(
+            ring=ring,
+            category=category,
+            min_viability=min_viability,
+            max_hype=max_hype,
+        )
     )
 
 
@@ -433,9 +605,7 @@ def query(
 @click.option("--output", default="data/export/radar.json", help="Destination path.")
 def export(export_format: str, output: str) -> None:
     """Export evaluated signals to static distribution files."""
-    console.print(
-        f"[bold magenta]Exporting radar data to:[/bold magenta] {output} ({export_format})"
-    )
+    asyncio.run(_run_export(export_format=export_format, output=output))
 
 
 if __name__ == "__main__":

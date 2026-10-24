@@ -99,9 +99,12 @@
   - Deterministic composite viability formula ($E_v = 0.35 \cdot S_{\text{sec}} + 0.35 \cdot S_{\text{ops}} + 0.30 \cdot S_{\text{tech}}$) with configurable weights.
   - Wire into CLI `radar evaluate` and persistence layer.
   - *Acceptance Criteria:* Full unit test coverage with MockProvider, exact weight calculation verification, and risk flag auditing. (Ref: ADR-0013)
-- [ ] **M3-T5: Stage 4 Radar Categorizer & Lifecycle Trajectory**
+- [x] **M3-T5: Stage 4 Radar Categorizer & Lifecycle Trajectory**
   - Synthesize committee viability, validity, and corroboration into final Radar rings (`Adopt`, `Trial`, `Assess`, `Hold`).
-  - Classify lifecycle trajectory (`Emerging`, `Consolidated`, `Fading`) based on time-decayed engagement velocity.
+  - Classify lifecycle trajectory (`Emerging`, `Consolidated`, `Fading`) based on time-decayed engagement velocity and corroboration.
+  - Compute deterministic validity score ($S_v$) and composite hype score ($H = 1.0 - S_v$) with anti-hype deductions and engineering bonuses.
+  - Wire into CLI `radar evaluate`, `radar query`, and `radar export` with JSON/CSV export support.
+  - *Acceptance Criteria:* Full unit test coverage for ring decisions, lifecycle trajectories, and score bounds. (Ref: ADR-0014)
 - [ ] **M3-T6: Golden Benchmark Evaluation Test Suite**
   - Create regression benchmark with 10 high-signal verified innovations vs. 10 hype products.
   - Assert deterministic scoring thresholds.
