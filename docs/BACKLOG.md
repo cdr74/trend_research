@@ -38,7 +38,7 @@
 
 ---
 
-## Milestone 2: Source Ingestion, Telemetry & Heuristic Noise Sieve (NEXT UP)
+## Milestone 2: Source Ingestion, Telemetry & Heuristic Noise Sieve (Completed)
 **Goal:** Build asynchronous multi-channel ingestion collectors, capture audience engagement telemetry, and execute Stage 1 deterministic noise filtering.
 
 ### Stories & Tasks:
@@ -60,14 +60,15 @@
   - Implement feed reader capturing engineering case studies, post-mortems, and community telemetry.
   - Implement `RssFeedIngestor` supporting dual RSS 2.0 / Atom 1.0 parsing, RFC 2822 / ISO 8601 date parsing, and HTML text stripping.
   - *Acceptance Criteria:* Full test suite with RSS/Atom fixtures, live engineering blog ingestion verified. (Ref: ADR-0008)
-- [ ] **M2-T5: Stage 1 Noise Sieve (Rule-based Filter)**
+- [x] **M2-T5: Stage 1 Noise Sieve (Rule-based Filter)**
   - Implement heuristic classifier dropping marketing buzzwords, unsubstantiated claims, and affiliate links.
   - Calculate early `heuristic_noise_score`; immediately drop records with hype $> 0.60$.
-  - *Acceptance Criteria:* Stage 1 filter correctly drops synthetic benchmark claims and sponsored listicles with > 90% precision.
+  - Integrated into pipeline with `NoiseFilterResult` and `QualifiedSignal` promotion.
+  - *Acceptance Criteria:* Stage 1 filter correctly drops synthetic benchmark claims and sponsored listicles with > 90% precision on golden benchmark suite. (Ref: ADR-0009)
 
 ---
 
-## Milestone 3: Topic Convergence, Adversarial Committee & Evaluation Pipeline
+## Milestone 3: Topic Convergence, Adversarial Committee & Evaluation Pipeline (NEXT UP)
 **Goal:** Implement deep fact extraction, pgvector topic clustering, cross-source corroboration, multi-lens committee review, and radar categorization.
 
 ### Stories & Tasks:

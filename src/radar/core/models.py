@@ -69,6 +69,28 @@ class SourcePayload(BaseModel):
     engagement_metrics: dict[str, float] = Field(default_factory=dict)
 
 
+class NoiseFilterResult(BaseModel):
+    """Result of Stage 1 heuristic noise filtering."""
+
+    payload_id: UUID
+    passed: bool
+    noise_score: float = Field(..., ge=0.0, le=1.0)
+    matched_hype_indicators: list[str] = Field(default_factory=list)
+    matched_credibility_indicators: list[str] = Field(default_factory=list)
+    rejection_reasons: list[str] = Field(default_factory=list)
+    evaluated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class QualifiedSignal(BaseModel):
+    """Normalized signal that passed Stage 1 noise filtering and qualifies for Stage 2."""
+
+    id: UUID = Field(default_factory=uuid4)
+    payload: SourcePayload
+    noise_score: float = Field(..., ge=0.0, le=1.0)
+    quality_markers: list[str] = Field(default_factory=list)
+    passed_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
 class SignalDossier(BaseModel):
     """Stage 2 structured technical extraction dossier."""
 

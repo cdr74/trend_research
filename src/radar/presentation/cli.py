@@ -10,6 +10,7 @@ from radar.core.models import SourcePayload, SourceType
 from radar.ingestion.arxiv import ArxivIngestor
 from radar.ingestion.github import GithubIngestor
 from radar.ingestion.rss import RssFeedIngestor
+from radar.pipeline.noise_sieve import NoiseSieve
 
 console = Console()
 
@@ -82,39 +83,63 @@ async def _run_ingest(
         async for payload in rss_ingestor.fetch_records(limit=limit):
             records.append(payload)
 
+    sieve = NoiseSieve()
+
     table = Table(
-        title="Ingested Raw Signals",
+        title="Ingested Raw Signals & Stage 1 Sieve Verdict",
         show_header=True,
         header_style="bold magenta",
     )
     table.add_column("Channel", style="dim", width=8)
-    table.add_column("ID / Slug", width=16)
-    table.add_column("Title", style="bold", width=40)
-    table.add_column("Authors", width=20)
-    table.add_column("Published", width=12)
-    table.add_column("Velocity", justify="right", width=10)
+    table.add_column("ID / Slug", width=14)
+    table.add_column("Title", style="bold", width=36)
+    table.add_column("Authors", width=16)
+    table.add_column("Published", width=11)
+    table.add_column("Velocity", justify="right", width=9)
+    table.add_column("Noise", justify="right", width=7)
+    table.add_column("Sieve", justify="center", width=7)
 
+    passed_count = 0
     for r in records:
         pub_str = r.published_date.strftime("%Y-%m-%d") if r.published_date else "N/A"
         if r.source_type == SourceType.ARXIV:
             item_id = str(r.metadata.get("arxiv_id", ""))
+            auth_wt = 1.3
         elif r.source_type == SourceType.GITHUB:
             item_id = str(r.metadata.get("repo_name", ""))
+            auth_wt = 1.1
         else:
             item_id = str(r.metadata.get("feed_format", "rss"))
+            auth_wt = 1.25
 
         velocity = r.engagement_metrics.get("velocity", 0.0)
+        sieve_result, _ = sieve.evaluate(r, authority_weight=auth_wt)
+        if sieve_result.passed:
+            passed_count += 1
+            sieve_badge = "[green]PASS[/green]"
+        else:
+            sieve_badge = "[red]DROP[/red]"
+
         table.add_row(
             r.source_type.value,
-            item_id[:16],
-            r.title[:38] + "..." if len(r.title) > 38 else r.title,
-            (r.author or "Unknown")[:18],
+            item_id[:14],
+            r.title[:34] + "..." if len(r.title) > 34 else r.title,
+            (r.author or "Unknown")[:15],
             pub_str,
             f"{velocity:.2f}",
+            f"{sieve_result.noise_score:.2f}",
+            sieve_badge,
         )
 
     console.print(table)
-    console.print(f"[bold green]Successfully retrieved {len(records)} signal(s).[/bold green]")
+    console.print(
+        f"[bold green]Retrieved {len(records)} signal(s).[/bold green] "
+        f"[bold cyan]Stage 1 Sieve Qualified:[/bold cyan] {passed_count}/{len(records)} signals."
+    )
+    if passed_count < len(records):
+        console.print(
+            f"[yellow]Stage 1 Sieve dropped {len(records) - passed_count} signal(s) exceeding hype threshold (> 0.60).[/yellow]"
+        )
 
     if save and records:
         try:

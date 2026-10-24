@@ -73,7 +73,8 @@ def test_cli_ingest_command_invocation(
     result = runner.invoke(main, ["ingest", "--sources", "arxiv", "--limit", "2"])
     assert result.exit_code == 0
     assert "Automated Mutation Testing" in result.output
-    assert "Successfully retrieved 2 signal(s)" in result.output
+    assert "Retrieved 2 signal(s)" in result.output
+    assert "Stage 1 Sieve Qualified" in result.output
 
 
 @pytest.mark.asyncio
