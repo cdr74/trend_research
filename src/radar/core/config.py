@@ -14,6 +14,7 @@ class LLMProviderType(StrEnum):
     GEMINI = "gemini"
     OPENAI_COMPAT = "openai_compat"
     OLLAMA = "ollama"
+    AGY = "agy"
 
 
 class Settings(BaseSettings):
@@ -43,6 +44,7 @@ class Settings(BaseSettings):
 
     # Provider credentials / endpoints
     gemini_api_key: str | None = Field(default=None, alias="GEMINI_API_KEY")
+    gemini_model_name: str = Field(default="gemini-2.5-flash", alias="GEMINI_MODEL_NAME")
     openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
     openai_base_url: str = Field(
         default="http://localhost:11434/v1",
@@ -52,6 +54,8 @@ class Settings(BaseSettings):
         default="llama3.2",
         alias="OPENAI_MODEL_NAME",
     )
+    agy_binary_path: str = Field(default="agy", alias="AGY_BINARY_PATH")
+    agy_model_name: str | None = Field(default=None, alias="AGY_MODEL_NAME")
     github_token: str | None = Field(default=None, alias="GITHUB_TOKEN")
 
     # Pipeline defaults

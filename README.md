@@ -149,6 +149,7 @@ flowchart TD
   - [ADR 0007: Open Source Repository & Metrics Collector (GitHub Ingestor)](docs/adr/0007-github-repository-ingestion-collector.md)
   - [ADR 0008: Practitioner Publication & Media Ingestion Collector (RSS / Atom)](docs/adr/0008-practitioner-rss-atom-feed-collector.md)
   - [ADR 0009: Stage 1 Deterministic Heuristic Noise Sieve](docs/adr/0009-stage-1-heuristic-noise-sieve.md)
+  - [ADR 0010: Pluggable LLM Adapters with Local Antigravity (agy) CLI Bridge](docs/adr/0010-pluggable-llm-adapters-and-agy-cli-bridge.md)
 - [System Design & Architecture Document](docs/design/architecture.md)
 - [Product & Engineering Backlog](docs/BACKLOG.md)
 - [User Guide & Operations Manual](docs/USER_GUIDE.md)

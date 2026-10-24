@@ -72,10 +72,12 @@
 **Goal:** Implement deep fact extraction, pgvector topic clustering, cross-source corroboration, multi-lens committee review, and radar categorization.
 
 ### Stories & Tasks:
-- [ ] **M3-T1: Pluggable LLM Provider Adapter**
+- [x] **M3-T1: Pluggable LLM Provider Adapter**
   - Implement `LLMProvider` interface in `src/radar/providers/`.
-  - Implement `GeminiProvider`, `OpenAICompatibleProvider` (Ollama/vLLM/OpenAI), and deterministic `MockProvider` for testing.
-  - Implement structured output validation using Pydantic schemas.
+  - Implement `AgyCliProvider` bridge for zero-cost local execution via `agy` CLI on WSL.
+  - Implement `GeminiProvider`, `OpenAICompatProvider` (Ollama/vLLM/OpenAI), and deterministic `MockProvider` for testing.
+  - Implement structured output validation using Pydantic schemas and JSON repair fallback.
+  - *Acceptance Criteria:* Full test coverage across all adapters, verified live on local WSL `agy` CLI and mock transports. (Ref: ADR-0010)
 - [ ] **M3-T2: Stage 2 Deep Extractor Agent**
   - Extract technical claims, evidence tiers, reproducible artifacts, and domain classifications from normalized signals.
   - Compute text embeddings using the pluggable provider and persist to `pgvector`.
