@@ -151,6 +151,7 @@ flowchart TD
   - [ADR 0009: Stage 1 Deterministic Heuristic Noise Sieve](docs/adr/0009-stage-1-heuristic-noise-sieve.md)
   - [ADR 0010: Pluggable LLM Adapters with Local Antigravity (agy) CLI Bridge](docs/adr/0010-pluggable-llm-adapters-and-agy-cli-bridge.md)
   - [ADR 0011: Stage 2 Deep Extractor Agent with Schema Validation and Vector Embeddings](docs/adr/0011-stage-2-deep-extractor-agent.md)
+  - [ADR 0012: pgvector Topic Convergence, Cross-Source Corroboration, and Wrapper Detection](docs/adr/0012-pgvector-topic-convergence-and-wrapper-detection.md)
 - [System Design & Architecture Document](docs/design/architecture.md)
 - [Product & Engineering Backlog](docs/BACKLOG.md)
 - [User Guide & Operations Manual](docs/USER_GUIDE.md)

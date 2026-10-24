@@ -158,6 +158,27 @@ class EnterpriseEvaluation(BaseModel):
     evaluated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
+class SynthesizedTopic(BaseModel):
+    """Structured LLM synthesis for a converged trend topic cluster."""
+
+    name: str = Field(..., description="Canonical unified topic name")
+    summary: str = Field(..., description="2-3 sentence technical summary of the converged trend")
+    primary_category: QECategory = Field(..., description="Consensus QE domain pillar")
+
+
+class ConvergenceResult(BaseModel):
+    """Result of Stage 3 topic convergence and wrapper audit for a single dossier."""
+
+    dossier_id: UUID
+    topic_id: UUID
+    is_new_topic: bool
+    similarity_score: float = Field(..., ge=0.0, le=1.0)
+    is_wrapper: bool = False
+    wrapper_penalty_applied: float = 0.0
+    multi_source_consensus: bool = False
+    corroboration_count: int = 1
+
+
 class TrendTopic(BaseModel):
     """Synthesized cross-source trend topic entity (Option 3B)."""
 

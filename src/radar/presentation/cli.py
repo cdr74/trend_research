@@ -11,6 +11,7 @@ from radar.core.models import QualifiedSignal, SignalDossier, SourcePayload, Sou
 from radar.ingestion.arxiv import ArxivIngestor
 from radar.ingestion.github import GithubIngestor
 from radar.ingestion.rss import RssFeedIngestor
+from radar.pipeline.convergence import TopicConvergenceEngine
 from radar.pipeline.extractor import DeepExtractor
 from radar.pipeline.noise_sieve import NoiseSieve
 from radar.providers import LLMProvider, get_llm_provider
@@ -296,16 +297,51 @@ async def _run_evaluate(
         f"[bold green]Successfully extracted {len(dossiers)} innovation dossier(s).[/bold green]"
     )
 
+    # Stage 3 Topic Convergence & Wrapper Detection (Option 3B)
+    console.print("[cyan]Running Stage 3 pgvector Topic Convergence & Wrapper Detection...[/cyan]")
+    convergence_engine = TopicConvergenceEngine(provider=provider)
+    await convergence_engine.converge_batch(dossiers)
+    topics = convergence_engine.get_all_topics()
+
+    topic_table = Table(
+        title="Stage 3 Synthesized Trend Topics",
+        show_header=True,
+        header_style="bold cyan",
+    )
+    topic_table.add_column("Topic Name", style="bold", width=28)
+    topic_table.add_column("QE Pillar", style="magenta", width=26)
+    topic_table.add_column("Corroborations", justify="center", width=14)
+    topic_table.add_column("Sources", justify="center", width=9)
+    topic_table.add_column("Validity", justify="right", width=9)
+    topic_table.add_column("Topic Synthesis", style="dim", width=42)
+
+    for t in topics:
+        topic_table.add_row(
+            t.name[:26],
+            t.category.value,
+            str(t.corroboration_count),
+            str(len(t.sources)),
+            f"{t.average_validity:.2f}",
+            (t.summary[:40] + "...") if len(t.summary) > 40 else t.summary,
+        )
+
+    console.print(topic_table)
+    console.print(
+        f"[bold green]Synthesized {len(topics)} convergent topic cluster(s).[/bold green]"
+    )
+
     try:
         from radar.db.repository import RadarRepository
         from radar.db.session import get_db_session
 
         async with get_db_session() as session:
             repo = RadarRepository(session)
+            for t in topics:
+                await repo.save_topic(t)
             for d in dossiers:
                 await repo.save_dossier(d)
         console.print(
-            f"[bold green]Persisted {len(dossiers)} dossier(s) to PostgreSQL.[/bold green]"
+            f"[bold green]Persisted {len(topics)} topic(s) and {len(dossiers)} dossier(s) to PostgreSQL.[/bold green]"
         )
     except Exception:
         # DB optional for offline/dry-run execution

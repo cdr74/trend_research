@@ -75,6 +75,42 @@ class RadarRepository:
         await self.session.flush()
         return record
 
+    async def get_topic_by_id(self, topic_id: UUID) -> TrendTopicTable | None:
+        """Retrieve a trend topic by primary key."""
+        stmt = select(TrendTopicTable).where(TrendTopicTable.id == topic_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
+
+    async def update_topic(self, topic: TrendTopic) -> TrendTopicTable | None:
+        """Update an existing trend topic with newly synthesized data."""
+        record = await self.get_topic_by_id(topic.id)
+        if record is not None:
+            record.name = topic.name
+            record.category = topic.category.value
+            record.summary = topic.summary
+            record.corroboration_count = topic.corroboration_count
+            record.sources = topic.sources
+            record.average_viability = topic.average_viability
+            record.average_validity = topic.average_validity
+            record.lifecycle_stage = topic.lifecycle_stage.value
+            await self.session.flush()
+        return record
+
+    async def get_dossiers_for_topic(self, topic_id: UUID) -> list[SignalDossierTable]:
+        """Retrieve all dossiers associated with a given topic."""
+        stmt = select(SignalDossierTable).where(SignalDossierTable.topic_id == topic_id)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def assign_dossier_to_topic(self, dossier_id: UUID, topic_id: UUID) -> None:
+        """Link a dossier to a topic."""
+        stmt = select(SignalDossierTable).where(SignalDossierTable.id == dossier_id)
+        result = await self.session.execute(stmt)
+        record = result.scalars().first()
+        if record is not None:
+            record.topic_id = topic_id
+            await self.session.flush()
+
     async def save_dossier(self, dossier: SignalDossier) -> SignalDossierTable:
         """Persist a Stage 2 extracted technical dossier."""
         record = SignalDossierTable(

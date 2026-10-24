@@ -83,10 +83,13 @@
   - Compute text embeddings using the pluggable provider and persist to `pgvector`.
   - Wire into CLI `radar evaluate` for batch processing of pending signals.
   - *Acceptance Criteria:* Full test coverage with MockProvider, strict Pydantic v2 validation contracts, deterministic vector generation. (Ref: ADR-0011)
-- [ ] **M3-T3: pgvector Topic Convergence & Cross-Source Corroboration (Option 3B)**
-  - Implement semantic topic clustering: link signals across distinct source channels sharing similarity $> 0.82$ to a shared `TrendTopic`.
-  - Award positive consensus bonus for independent multi-source corroboration ($N_{\text{sources}} \ge 3$).
-  - Detect parasitic wrappers (similarity $> 0.88$ with no distinct dataset/code) and apply automated Wrapper Penalty ($-0.20$).
+- [x] **M3-T3: pgvector Topic Convergence & Cross-Source Corroboration (Option 3B)**
+  - Implement semantic topic clustering: link signals across distinct source channels sharing similarity >= threshold (default 0.82) to a shared `TrendTopic`.
+  - Configurable similarity and penalty thresholds via `Settings`.
+  - Autonomous LLM topic synthesis across clustered dossiers (`SynthesizedTopic`).
+  - Award positive consensus bonus (+0.25) for independent multi-source corroboration ($N_{\text{sources}} \ge 3$).
+  - Detect parasitic wrappers (similarity >= 0.88 with no distinct dataset/code) and apply automated Wrapper Penalty (-0.20).
+  - *Acceptance Criteria:* Full test coverage for cosine similarity, topic synthesis, wrapper penalties, and consensus bonus. (Ref: ADR-0012)
 - [ ] **M3-T4: Stage 3 Multi-Lens Evaluator Committee (Option 2C)**
   - Implement 3 discrete critic agents with domain governance prompts:
     1. Security & Privacy Lens (Weight: 35% - data egress boundaries, zero-trust, secret handling)

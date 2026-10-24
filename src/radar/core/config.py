@@ -62,6 +62,36 @@ class Settings(BaseSettings):
     batch_size: int = Field(default=20, alias="RADAR_BATCH_SIZE")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
 
+    # Topic Convergence & Wrapper Detection (Stage 3 / Option 3B)
+    topic_convergence_threshold: float = Field(
+        default=0.82,
+        ge=0.0,
+        le=1.0,
+        alias="RADAR_TOPIC_CONVERGENCE_THRESHOLD",
+        description="Minimum cosine similarity threshold to merge dossiers into an existing TrendTopic",
+    )
+    wrapper_similarity_threshold: float = Field(
+        default=0.88,
+        ge=0.0,
+        le=1.0,
+        alias="RADAR_WRAPPER_SIMILARITY_THRESHOLD",
+        description="Cosine similarity threshold above which a dossier is scrutinized for parasitic wrapper detection",
+    )
+    wrapper_penalty: float = Field(
+        default=0.20,
+        ge=0.0,
+        le=1.0,
+        alias="RADAR_WRAPPER_PENALTY",
+        description="Score deduction applied to detected parasitic wrappers",
+    )
+    corroboration_consensus_bonus: float = Field(
+        default=0.25,
+        ge=0.0,
+        le=1.0,
+        alias="RADAR_CORROBORATION_CONSENSUS_BONUS",
+        description="Validity bonus awarded when a topic reaches >= 3 distinct source channels",
+    )
+
     # Data paths
     export_dir: Path = Field(default=Path("data/export"))
     reports_dir: Path = Field(default=Path("reports"))
