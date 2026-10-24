@@ -1,5 +1,7 @@
 """Unit tests for the LLM provider factory."""
 
+import shutil
+
 import pytest
 
 from radar.core.config import LLMProviderType, settings
@@ -18,7 +20,8 @@ def test_get_llm_provider_mock() -> None:
     assert isinstance(provider, MockProvider)
 
 
-def test_get_llm_provider_agy() -> None:
+def test_get_llm_provider_agy(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(shutil, "which", lambda *_args, **_kwargs: "/usr/local/bin/agy")
     provider = get_llm_provider(LLMProviderType.AGY)
     assert isinstance(provider, AgyCliProvider)
 

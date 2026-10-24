@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import shutil
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -10,6 +11,21 @@ from pydantic import BaseModel
 from radar.core.exceptions import ProviderError
 from radar.providers.agy import AgyCliProvider
 from radar.providers.base import LLMProvider
+
+
+@pytest.fixture(autouse=True)
+def mock_agy_on_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Ensure agy binary path check passes hermetically during unit tests without host dependency."""
+    real_which = shutil.which
+
+    def fake_which(cmd: str, mode: int = 1, path: str | None = None) -> str | None:
+        if cmd == "agy" or cmd.endswith("/agy"):
+            return "/usr/local/bin/agy"
+        if "non_existent" in cmd:
+            return None
+        return real_which(cmd, mode=mode, path=path)
+
+    monkeypatch.setattr(shutil, "which", fake_which)
 
 
 class SampleOutputModel(BaseModel):
