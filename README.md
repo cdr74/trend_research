@@ -145,9 +145,14 @@ flowchart TD
   - [ADR 0003: Pluggable LLM Provider Adapter Architecture](docs/adr/0003-pluggable-llm-evaluation-engine.md)
   - [ADR 0004: Pipeline DAG and Schema Contracts](docs/adr/0004-pipeline-dag-and-schemas.md)
   - [ADR 0005: Visualization Strategy and Radar User Interface](docs/adr/0005-visualization-and-radar-ui.md)
+  - [ADR 0006: Academic Pre-Print Ingestion Collector (arXiv Atom API)](docs/adr/0006-arxiv-pre-print-ingestion-collector.md)
+  - [ADR 0007: Open Source Repository & Metrics Collector (GitHub Ingestor)](docs/adr/0007-github-repository-ingestion-collector.md)
+  - [ADR 0008: Practitioner Publication & Media Ingestion Collector (RSS / Atom)](docs/adr/0008-practitioner-rss-atom-feed-collector.md)
+  - [ADR 0009: Stage 1 Deterministic Heuristic Noise Sieve](docs/adr/0009-stage-1-heuristic-noise-sieve.md)
 - [System Design & Architecture Document](docs/design/architecture.md)
 - [Product & Engineering Backlog](docs/BACKLOG.md)
 - [User Guide & Operations Manual](docs/USER_GUIDE.md)
+- [Curated Data Sources Registry](docs/data_sources.md)
 - [Agent & Engineering Directives](AGENTS.md)
 
 ---
@@ -155,7 +160,7 @@ flowchart TD
 ## 🗺️ Roadmap & Milestones
 
 - [x] **Milestone 1: Repository Baseline, Schemas & Tooling Harness**
-- [ ] **Milestone 2: Multi-Channel Ingestion & Heuristic Noise Sieve**
+- [x] **Milestone 2: Multi-Channel Ingestion & Heuristic Noise Sieve**
 - [ ] **Milestone 3: Topic Convergence, Adversarial Committee & Evaluation Pipeline**
 - [ ] **Milestone 4: Presentation, CLI & Decoupled Interactive Web Dashboard**
 - [ ] **Milestone 5: Continuous Delivery, Release & Ops Automation**

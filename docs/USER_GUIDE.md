@@ -46,9 +46,18 @@ This manual outlines how to operate the radar pipeline, run local evaluations, e
 The `radar` CLI coordinates all pipeline actions:
 
 ### 3.1 Synchronize and Ingest Signals
-Fetch fresh records and engagement metrics from configured channels:
+Fetch fresh records, calculate live engagement velocity, and evaluate Stage 1 Noise Sieve verdicts:
 ```bash
-uv run radar ingest --sources arxiv,github,rss
+# Ingest across all active channels (arXiv, GitHub, RSS)
+uv run radar ingest --sources arxiv,github,rss --limit 5
+
+# Query specific channels with custom topic or feed overrides
+uv run radar ingest --sources arxiv --query "cat:cs.SE" --limit 5
+uv run radar ingest --sources github --query "topic:test-generation sort:updated" --limit 5
+uv run radar ingest --sources rss --query "https://netflixtechblog.com/feed" --limit 5
+
+# Ingest and persist raw payloads to PostgreSQL
+uv run radar ingest --sources arxiv,github,rss --limit 10 --save
 ```
 
 ### 3.2 Run Evaluation Pipeline
