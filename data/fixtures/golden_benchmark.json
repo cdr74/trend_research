@@ -1,0 +1,206 @@
+{
+  "genuine_innovations": [
+    {
+      "id": "11111111-1111-1111-1111-111111111001",
+      "source_type": "arxiv",
+      "source_url": "https://arxiv.org/abs/2410.18021",
+      "title": "AutoMut: Mutation Testing for Autonomous Driving Perception",
+      "raw_content": "We present an empirical mutation testing framework for autonomous perception pipelines. Evaluated on CARLA simulation with 12,000 synthetic mutants, achieving an 84% kill rate with statistically validated fault detection.",
+      "author": "Dr. Elena Rostova et al.",
+      "metadata": {"arxiv_id": "2410.18021", "categories": ["cs.SE", "cs.AI"]},
+      "engagement_metrics": {"citations": 14.0, "velocity": 28.5}
+    },
+    {
+      "id": "11111111-1111-1111-1111-111111111002",
+      "source_type": "github",
+      "source_url": "https://github.com/microsoft/playwright",
+      "title": "microsoft/playwright",
+      "raw_content": "Fast and reliable end-to-end testing for modern web apps. Cross-browser, cross-platform automation with headless execution and network mocking capabilities.",
+      "author": "microsoft",
+      "metadata": {"repo_name": "microsoft/playwright", "stars": 65000},
+      "engagement_metrics": {"stars": 65000.0, "velocity": 45.0}
+    },
+    {
+      "id": "11111111-1111-1111-1111-111111111003",
+      "source_type": "rss",
+      "source_url": "https://netflixtechblog.com/chaos-engineering-in-cloud",
+      "title": "Chaos Engineering in Cloud Microservices: 10 Years of Chaos Monkey",
+      "raw_content": "Production architecture post-mortem reviewing resilience and automated failure injection testing across distributed systems. Empirical analysis of outages prevented.",
+      "author": "Netflix Engineering",
+      "metadata": {"feed_format": "rss"},
+      "engagement_metrics": {"views": 18000.0, "velocity": 22.0}
+    },
+    {
+      "id": "11111111-1111-1111-1111-111111111004",
+      "source_type": "arxiv",
+      "source_url": "https://arxiv.org/abs/2405.09112",
+      "title": "Predictive Test Selection using Graph Neural Networks at Meta",
+      "raw_content": "Graph neural network model predicting code impact and test dependencies across 100M lines of code. Reduces regression CI runner execution by 42% without missing production bugs.",
+      "author": "Meta AI & DevX Research",
+      "metadata": {"arxiv_id": "2405.09112", "categories": ["cs.SE"]},
+      "engagement_metrics": {"citations": 32.0, "velocity": 38.0}
+    },
+    {
+      "id": "11111111-1111-1111-1111-111111111005",
+      "source_type": "github",
+      "source_url": "https://github.com/pytest-dev/pytest-xdist",
+      "title": "pytest-dev/pytest-xdist",
+      "raw_content": "Pytest plugin for distributed and parallel test execution across multiple CPUs and remote execution hosts with load balancing and looponfail mode.",
+      "author": "pytest-dev",
+      "metadata": {"repo_name": "pytest-dev/pytest-xdist", "stars": 1800},
+      "engagement_metrics": {"stars": 1800.0, "velocity": 12.0}
+    },
+    {
+      "id": "11111111-1111-1111-1111-111111111006",
+      "source_type": "arxiv",
+      "source_url": "https://arxiv.org/abs/2402.04561",
+      "title": "EvoSuite: Automatic Test Suite Generation for Java Classes with Genetic Algorithms",
+      "raw_content": "Search-based software engineering framework applying evolutionary genetic algorithms to optimize branch coverage and generate JUnit test suites with mutation-guided assertions.",
+      "author": "Gordon Fraser et al.",
+      "metadata": {"arxiv_id": "2402.04561", "categories": ["cs.SE"]},
+      "engagement_metrics": {"citations": 120.0, "velocity": 18.0}
+    },
+    {
+      "id": "11111111-1111-1111-1111-111111111007",
+      "source_type": "github",
+      "source_url": "https://github.com/rjust/defects4j",
+      "title": "rjust/defects4j",
+      "raw_content": "A database of real, reproducible faults and an execution framework to facilitate controlled software testing and fault localization experiments in Java systems.",
+      "author": "René Just et al.",
+      "metadata": {"repo_name": "rjust/defects4j", "stars": 1200},
+      "engagement_metrics": {"stars": 1200.0, "velocity": 8.0}
+    },
+    {
+      "id": "11111111-1111-1111-1111-111111111008",
+      "source_type": "rss",
+      "source_url": "https://engineering.practitioner.com/hypofuzz-stateful-testing",
+      "title": "HypoFuzz: Adaptive Property-Based Fuzzing in Financial Payment Rails",
+      "raw_content": "Detailed production retrospective on deploying stateful property-based testing and coverage-guided fuzzing on critical settlement services, uncovering subtle state machine concurrency bugs.",
+      "author": "FinTech Core Architecture",
+      "metadata": {"feed_format": "atom"},
+      "engagement_metrics": {"views": 9500.0, "velocity": 24.0}
+    },
+    {
+      "id": "11111111-1111-1111-1111-111111111009",
+      "source_type": "github",
+      "source_url": "https://github.com/princeton-nlp/SWE-bench",
+      "title": "princeton-nlp/SWE-bench",
+      "raw_content": "A benchmark for evaluating large language models on end-to-end software engineering problems sampled from real GitHub pull requests and test suites.",
+      "author": "princeton-nlp",
+      "metadata": {"repo_name": "princeton-nlp/SWE-bench", "stars": 7500},
+      "engagement_metrics": {"stars": 7500.0, "velocity": 55.0}
+    },
+    {
+      "id": "11111111-1111-1111-1111-111111111010",
+      "source_type": "rss",
+      "source_url": "https://eng.uber.com/mitigating-flaky-tests-at-scale",
+      "title": "Mitigating Flaky Tests at Scale: Uber Engineering",
+      "raw_content": "Engineering retrospective on designing automated quarantine pipelines, impact-based rerun heuristics, and deterministic test sandboxing across tens of thousands of CI builds daily.",
+      "author": "Uber DevPlatform",
+      "metadata": {"feed_format": "rss"},
+      "engagement_metrics": {"views": 15000.0, "velocity": 21.0}
+    }
+  ],
+  "hype_products": [
+    {
+      "id": "22222222-2222-2222-2222-222222222001",
+      "source_type": "rss",
+      "source_url": "https://hypeblog.com/100x-faster-qa",
+      "title": "100x Faster Revolutionary AI Testing Replaces All QA Engineers",
+      "raw_content": "Our miraculous breakthrough delivers 100x faster test creation! Replaces all software testers forever with automated AI magic. Click our affiliate link for 50% discount!",
+      "author": "HypeMarketer",
+      "metadata": {"feed_format": "rss"},
+      "engagement_metrics": {"views": 100.0, "velocity": 1.0}
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222002",
+      "source_type": "rss",
+      "source_url": "https://spamtest.io/zero-bugs",
+      "title": "Guaranteed 100% Bug-Free Software with Magic Bullet Testing AI",
+      "raw_content": "Zero bugs guaranteed with this miraculous silver bullet! Eliminates all defects effortlessly. Buy now with our special coupon code before the limited time offer expires!",
+      "author": "SpamVendor",
+      "metadata": {"feed_format": "rss"},
+      "engagement_metrics": {"views": 250.0, "velocity": 2.0}
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222003",
+      "source_type": "rss",
+      "source_url": "https://ai-revolution.tech/replaces-all-devs",
+      "title": "The Tool That Replaces All Developers and Testers Forever",
+      "raw_content": "Game-changing disruptive innovation replaces all software developers and QA jobs. Guaranteed zero defects with affiliate link inside!",
+      "author": "TechDisruptor",
+      "metadata": {"feed_format": "rss"},
+      "engagement_metrics": {"views": 50.0, "velocity": 0.5}
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222004",
+      "source_type": "rss",
+      "source_url": "https://wrappersaas.com/chatgpt-test-wrapper",
+      "title": "Revolutionary Cloud QA: Proprietary AI Testing Architecture",
+      "raw_content": "We repackage standard LLM system prompts in a proprietary closed dashboard. No public repository, no benchmark dataset, just prompt templates sent to third-party endpoints.",
+      "author": "WrapperSaaS Inc",
+      "metadata": {"feed_format": "rss"},
+      "engagement_metrics": {"views": 120.0, "velocity": 1.2}
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222005",
+      "source_type": "rss",
+      "source_url": "https://listicleclick.com/top-10-miracle-ai",
+      "title": "Top 10 Miracle AI Testing Tools You Must Buy Today! Promo Code",
+      "raw_content": "Check out these miraculous game-changing tools. 10x more productive testing overnight. Use promo code DISCOUNT20 for discount!",
+      "author": "ClickBaiter",
+      "metadata": {"feed_format": "rss"},
+      "engagement_metrics": {"views": 80.0, "velocity": 0.8}
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222006",
+      "source_type": "rss",
+      "source_url": "https://vanitybench.ai/unbeatable",
+      "title": "Game-Changing Test AI Beats Everything on Secret Vanity Benchmark",
+      "raw_content": "Our closed-source tool achieves 100% on our secret proprietary test suite. Replaces all QA engineers effortlessly with disruptive innovation.",
+      "author": "VanityAI",
+      "metadata": {"feed_format": "rss"},
+      "engagement_metrics": {"views": 300.0, "velocity": 3.0}
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222007",
+      "source_type": "rss",
+      "source_url": "https://magicqa.co/disruptive",
+      "title": "Disruptive Magic Testing AI Replaces All QA Teams - Limited Time Offer",
+      "raw_content": "Miraculous silver bullet software engineering platform. Buy now for guaranteed zero bugs across every pull request!",
+      "author": "MagicQA",
+      "metadata": {"feed_format": "rss"},
+      "engagement_metrics": {"views": 40.0, "velocity": 0.4}
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222008",
+      "source_type": "rss",
+      "source_url": "https://vaporwareqa.io/1000x",
+      "title": "1000x More Productive Testing Suite With Zero Bugs Guaranteed",
+      "raw_content": "1000x improvement in test creation! Absolutely zero defects guaranteed in your software architecture. Limited time offer, subscribe now!",
+      "author": "VaporwareInc",
+      "metadata": {"feed_format": "rss"},
+      "engagement_metrics": {"views": 90.0, "velocity": 0.9}
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222009",
+      "source_type": "rss",
+      "source_url": "https://repackagedgen.com/tool",
+      "title": "Superficial AI Prompter: Commercial Testing Wrapper",
+      "raw_content": "A closed commercial wrapper tool without code, without benchmarks, merely relaying standard prompts to public cloud models.",
+      "author": "RepackagedGen",
+      "metadata": {"feed_format": "rss"},
+      "engagement_metrics": {"views": 60.0, "velocity": 0.6}
+    },
+    {
+      "id": "22222222-2222-2222-2222-222222222010",
+      "source_type": "rss",
+      "source_url": "https://promotest.biz/buy",
+      "title": "Next-Gen AI Testing: Revolutionary Silver Bullet Buy Now",
+      "raw_content": "Miraculous silver bullet technology for automated test suites. Affiliate link and promo code inside for immediate purchase!",
+      "author": "PromoTest",
+      "metadata": {"feed_format": "rss"},
+      "engagement_metrics": {"views": 150.0, "velocity": 1.5}
+    }
+  ]
+}

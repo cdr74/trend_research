@@ -46,7 +46,11 @@ class RadarCategorizer:
         validity = 0.50
 
         # Anti-hype deductions
-        if not dossier.has_reproducible_benchmark and not dossier.has_open_source_repo:
+        if (
+            not dossier.has_reproducible_benchmark
+            and not dossier.has_open_source_repo
+            and dossier.evidence_tier != EvidenceTier.ENGINEERING_POST_MORTEM
+        ):
             validity -= 0.30
         if dossier.is_superficial_wrapper:
             validity -= 0.20

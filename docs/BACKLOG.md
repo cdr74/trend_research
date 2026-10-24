@@ -68,7 +68,7 @@
 
 ---
 
-## Milestone 3: Topic Convergence, Adversarial Committee & Evaluation Pipeline (NEXT UP)
+## Milestone 3: Topic Convergence, Adversarial Committee & Evaluation Pipeline (Completed)
 **Goal:** Implement deep fact extraction, pgvector topic clustering, cross-source corroboration, multi-lens committee review, and radar categorization.
 
 ### Stories & Tasks:
@@ -105,13 +105,15 @@
   - Compute deterministic validity score ($S_v$) and composite hype score ($H = 1.0 - S_v$) with anti-hype deductions and engineering bonuses.
   - Wire into CLI `radar evaluate`, `radar query`, and `radar export` with JSON/CSV export support.
   - *Acceptance Criteria:* Full unit test coverage for ring decisions, lifecycle trajectories, and score bounds. (Ref: ADR-0014)
-- [ ] **M3-T6: Golden Benchmark Evaluation Test Suite**
-  - Create regression benchmark with 10 high-signal verified innovations vs. 10 hype products.
-  - Assert deterministic scoring thresholds.
+- [x] **M3-T6: Golden Benchmark Evaluation Test Suite**
+  - Curate 20-item regression benchmark (10 genuine innovations across arXiv, GitHub, RSS vs 10 hype/wrapper products) in `data/fixtures/golden_benchmark.json`.
+  - Execute end-to-end 4-stage pipeline DAG and assert strict acceptance gates.
+  - Assert 100% recall (0 genuine innovations in Hold) and 0% false positives (10/10 hype products dropped or quarantined to Hold).
+  - *Acceptance Criteria:* Full offline integration test suite passing cleanly with deterministic providers. (Ref: ADR-0015)
 
 ---
 
-## Milestone 4: Presentation, CLI & Decoupled Interactive Web Dashboard
+## Milestone 4: Presentation, CLI & Decoupled Interactive Web Dashboard (NEXT UP)
 **Goal:** Deliver flexible multi-view visualization, filtering, and automated intelligence reporting.
 
 ### Stories & Tasks:

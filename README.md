@@ -154,6 +154,7 @@ flowchart TD
   - [ADR 0012: pgvector Topic Convergence, Cross-Source Corroboration, and Wrapper Detection](docs/adr/0012-pgvector-topic-convergence-and-wrapper-detection.md)
   - [ADR 0013: Stage 3 Multi-Lens Adversarial Evaluator Committee](docs/adr/0013-stage-3-multi-lens-adversarial-evaluator.md)
   - [ADR 0014: Stage 4 Radar Categorizer and Lifecycle Trajectory](docs/adr/0014-stage-4-radar-categorizer-and-lifecycle-trajectory.md)
+  - [ADR 0015: Golden Benchmark Evaluation Test Suite and Regression Gates](docs/adr/0015-golden-benchmark-evaluation-test-suite.md)
 - [System Design & Architecture Document](docs/design/architecture.md)
 - [Product & Engineering Backlog](docs/BACKLOG.md)
 - [User Guide & Operations Manual](docs/USER_GUIDE.md)

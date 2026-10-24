@@ -38,6 +38,8 @@ htmlcov/
 data/*
 !data/seeds/
 !data/seeds/**
+!data/fixtures/
+!data/fixtures/**
 pgdata/
 *.sqlite
 *.db
