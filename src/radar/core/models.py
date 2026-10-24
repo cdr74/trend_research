@@ -138,6 +138,53 @@ class SignalDossier(BaseModel):
     engagement_metrics: dict[str, float] = Field(default_factory=dict)
 
 
+class CommitteeAuditResult(BaseModel):
+    """Structured LLM response schema for multi-lens adversarial evaluation."""
+
+    security_score: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Security & Privacy viability score (0.0=critical blocker, 1.0=fully compliant)",
+    )
+    cicd_score: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Operational & CI/CD feasibility score (0.0=unusable/non-deterministic, 1.0=seamless)",
+    )
+    qe_score: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Technical rigor & empirical problem-solving score (0.0=synthetic toy, 1.0=rigorous breakthrough)",
+    )
+    security_critique: str = Field(
+        ...,
+        description="Adversarial critique from the Enterprise Security & Privacy Architect",
+    )
+    cicd_critique: str = Field(
+        ...,
+        description="Adversarial critique from the Enterprise DevOps & CI/CD Operations Lead",
+    )
+    qe_critique: str = Field(
+        ...,
+        description="Adversarial critique from the Principal AI Quality Engineering Architect",
+    )
+    skeptic_critique: str = Field(
+        ...,
+        description="Unified consensus critique synthesizing trade-offs, deployment hurdles, and bottom-line verdict",
+    )
+    enterprise_risks: list[str] = Field(
+        default_factory=list,
+        description="Concrete enterprise risk flags (e.g. data exfiltration, non-determinism, GPU memory cost)",
+    )
+    prerequisites: list[str] = Field(
+        default_factory=list,
+        description="Mandatory architectural prerequisites before enterprise adoption",
+    )
+
+
 class EnterpriseEvaluation(BaseModel):
     """Stage 3 multi-lens committee audit critique (Option 2C)."""
 

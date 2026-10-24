@@ -90,12 +90,15 @@
   - Award positive consensus bonus (+0.25) for independent multi-source corroboration ($N_{\text{sources}} \ge 3$).
   - Detect parasitic wrappers (similarity >= 0.88 with no distinct dataset/code) and apply automated Wrapper Penalty (-0.20).
   - *Acceptance Criteria:* Full test coverage for cosine similarity, topic synthesis, wrapper penalties, and consensus bonus. (Ref: ADR-0012)
-- [ ] **M3-T4: Stage 3 Multi-Lens Evaluator Committee (Option 2C)**
-  - Implement 3 discrete critic agents with domain governance prompts:
+- [x] **M3-T4: Stage 3 Multi-Lens Evaluator Committee (Option 2C)**
+  - Implement 3 discrete critic lenses with domain governance prompts:
     1. Security & Privacy Lens (Weight: 35% - data egress boundaries, zero-trust, secret handling)
     2. Operational Feasibility Lens (Weight: 35% - seed determinism, runner footprint, integration friction)
     3. Technical Rigor Lens (Weight: 30% - empirical problem-solving vs synthetic vanity benchmarks)
-  - Generate structured committee scores, risk flags, prerequisites, and critiques.
+  - Generate structured committee scores, risk flags, prerequisites, and critiques in a single multi-perspective turn (Option B).
+  - Deterministic composite viability formula ($E_v = 0.35 \cdot S_{\text{sec}} + 0.35 \cdot S_{\text{ops}} + 0.30 \cdot S_{\text{tech}}$) with configurable weights.
+  - Wire into CLI `radar evaluate` and persistence layer.
+  - *Acceptance Criteria:* Full unit test coverage with MockProvider, exact weight calculation verification, and risk flag auditing. (Ref: ADR-0013)
 - [ ] **M3-T5: Stage 4 Radar Categorizer & Lifecycle Trajectory**
   - Synthesize committee viability, validity, and corroboration into final Radar rings (`Adopt`, `Trial`, `Assess`, `Hold`).
   - Classify lifecycle trajectory (`Emerging`, `Consolidated`, `Fading`) based on time-decayed engagement velocity.

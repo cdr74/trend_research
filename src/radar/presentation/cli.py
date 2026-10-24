@@ -12,6 +12,7 @@ from radar.ingestion.arxiv import ArxivIngestor
 from radar.ingestion.github import GithubIngestor
 from radar.ingestion.rss import RssFeedIngestor
 from radar.pipeline.convergence import TopicConvergenceEngine
+from radar.pipeline.evaluator import MultiLensEvaluator
 from radar.pipeline.extractor import DeepExtractor
 from radar.pipeline.noise_sieve import NoiseSieve
 from radar.providers import LLMProvider, get_llm_provider
@@ -330,6 +331,51 @@ async def _run_evaluate(
         f"[bold green]Synthesized {len(topics)} convergent topic cluster(s).[/bold green]"
     )
 
+    # Stage 3 Multi-Lens Evaluator Committee (Option 2C)
+    console.print(
+        "[cyan]Running Stage 3 Multi-Lens Committee (Security 35%, Operations 35%, Rigor 30%)...[/cyan]"
+    )
+    evaluator = MultiLensEvaluator(provider=provider)
+    topic_map = {t.id: t for t in topics}
+    evaluations = await evaluator.evaluate_batch(dossiers, topics=topic_map)
+
+    eval_table = Table(
+        title="Stage 3 Adversarial Committee Evaluations",
+        show_header=True,
+        header_style="bold yellow",
+    )
+    eval_table.add_column("Dossier Name", style="bold", width=24)
+    eval_table.add_column("Security", justify="right", width=9)
+    eval_table.add_column("Ops/CI-CD", justify="right", width=10)
+    eval_table.add_column("Technical", justify="right", width=10)
+    eval_table.add_column("Viability", justify="right", style="bold green", width=10)
+    eval_table.add_column("Risks Count", justify="center", width=11)
+    eval_table.add_column("Skeptic Critique", style="dim", width=38)
+
+    dossier_map = {d.id: d for d in dossiers}
+    for evaluation in evaluations:
+        d_name = (
+            dossier_map[evaluation.dossier_id].name
+            if evaluation.dossier_id in dossier_map
+            else str(evaluation.dossier_id)[:8]
+        )
+        eval_table.add_row(
+            d_name[:22],
+            f"{evaluation.security_score:.2f}",
+            f"{evaluation.cicd_score:.2f}",
+            f"{evaluation.qe_score:.2f}",
+            f"{evaluation.composite_viability_score:.2f}",
+            str(len(evaluation.enterprise_risks)),
+            (evaluation.skeptic_critique[:36] + "...")
+            if len(evaluation.skeptic_critique) > 36
+            else evaluation.skeptic_critique,
+        )
+
+    console.print(eval_table)
+    console.print(
+        f"[bold green]Completed adversarial audit for {len(evaluations)} dossier(s).[/bold green]"
+    )
+
     try:
         from radar.db.repository import RadarRepository
         from radar.db.session import get_db_session
@@ -340,8 +386,10 @@ async def _run_evaluate(
                 await repo.save_topic(t)
             for d in dossiers:
                 await repo.save_dossier(d)
+            for evaluation in evaluations:
+                await repo.save_evaluation(evaluation)
         console.print(
-            f"[bold green]Persisted {len(topics)} topic(s) and {len(dossiers)} dossier(s) to PostgreSQL.[/bold green]"
+            f"[bold green]Persisted {len(topics)} topic(s), {len(dossiers)} dossier(s), and {len(evaluations)} evaluation(s) to PostgreSQL.[/bold green]"
         )
     except Exception:
         # DB optional for offline/dry-run execution

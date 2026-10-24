@@ -92,6 +92,29 @@ class Settings(BaseSettings):
         description="Validity bonus awarded when a topic reaches >= 3 distinct source channels",
     )
 
+    # Multi-Lens Adversarial Committee Weights (Stage 3 / Option 2C)
+    security_weight: float = Field(
+        default=0.35,
+        ge=0.0,
+        le=1.0,
+        alias="RADAR_SECURITY_WEIGHT",
+        description="Evaluation weight for Security & Data Privacy lens",
+    )
+    cicd_weight: float = Field(
+        default=0.35,
+        ge=0.0,
+        le=1.0,
+        alias="RADAR_CICD_WEIGHT",
+        description="Evaluation weight for Operational Feasibility & CI/CD lens",
+    )
+    qe_weight: float = Field(
+        default=0.30,
+        ge=0.0,
+        le=1.0,
+        alias="RADAR_QE_WEIGHT",
+        description="Evaluation weight for Technical Rigor & Empirical Problem Solving lens",
+    )
+
     # Data paths
     export_dir: Path = Field(default=Path("data/export"))
     reports_dir: Path = Field(default=Path("reports"))
