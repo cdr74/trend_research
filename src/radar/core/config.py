@@ -52,6 +52,7 @@ class Settings(BaseSettings):
         default="llama3.2",
         alias="OPENAI_MODEL_NAME",
     )
+    github_token: str | None = Field(default=None, alias="GITHUB_TOKEN")
 
     # Pipeline defaults
     batch_size: int = Field(default=20, alias="RADAR_BATCH_SIZE")

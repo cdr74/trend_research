@@ -5,6 +5,8 @@ import pytest
 from click.testing import CliRunner
 
 from radar.ingestion.arxiv import ArxivIngestor
+from radar.ingestion.github import GithubIngestor
+from radar.ingestion.rss import RssFeedIngestor
 from radar.presentation.cli import _run_ingest, main
 
 
@@ -72,3 +74,44 @@ def test_cli_ingest_command_invocation(
     assert result.exit_code == 0
     assert "Automated Mutation Testing" in result.output
     assert "Successfully retrieved 2 signal(s)" in result.output
+
+
+@pytest.mark.asyncio
+async def test_run_ingest_github(sample_github_response: dict[str, object]) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        _ = request
+        return httpx.Response(200, json=sample_github_response)
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        mock_gh = GithubIngestor(client=client, rate_limit_delay=0.0)
+        records = await _run_ingest(
+            sources="github",
+            limit=2,
+            query="topic:test-generation",
+            save=False,
+            github_override=mock_gh,
+        )
+        assert len(records) == 2
+        assert records[0].title == "microsoft/playwright"
+        assert records[0].engagement_metrics["stars"] == 65000.0
+
+
+@pytest.mark.asyncio
+async def test_run_ingest_rss(sample_rss_xml: str) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        _ = request
+        return httpx.Response(200, text=sample_rss_xml)
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        mock_rss = RssFeedIngestor(client=client, rate_limit_delay=0.0)
+        records = await _run_ingest(
+            sources="rss",
+            limit=2,
+            query="https://netflixtechblog.com/feed",
+            save=False,
+            rss_override=mock_rss,
+        )
+        assert len(records) == 2
+        assert records[0].title == "Chaos Engineering in the Cloud Era"

@@ -6,8 +6,10 @@ import click
 from rich.console import Console
 from rich.table import Table
 
-from radar.core.models import SourcePayload
+from radar.core.models import SourcePayload, SourceType
 from radar.ingestion.arxiv import ArxivIngestor
+from radar.ingestion.github import GithubIngestor
+from radar.ingestion.rss import RssFeedIngestor
 
 console = Console()
 
@@ -18,6 +20,8 @@ async def _run_ingest(
     query: str | None,
     save: bool,
     ingestor_override: ArxivIngestor | None = None,
+    github_override: GithubIngestor | None = None,
+    rss_override: RssFeedIngestor | None = None,
 ) -> list[SourcePayload]:
     """Execute asynchronous signal ingestion across requested channels."""
     source_list = [s.strip().lower() for s in sources.split(",") if s.strip()]
@@ -26,6 +30,8 @@ async def _run_ingest(
     )
 
     records: list[SourcePayload] = []
+
+    # 1. arXiv Channel
     if "arxiv" in source_list:
         search_q = query or "cat:cs.SE"
         console.print(f"[cyan]Connecting to arXiv public Atom API (query: '{search_q}')...[/cyan]")
@@ -42,27 +48,67 @@ async def _run_ingest(
         async for payload in ingestor.fetch_records(limit=limit):
             records.append(payload)
 
+    # 2. GitHub Channel
+    if "github" in source_list:
+        gh_query = query or "topic:test-generation sort:updated"
+        console.print(f"[cyan]Connecting to GitHub Search API (query: '{gh_query}')...[/cyan]")
+        gh_ingestor = github_override or GithubIngestor(search_query=gh_query)
+
+        is_healthy = await gh_ingestor.check_health()
+        if not is_healthy:
+            console.print(
+                "[yellow]Warning: GitHub health check failed or rate limit reached.[/yellow]"
+            )
+        else:
+            console.print("[green]GitHub endpoint healthy.[/green]")
+
+        async for payload in gh_ingestor.fetch_records(limit=limit):
+            records.append(payload)
+
+    # 3. RSS / Practitioner Channel
+    if "rss" in source_list:
+        rss_url = query or "https://netflixtechblog.com/feed"
+        console.print(f"[cyan]Connecting to RSS/Atom publication feed ({rss_url})...[/cyan]")
+        rss_ingestor = rss_override or RssFeedIngestor(endpoint_url=rss_url)
+
+        is_healthy = await rss_ingestor.check_health()
+        if not is_healthy:
+            console.print(
+                "[yellow]Warning: RSS feed health check failed or endpoint unreachable.[/yellow]"
+            )
+        else:
+            console.print("[green]RSS feed endpoint healthy.[/green]")
+
+        async for payload in rss_ingestor.fetch_records(limit=limit):
+            records.append(payload)
+
     table = Table(
         title="Ingested Raw Signals",
         show_header=True,
         header_style="bold magenta",
     )
     table.add_column("Channel", style="dim", width=8)
-    table.add_column("ID", width=12)
-    table.add_column("Title", style="bold", width=42)
-    table.add_column("Authors", width=22)
+    table.add_column("ID / Slug", width=16)
+    table.add_column("Title", style="bold", width=40)
+    table.add_column("Authors", width=20)
     table.add_column("Published", width=12)
     table.add_column("Velocity", justify="right", width=10)
 
     for r in records:
         pub_str = r.published_date.strftime("%Y-%m-%d") if r.published_date else "N/A"
-        arxiv_id = str(r.metadata.get("arxiv_id", ""))
+        if r.source_type == SourceType.ARXIV:
+            item_id = str(r.metadata.get("arxiv_id", ""))
+        elif r.source_type == SourceType.GITHUB:
+            item_id = str(r.metadata.get("repo_name", ""))
+        else:
+            item_id = str(r.metadata.get("feed_format", "rss"))
+
         velocity = r.engagement_metrics.get("velocity", 0.0)
         table.add_row(
             r.source_type.value,
-            arxiv_id,
-            r.title[:40] + "..." if len(r.title) > 40 else r.title,
-            (r.author or "Unknown")[:20],
+            item_id[:16],
+            r.title[:38] + "..." if len(r.title) > 38 else r.title,
+            (r.author or "Unknown")[:18],
             pub_str,
             f"{velocity:.2f}",
         )

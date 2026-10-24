@@ -52,10 +52,14 @@
   - Implement `ArxivIngestor` protocol compliance, polite pacing (3s delay), exponential backoff, and Atom XML normalization.
   - Wire CLI `radar ingest --sources=arxiv`.
   - *Acceptance Criteria:* Full offline unit test coverage with fixtures, live connectivity validated, zero added dependencies. (Ref: ADR-0006)
-- [ ] **M2-T3: Open Source Repository & Metrics Ingestor (GitHub)**
-  - Implement GitHub API / GraphQL client tracking star velocity ($\Delta \text{stars}/\Delta t$), contributor counts, and issue resolution velocity.
-- [ ] **M2-T4: Practitioner Publication & Media Ingestor (RSS / Atom / Web)**
+- [x] **M2-T3: Open Source Repository & Metrics Ingestor (GitHub)**
+  - Implement GitHub API search client tracking star velocity ($\Delta \text{stars}/\Delta t$), forks, and issue telemetry.
+  - Implement `GithubIngestor` protocol compliance, public zero-token fallback, optional `GITHUB_TOKEN` support, and rate limit backoff.
+  - *Acceptance Criteria:* Full unit test coverage with fixtures, live connectivity validated, engagement velocity calculated. (Ref: ADR-0007)
+- [x] **M2-T4: Practitioner Publication & Media Ingestor (RSS / Atom / Web)**
   - Implement feed reader capturing engineering case studies, post-mortems, and community telemetry.
+  - Implement `RssFeedIngestor` supporting dual RSS 2.0 / Atom 1.0 parsing, RFC 2822 / ISO 8601 date parsing, and HTML text stripping.
+  - *Acceptance Criteria:* Full test suite with RSS/Atom fixtures, live engineering blog ingestion verified. (Ref: ADR-0008)
 - [ ] **M2-T5: Stage 1 Noise Sieve (Rule-based Filter)**
   - Implement heuristic classifier dropping marketing buzzwords, unsubstantiated claims, and affiliate links.
   - Calculate early `heuristic_noise_score`; immediately drop records with hype $> 0.60$.
