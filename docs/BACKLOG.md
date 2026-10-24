@@ -78,9 +78,11 @@
   - Implement `GeminiProvider`, `OpenAICompatProvider` (Ollama/vLLM/OpenAI), and deterministic `MockProvider` for testing.
   - Implement structured output validation using Pydantic schemas and JSON repair fallback.
   - *Acceptance Criteria:* Full test coverage across all adapters, verified live on local WSL `agy` CLI and mock transports. (Ref: ADR-0010)
-- [ ] **M3-T2: Stage 2 Deep Extractor Agent**
+- [x] **M3-T2: Stage 2 Deep Extractor Agent**
   - Extract technical claims, evidence tiers, reproducible artifacts, and domain classifications from normalized signals.
   - Compute text embeddings using the pluggable provider and persist to `pgvector`.
+  - Wire into CLI `radar evaluate` for batch processing of pending signals.
+  - *Acceptance Criteria:* Full test coverage with MockProvider, strict Pydantic v2 validation contracts, deterministic vector generation. (Ref: ADR-0011)
 - [ ] **M3-T3: pgvector Topic Convergence & Cross-Source Corroboration (Option 3B)**
   - Implement semantic topic clustering: link signals across distinct source channels sharing similarity $> 0.82$ to a shared `TrendTopic`.
   - Award positive consensus bonus for independent multi-source corroboration ($N_{\text{sources}} \ge 3$).

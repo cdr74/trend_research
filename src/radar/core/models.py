@@ -91,6 +91,33 @@ class QualifiedSignal(BaseModel):
     passed_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
+class ExtractedInnovation(BaseModel):
+    """Structured technical claims and domain classification extracted by Stage 2."""
+
+    name: str = Field(..., description="Canonical entity / tool / research paper name")
+    category: QECategory = Field(..., description="Primary QE domain pillar")
+    evidence_tier: EvidenceTier = Field(..., description="Backing evidence tier")
+    key_innovation: str = Field(
+        ...,
+        description="1-2 concise sentences summarizing the core technological breakthrough",
+    )
+    technical_claims: list[str] = Field(
+        default_factory=list,
+        description="2 to 5 verifiable, concrete technical claims made by authors/creators",
+    )
+    has_reproducible_benchmark: bool = Field(
+        default=False,
+        description="Whether empirical benchmark or replication dataset is provided",
+    )
+    has_open_source_repo: bool = Field(
+        default=False, description="Whether an accessible open-source code repository exists"
+    )
+    is_superficial_wrapper: bool = Field(
+        default=False,
+        description="Whether the tool is a superficial wrapper without novel architecture",
+    )
+
+
 class SignalDossier(BaseModel):
     """Stage 2 structured technical extraction dossier."""
 

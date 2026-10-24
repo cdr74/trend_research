@@ -4,10 +4,12 @@ import httpx
 import pytest
 from click.testing import CliRunner
 
+from radar.core.models import SourcePayload, SourceType
 from radar.ingestion.arxiv import ArxivIngestor
 from radar.ingestion.github import GithubIngestor
 from radar.ingestion.rss import RssFeedIngestor
-from radar.presentation.cli import _run_ingest, main
+from radar.presentation.cli import _run_evaluate, _run_ingest, main
+from radar.providers.mock import MockProvider
 
 
 def test_cli_version() -> None:
@@ -116,3 +118,32 @@ async def test_run_ingest_rss(sample_rss_xml: str) -> None:
         )
         assert len(records) == 2
         assert records[0].title == "Chaos Engineering in the Cloud Era"
+
+
+@pytest.mark.asyncio
+async def test_run_evaluate_with_mock_signals() -> None:
+    provider = MockProvider(embedding_dim=1536)
+    genuine_payload = SourcePayload(
+        source_type=SourceType.GITHUB,
+        source_url="https://github.com/microsoft/playwright",
+        title="microsoft/playwright",
+        raw_content="Reliable end-to-end testing for modern web apps with automated headless browsers.",
+    )
+    hype_payload = SourcePayload(
+        source_type=SourceType.RSS,
+        source_url="https://hypeblog.com/post1",
+        title="100x Faster Revolutionary AI Testing Replaces All Engineers",
+        raw_content="100% bug-free guarantee with this miraculous silver bullet! Affiliate link inside.",
+    )
+
+    dossiers = await _run_evaluate(
+        batch_size=5,
+        mock=True,
+        provider_override=provider,
+        signals_override=[genuine_payload, hype_payload],
+    )
+
+    assert len(dossiers) == 1
+    assert dossiers[0].source_id == genuine_payload.id
+    assert dossiers[0].embedding is not None
+    assert len(dossiers[0].embedding) == 1536

@@ -6,11 +6,14 @@ import click
 from rich.console import Console
 from rich.table import Table
 
-from radar.core.models import SourcePayload, SourceType
+from radar.core.config import LLMProviderType
+from radar.core.models import QualifiedSignal, SignalDossier, SourcePayload, SourceType
 from radar.ingestion.arxiv import ArxivIngestor
 from radar.ingestion.github import GithubIngestor
 from radar.ingestion.rss import RssFeedIngestor
+from radar.pipeline.extractor import DeepExtractor
 from radar.pipeline.noise_sieve import NoiseSieve
+from radar.providers import LLMProvider, get_llm_provider
 
 console = Console()
 
@@ -195,14 +198,128 @@ def ingest(sources: str, limit: int, query: str | None, save: bool) -> None:
     asyncio.run(_run_ingest(sources=sources, limit=limit, query=query, save=save))
 
 
+async def _run_evaluate(
+    batch_size: int,
+    mock: bool,
+    provider_override: LLMProvider | None = None,
+    signals_override: list[SourcePayload] | None = None,
+) -> list[SignalDossier]:
+    """Execute Stage 1 Sieve and Stage 2 Deep Extractor against pending signals."""
+    console.print(
+        f"[bold blue]Evaluating signals[/bold blue] (batch_size={batch_size}, mock={mock})"
+    )
+    if provider_override:
+        provider = provider_override
+    elif mock:
+        provider = get_llm_provider(LLMProviderType.MOCK)
+    else:
+        provider = get_llm_provider()
+
+    records_to_evaluate: list[SourcePayload] = []
+
+    if signals_override is not None:
+        records_to_evaluate = signals_override
+    else:
+        try:
+            from radar.db.repository import RadarRepository
+            from radar.db.session import get_db_session
+
+            async with get_db_session() as session:
+                repo = RadarRepository(session)
+                db_sources = await repo.get_pending_sources(limit=batch_size)
+                for db_s in db_sources:
+                    records_to_evaluate.append(
+                        SourcePayload(
+                            id=db_s.id,
+                            source_type=SourceType(db_s.source_type),
+                            source_url=db_s.source_url,
+                            title=db_s.title,
+                            raw_content=db_s.raw_content,
+                            author=db_s.author,
+                            published_date=db_s.published_date,
+                            ingested_at=db_s.ingested_at,
+                            metadata=db_s.meta,
+                            engagement_metrics=db_s.engagement_metrics,
+                        )
+                    )
+        except Exception as e:
+            console.print(f"[yellow]Could not query database for pending signals: {e}[/yellow]")
+
+    if not records_to_evaluate:
+        console.print("[dim]No pending signals found to evaluate.[/dim]")
+        return []
+
+    sieve = NoiseSieve()
+    extractor = DeepExtractor(provider=provider)
+    qualified_signals: list[QualifiedSignal] = []
+
+    for r in records_to_evaluate:
+        _, qualified = sieve.evaluate(r)
+        if qualified:
+            qualified_signals.append(qualified)
+
+    if not qualified_signals:
+        console.print("[yellow]All pending signals dropped by Stage 1 Noise Sieve.[/yellow]")
+        return []
+
+    console.print(
+        f"[cyan]Running Stage 2 Deep Extractor on {len(qualified_signals)} qualified signal(s)...[/cyan]"
+    )
+    dossiers = await extractor.extract_batch(qualified_signals)
+
+    table = Table(
+        title="Stage 2 Extracted Innovation Dossiers",
+        show_header=True,
+        header_style="bold green",
+    )
+    table.add_column("Canonical Name", style="bold", width=22)
+    table.add_column("QE Pillar", style="magenta", width=26)
+    table.add_column("Evidence Tier", width=24)
+    table.add_column("Bench", justify="center", width=7)
+    table.add_column("Repo", justify="center", width=6)
+    table.add_column("Wrapper", justify="center", width=8)
+    table.add_column("Key Innovation", style="dim", width=40)
+
+    for d in dossiers:
+        table.add_row(
+            d.name[:20],
+            d.category.value,
+            d.evidence_tier.value,
+            "[green]YES[/green]" if d.has_reproducible_benchmark else "[dim]NO[/dim]",
+            "[green]YES[/green]" if d.has_open_source_repo else "[dim]NO[/dim]",
+            "[red]YES[/red]" if d.is_superficial_wrapper else "[green]NO[/green]",
+            (d.key_innovation[:38] + "...") if len(d.key_innovation) > 38 else d.key_innovation,
+        )
+
+    console.print(table)
+    console.print(
+        f"[bold green]Successfully extracted {len(dossiers)} innovation dossier(s).[/bold green]"
+    )
+
+    try:
+        from radar.db.repository import RadarRepository
+        from radar.db.session import get_db_session
+
+        async with get_db_session() as session:
+            repo = RadarRepository(session)
+            for d in dossiers:
+                await repo.save_dossier(d)
+        console.print(
+            f"[bold green]Persisted {len(dossiers)} dossier(s) to PostgreSQL.[/bold green]"
+        )
+    except Exception:
+        # DB optional for offline/dry-run execution
+        pass
+
+    return dossiers
+
+
 @main.command()
 @click.option("--batch-size", default=20, help="Number of records to evaluate.")
 @click.option("--mock", is_flag=True, help="Force mock LLM provider.")
 def evaluate(batch_size: int, mock: bool) -> None:
     """Run the 4-stage evaluation DAG against pending signals."""
-    console.print(
-        f"[bold blue]Evaluating signals[/bold blue] (batch_size={batch_size}, mock={mock})"
-    )
+    asyncio.run(_run_evaluate(batch_size=batch_size, mock=mock))
 
 
 @main.command()

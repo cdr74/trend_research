@@ -47,6 +47,17 @@ class RadarRepository:
         await self.session.flush()
         return record
 
+    async def get_pending_sources(self, limit: int = 20) -> list[IngestedSourceTable]:
+        """Fetch ingested sources pending evaluation."""
+        stmt = (
+            select(IngestedSourceTable)
+            .where(IngestedSourceTable.status == "pending")
+            .order_by(IngestedSourceTable.ingested_at.asc())
+            .limit(limit)
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
     async def save_topic(self, topic: TrendTopic) -> TrendTopicTable:
         """Persist a multi-source synthesized trend topic cluster."""
         record = TrendTopicTable(
