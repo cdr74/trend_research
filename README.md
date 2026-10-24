@@ -167,7 +167,7 @@ flowchart TD
 
 - [x] **Milestone 1: Repository Baseline, Schemas & Tooling Harness**
 - [x] **Milestone 2: Multi-Channel Ingestion & Heuristic Noise Sieve**
-- [ ] **Milestone 3: Topic Convergence, Adversarial Committee & Evaluation Pipeline**
+- [x] **Milestone 3: Topic Convergence, Adversarial Committee & Evaluation Pipeline**
 - [ ] **Milestone 4: Presentation, CLI & Decoupled Interactive Web Dashboard**
 - [ ] **Milestone 5: Continuous Delivery, Release & Ops Automation**
 

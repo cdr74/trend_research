@@ -30,7 +30,7 @@ This manual outlines how to operate the radar pipeline, run local evaluations, e
    ```
    Key variables:
    - `RADAR_DATABASE_URL`: `postgresql+asyncpg://radar:radar_secret@localhost:5432/radar_db`
-   - `RADAR_LLM_PROVIDER`: `gemini` (or `openai_compat`, `ollama`, `mock`)
+   - `RADAR_LLM_PROVIDER`: `gemini` (or `openai_compat`, `ollama`, `agy`, `mock`)
    - `GEMINI_API_KEY`: Your Gemini API key (if using Google Gemini provider)
    - `OLLAMA_BASE_URL`: `http://localhost:11434` (if running air-gapped local models)
 
