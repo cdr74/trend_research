@@ -14,6 +14,7 @@ interface FilterSidebarProps {
   onChangeMaxHype: (val: number) => void;
   searchTerm: string;
   onChangeSearchTerm: (term: string) => void;
+  onResetFilters: () => void;
 }
 
 const ALL_RINGS: RadarRing[] = ["Adopt", "Trial", "Assess", "Hold"];
@@ -45,21 +46,33 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   onChangeMaxHype,
   searchTerm,
   onChangeSearchTerm,
+  onResetFilters,
 }) => {
   return (
     <div className="w-80 bg-[#121826] border border-[#1f293d] rounded-xl p-5 shadow-2xl space-y-6">
-      {/* Search Input */}
+      {/* Search Omnibar */}
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-          Search Intelligence
-        </label>
+        <div className="flex justify-between items-center mb-1.5">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+            Search Omnibar
+          </label>
+          <button
+            onClick={onResetFilters}
+            className="text-[10px] text-blue-400 hover:text-blue-300 font-semibold underline"
+          >
+            Reset All
+          </button>
+        </div>
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => onChangeSearchTerm(e.target.value)}
-          placeholder="Filter by name, claim, topic..."
-          className="w-full bg-[#0b0f19] border border-[#1f293d] rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500"
+          placeholder='e.g. ring:Adopt viability:>0.8 "visual"'
+          className="w-full bg-[#0b0f19] border border-[#1f293d] rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
         />
+        <p className="text-[10px] text-slate-500 mt-1 leading-tight">
+          Supports: <code className="text-slate-400">ring:</code>, <code className="text-slate-400">tier:</code>, <code className="text-slate-400">viability:&gt;0.8</code>, <code className="text-slate-400">risk:</code>
+        </p>
       </div>
 
       {/* Ring Filter */}

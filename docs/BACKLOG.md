@@ -113,7 +113,7 @@
 
 ---
 
-## Milestone 4: Presentation, CLI & Decoupled Interactive Web Dashboard (IN PROGRESS)
+## Milestone 4: Presentation, CLI & Decoupled Interactive Web Dashboard (Completed)
 **Goal:** Deliver flexible multi-view visualization, filtering, and automated intelligence reporting.
 
 ### Stories & Tasks:
@@ -125,22 +125,27 @@
   - Automated generation of Markdown executive intelligence digest detailing ring distributions, trajectory movements, new entries, skeptic critique highlights, and top recommendations.
   - Database offline safety guard: halts if DB unreachable without creating offline report unless `--mock` is explicitly passed.
   - *Acceptance Criteria:* Dedicated Markdown generator unit tests and CLI integration tests passing. (Ref: ADR-0016)
-- [ ] **M4-T3: JSON Data Bundle Exporter (`radar.json`)**
-  - Export complete evaluated corpus with 2D UMAP projection coordinates for semantic clustering.
-- [ ] **M4-T4: Interactive Web Radar Dashboard (Vite + React + Tailwind + D3)**
-  - Scaffold `web/` application with instant multi-criteria sidebar filters:
+- [x] **M4-T3: JSON Data Bundle Exporter (`radar.json`)**
+  - Standardized `RadarData` JSON schema envelope with metadata, rings, categories, and item dossiers.
+  - 2D UMAP non-linear manifold projection engine (`src/radar/presentation/projection.py`) with SVD PCA fallback.
+  - *Acceptance Criteria:* UMAP projection unit tests and export integration tests passing. (Ref: ADR-0017)
+- [x] **M4-T4: Interactive Web Radar Dashboard (Vite + React + Tailwind)**
+  - Decoupled `web/` application with instant multi-criteria sidebar filters and free-format token Omnibar:
     - Ring filter (Adopt/Trial/Assess/Hold)
     - QE Pillar filter (1-6)
     - Evidence Tier filter
     - Banking Gate / Risk Tag filters
     - Hype / Viability score range sliders
-  - Implement 4 interactive view modes:
-    1. **Radar View:** 4-quadrant interactive radar with zoomable blips.
+    - Smart search omnibar with token parsing (`ring:`, `category:`, `tier:`, `viability:>X`, `hype:<Y`, `risk:`)
+  - 4 interactive view modes:
+    1. **Radar View:** Polar radar with 4 rings, quadrant categories, and zoomable interactive blips.
     2. **Matrix View:** Data grid with sortable columns and expandable skeptic critique dossiers.
-    3. **Scatter Matrix:** Interactive Hype vs Viability scatter plot.
-    4. **Semantic Cluster View:** 2D canvas/SVG projection of tool embeddings.
-- [ ] **M4-T5: Static Build & GitHub Pages Workflow**
-  - Automated build and deploy workflow publishing the static dashboard to GitHub Pages.
+    3. **Scatter Matrix:** Interactive Hype vs Viability scatter plot with quadrant analysis.
+    4. **Semantic Cluster View:** 2D spatial canvas rendering UMAP projection coordinates.
+  - *Acceptance Criteria:* Static web bundle builds cleanly (`npm run build`) with zero TypeScript errors. (Ref: ADR-0005, ADR-0017)
+- [x] **M4-T5: Static Build & GitHub Pages Workflow**
+  - Configured automated deployment workflow (`.github/workflows/pages.yml`) publishing the static dashboard bundle to GitHub Pages.
+  - *Acceptance Criteria:* Pages deployment workflow with artifact upload and deploy stages. (Ref: ADR-0017)
 
 ---
 

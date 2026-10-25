@@ -1,5 +1,6 @@
 """Unit tests for the Radar command line interface."""
 
+import json
 from pathlib import Path
 
 import httpx
@@ -32,15 +33,41 @@ def test_cli_query_and_export_commands(tmp_path: Path) -> None:
     assert query_res.exit_code == 0
     assert "Querying radar" in query_res.output
 
-    out_json = str(tmp_path / "radar.json")
-    export_json_res = runner.invoke(main, ["export", "--format", "json", "--output", out_json])
+    out_json = tmp_path / "radar.json"
+    export_json_res = runner.invoke(
+        main, ["export", "--format", "json", "--output", str(out_json), "--mock"]
+    )
     assert export_json_res.exit_code == 0
     assert "Exporting radar data" in export_json_res.output
+    assert out_json.exists()
+    raw_data = json.loads(out_json.read_text(encoding="utf-8"))
+    assert raw_data["radar_title"] == "AI Test Engineering Trend Horizon Radar"
+    assert len(raw_data["items"]) >= 1
+    assert "cluster_x" in raw_data["items"][0]
+    assert "cluster_y" in raw_data["items"][0]
 
-    out_csv = str(tmp_path / "radar.csv")
-    export_csv_res = runner.invoke(main, ["export", "--format", "csv", "--output", out_csv])
+    out_csv = tmp_path / "radar.csv"
+    export_csv_res = runner.invoke(
+        main, ["export", "--format", "csv", "--output", str(out_csv), "--mock"]
+    )
     assert export_csv_res.exit_code == 0
     assert "Exporting radar data" in export_csv_res.output
+    assert out_csv.exists()
+
+
+def test_cli_query_token_and_free_text_search() -> None:
+    runner = CliRunner()
+
+    # Query with structured token expression in mock mode
+    token_res = runner.invoke(main, ["query", "ring:Adopt viability:>0.8", "--mock"])
+    assert token_res.exit_code == 0
+    assert "Playwright" in token_res.output
+    assert "Hype-Fix" not in token_res.output
+
+    # Query with free text keyword in mock mode
+    text_res = runner.invoke(main, ["query", "deterministic", "--mock"])
+    assert text_res.exit_code == 0
+    assert "Playwright" in text_res.output
 
 
 def test_cli_inspect_command() -> None:

@@ -33,6 +33,8 @@ export interface RadarItem {
   enterprise_risks: string[];
   prerequisites: string[];
   source_url: string;
+  cluster_x?: number;
+  cluster_y?: number;
 }
 
 export interface RadarData {

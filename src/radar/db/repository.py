@@ -1,8 +1,9 @@
 """Asynchronous repository for Radar persistence operations."""
 
+from typing import Any
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from radar.core.models import (
@@ -232,3 +233,30 @@ class RadarRepository:
         stmt = stmt.order_by(SignalDossierTable.embedding.cosine_distance(embedding)).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
+
+    async def execute_raw_sql(self, sql_query: str) -> tuple[list[str], list[list[Any]]]:
+        """Execute a raw SQL query and return column names and rows."""
+        result = await self.session.execute(text(sql_query))
+        columns = list(result.keys())
+        if columns:
+            rows = [list(row) for row in result.all()]
+            return columns, rows
+        return [], []
+
+    async def get_items_with_embeddings(self) -> list[tuple[RadarItemTable, list[float] | None]]:
+        """Retrieve all active radar items alongside their signal embeddings if available."""
+        stmt = (
+            select(RadarItemTable, SignalDossierTable.embedding)
+            .outerjoin(
+                EnterpriseEvaluationTable,
+                RadarItemTable.evaluation_id == EnterpriseEvaluationTable.id,
+            )
+            .outerjoin(
+                SignalDossierTable,
+                EnterpriseEvaluationTable.dossier_id == SignalDossierTable.id,
+            )
+            .where(RadarItemTable.active.is_(True))
+            .order_by(RadarItemTable.viability_score.desc())
+        )
+        result = await self.session.execute(stmt)
+        return [(row[0], row[1]) for row in result.all()]

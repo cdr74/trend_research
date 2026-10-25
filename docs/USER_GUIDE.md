@@ -71,22 +71,28 @@ RADAR_LLM_PROVIDER=mock uv run radar evaluate
 ```
 
 ### 3.3 Query and Filter Signals
-Query the local evaluated database from the terminal:
+Query the local evaluated database from the terminal using standard flags, free-format token syntax, or ad-hoc SQL:
 ```bash
 # Filter by ring and category
 uv run radar query --ring Adopt --category "Test Synthesis"
 
-# Filter by viability threshold and velocity
-uv run radar query --min-viability 0.80 --max-hype 0.30
+# Free-format token syntax query
+uv run radar query "ring:Adopt viability:>0.80 tier:oss"
+
+# Free-text semantic keyword search
+uv run radar query "deterministic visual diffing"
+
+# Direct ad-hoc SQL query across PostgreSQL tables
+uv run radar query --sql "SELECT name, viability_score, hype_score, key_innovation FROM radar_items WHERE viability_score > 0.85 ORDER BY viability_score DESC"
 
 # Show full multi-lens committee audit and corroborating sources
 uv run radar inspect --id <SIGNAL_UUID>
 ```
 
 ### 3.4 Export Data and Generate Reports
-Export the static dataset and generate executive trend briefings:
+Export the static dataset with 2D UMAP projection coordinates and generate executive briefings:
 ```bash
-# Export static JSON for web dashboard
+# Export static JSON bundle with 2D UMAP coordinates for web dashboard
 uv run radar export --format json --output web/public/radar.json
 
 # Export CSV summary
@@ -98,6 +104,24 @@ uv run radar report --output reports/$(date +%Y-W%V).md
 # Generate test report in offline mock mode (no live DB connection needed)
 uv run radar report --output reports/test_digest.md --mock
 ```
+
+### 3.5 Interactive Web Dashboard
+Launch the decoupled Vite + React application locally or preview static build:
+```bash
+# Start local development server
+cd web
+npm install
+npm run dev
+
+# Build static production bundle (ready for GitHub Pages or static host)
+npm run build
+```
+The dashboard features four interactive views with a unified filter Omnibar:
+1. **Radar Quadrant View:** Polar visualization across 4 rings (Adopt to Hold) and 6 QE pillars with interactive blips and tooltips.
+2. **Matrix Table View:** Sortable data grid with risk badges and expandable committee skeptic critiques.
+3. **Scatter Matrix View:** Viability Score vs. Hype Score quadrant analysis (identifying the "High Viability / Low Hype" enterprise sweet spot).
+4. **Semantic Cluster View:** 2D canvas mapping tools by their UMAP embedding projection to spot topical proximity and wrapper overlap.
+5. **Smart Search Omnibar:** Instant client-side search supporting structured tokens (`ring:Adopt`, `viability:>0.8`, `risk:egress`, `tier:oss`) and plain keyword phrases.
 
 ---
 

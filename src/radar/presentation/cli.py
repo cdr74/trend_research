@@ -3,7 +3,9 @@
 import asyncio
 import csv
 import json
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 from uuid import UUID
 
 import click
@@ -460,16 +462,240 @@ async def _run_evaluate(
     return dossiers
 
 
+def _get_mock_radar_items() -> list[RadarItem]:
+    """Provide realistic mock radar items for offline testing, queries, and exports."""
+    from radar.core.models import EvidenceTier, LifecycleStage
+
+    return [
+        RadarItem(
+            name="Playwright-Invariance-Agent",
+            category=QECategory.TEST_SYNTHESIS,
+            source_url="https://github.com/cdr74/playwright-invariance",
+            evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+            hype_score=0.15,
+            viability_score=0.92,
+            validity_score=0.85,
+            recommended_ring=RadarRing.ADOPT,
+            lifecycle_stage=LifecycleStage.CONSOLIDATED,
+            corroboration_count=4,
+            velocity_score=82.5,
+            corroborating_sources=[
+                "https://arxiv.org/abs/2403.0001",
+                "https://github.com/cdr74/playwright-invariance",
+            ],
+            key_innovation="Deterministic DOM-invariant locator synthesis with zero-egress local visual diffing.",
+            enterprise_risks=["Requires local Playwright browser container runtime."],
+            prerequisites=["Node.js 20+", "Docker or Podman"],
+        ),
+        RadarItem(
+            name="AutoMut-ADS",
+            category=QECategory.EXECUTION_AND_OPTIMIZATION,
+            source_url="https://arxiv.org/abs/2410.18021",
+            evidence_tier=EvidenceTier.ACADEMIC_PEER_REVIEWED,
+            hype_score=0.15,
+            viability_score=0.88,
+            validity_score=0.85,
+            recommended_ring=RadarRing.ADOPT,
+            lifecycle_stage=LifecycleStage.CONSOLIDATED,
+            corroboration_count=3,
+            velocity_score=28.5,
+            corroborating_sources=["https://arxiv.org/abs/2410.18021"],
+            key_innovation="Automated mutation synthesis optimizing test coverage.",
+            enterprise_risks=[],
+            prerequisites=["High memory CI runner"],
+        ),
+        RadarItem(
+            name="SpecToProperty-LLM",
+            category=QECategory.SPEC_AND_MODEL,
+            source_url="https://github.com/cdr74/spec-property-gen",
+            evidence_tier=EvidenceTier.ENGINEERING_POST_MORTEM,
+            hype_score=0.28,
+            viability_score=0.78,
+            validity_score=0.72,
+            recommended_ring=RadarRing.TRIAL,
+            lifecycle_stage=LifecycleStage.EMERGING,
+            corroboration_count=2,
+            velocity_score=45.0,
+            corroborating_sources=["https://github.com/cdr74/spec-property-gen"],
+            key_innovation="OpenAPI and GraphQL schema transformation to Hypothesis property-based stateful models.",
+            enterprise_risks=["Complex schema recursive models may require prompt tuning."],
+            prerequisites=["Hypothesis test runner"],
+        ),
+        RadarItem(
+            name="RCA-Tracer Agent",
+            category=QECategory.TRIAGE_AND_FIX,
+            source_url="https://github.com/cdr74/rca-tracer",
+            evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+            hype_score=0.32,
+            viability_score=0.75,
+            validity_score=0.68,
+            recommended_ring=RadarRing.TRIAL,
+            lifecycle_stage=LifecycleStage.EMERGING,
+            corroboration_count=2,
+            velocity_score=38.0,
+            corroborating_sources=["https://github.com/cdr74/rca-tracer"],
+            key_innovation="Correlates distributed OpenTelemetry traces with flaky test failure logs to pinpoint thread races.",
+            enterprise_risks=["Requires OpenTelemetry trace instrumentation."],
+            prerequisites=["OpenTelemetry collector"],
+        ),
+        RadarItem(
+            name="Multi-Agent Red-Team Explorer",
+            category=QECategory.AGENT_SYSTEMS,
+            source_url="https://arxiv.org/abs/2408.00002",
+            evidence_tier=EvidenceTier.ACADEMIC_PEER_REVIEWED,
+            hype_score=0.45,
+            viability_score=0.58,
+            validity_score=0.55,
+            recommended_ring=RadarRing.ASSESS,
+            lifecycle_stage=LifecycleStage.EMERGING,
+            corroboration_count=1,
+            velocity_score=52.0,
+            corroborating_sources=[],
+            key_innovation="Autonomous multi-agent exploration discovering unmapped edge-case API state transitions.",
+            enterprise_risks=[
+                "High token consumption; non-deterministic execution paths without fixed seeds."
+            ],
+            prerequisites=["Ollama or Gemini API"],
+        ),
+        RadarItem(
+            name="Hype-Fix 99.9% AutoBugRepair",
+            category=QECategory.TRIAGE_AND_FIX,
+            source_url="https://vendor-hype-example.com/repair",
+            evidence_tier=EvidenceTier.VENDOR_ANNOUNCEMENT,
+            hype_score=0.85,
+            viability_score=0.22,
+            validity_score=0.15,
+            recommended_ring=RadarRing.HOLD,
+            lifecycle_stage=LifecycleStage.FADING,
+            corroboration_count=1,
+            velocity_score=5.0,
+            corroborating_sources=[],
+            key_innovation="Claims automated bug repair across any codebase; un-augmented prompt wrapper over proprietary LLM.",
+            enterprise_risks=[
+                "Transmits full private source code to vendor third-party endpoint.",
+                "Non-deterministic code patches with zero formal verification.",
+            ],
+            prerequisites=["Vendor cloud subscription"],
+        ),
+    ]
+
+
+def _filter_items_by_query_string(items: list[Any], query_string: str) -> list[Any]:
+    """Filter items using token syntax (e.g. ring:Adopt viability:>0.8) and free terms."""
+    terms = query_string.split()
+    filtered = list(items)
+
+    for term in terms:
+        if ":" in term:
+            key, val = term.split(":", 1)
+            key = key.lower()
+            val_clean = val.strip('"').lower()
+
+            if key == "ring":
+                filtered = [
+                    it
+                    for it in filtered
+                    if (
+                        it.recommended_ring
+                        if isinstance(it.recommended_ring, str)
+                        else it.recommended_ring.value
+                    ).lower()
+                    == val_clean
+                ]
+            elif key in ("category", "pillar"):
+                filtered = [
+                    it
+                    for it in filtered
+                    if val_clean
+                    in (it.category if isinstance(it.category, str) else it.category.value).lower()
+                ]
+            elif key in ("tier", "evidence"):
+                filtered = [
+                    it
+                    for it in filtered
+                    if val_clean
+                    in (
+                        it.evidence_tier
+                        if isinstance(it.evidence_tier, str)
+                        else it.evidence_tier.value
+                    ).lower()
+                ]
+            elif key == "viability":
+                if val_clean.startswith(">"):
+                    thresh = float(val_clean.lstrip(">="))
+                    filtered = [it for it in filtered if it.viability_score >= thresh]
+                elif val_clean.startswith("<"):
+                    thresh = float(val_clean.lstrip("<="))
+                    filtered = [it for it in filtered if it.viability_score <= thresh]
+            elif key == "hype":
+                if val_clean.startswith(">"):
+                    thresh = float(val_clean.lstrip(">="))
+                    filtered = [it for it in filtered if it.hype_score >= thresh]
+                elif val_clean.startswith("<"):
+                    thresh = float(val_clean.lstrip("<="))
+                    filtered = [it for it in filtered if it.hype_score <= thresh]
+            elif key == "risk":
+                filtered = [
+                    it
+                    for it in filtered
+                    if any(val_clean in r.lower() for r in it.enterprise_risks)
+                ]
+        else:
+            free = term.strip('"').lower()
+            filtered = [
+                it
+                for it in filtered
+                if free in it.name.lower()
+                or free in it.key_innovation.lower()
+                or any(free in r.lower() for r in it.enterprise_risks)
+            ]
+
+    return filtered
+
+
 async def _run_query(
-    ring: str | None,
-    category: str | None,
-    min_viability: float,
-    max_hype: float,
+    ring: str | None = None,
+    category: str | None = None,
+    min_viability: float = 0.0,
+    max_hype: float = 1.0,
+    sql: str | None = None,
+    query_string: str | None = None,
+    mock: bool = False,
 ) -> None:
-    """Query active radar items from database."""
+    """Query evaluated radar signals via standard filters, tokens, or ad-hoc SQL."""
+    if sql:
+        console.print(f"[bold cyan]Executing ad-hoc SQL query:[/bold cyan]\n[dim]{sql}[/dim]")
+        try:
+            from radar.db.repository import RadarRepository
+            from radar.db.session import get_db_session
+
+            async with get_db_session() as session:
+                repo = RadarRepository(session)
+                cols, rows = await repo.execute_raw_sql(sql)
+
+            if not cols:
+                console.print("[dim]Query executed successfully (0 rows returned or DDL).[/dim]")
+                return
+
+            table = Table(
+                title=f"SQL Results ({len(rows)} row(s))",
+                show_header=True,
+                header_style="bold cyan",
+            )
+            for c in cols:
+                table.add_column(c)
+            for r in rows:
+                table.add_row(*[str(val) for val in r])
+            console.print(table)
+            return
+        except Exception as e:
+            console.print(f"[red]Could not execute SQL query (DB running?): {e}[/red]")
+            return
+
     console.print(
-        f"[bold cyan]Querying radar:[/bold cyan] ring={ring}, category={category}, min_viability={min_viability}, max_hype={max_hype}"
+        f"[bold cyan]Querying radar:[/bold cyan] query='{query_string or ''}' ring={ring}, category={category}, min_viability={min_viability}, max_hype={max_hype}"
     )
+    items: list[Any] = []
     try:
         from radar.db.repository import RadarRepository
         from radar.db.session import get_db_session
@@ -485,44 +711,87 @@ async def _run_query(
                 min_viability=min_viability,
                 max_hype=max_hype,
             )
-
-        table = Table(
-            title=f"Radar Query Results ({len(items)} items)",
-            show_header=True,
-            header_style="bold magenta",
-        )
-        table.add_column("Ring", style="bold", justify="center", width=8)
-        table.add_column("Technology", style="bold", width=22)
-        table.add_column("QE Pillar", style="cyan", width=24)
-        table.add_column("Trajectory", justify="center", width=12)
-        table.add_column("Viability", justify="right", width=9)
-        table.add_column("Hype", justify="right", width=7)
-        table.add_column("Key Innovation", style="dim", width=40)
-
-        for it in items:
-            table.add_row(
-                it.recommended_ring,
-                it.name[:20],
-                it.category,
-                it.lifecycle_stage,
-                f"{it.viability_score:.2f}",
-                f"{it.hype_score:.2f}",
-                (it.key_innovation[:38] + "...")
-                if len(it.key_innovation) > 38
-                else it.key_innovation,
-            )
-        console.print(table)
     except Exception as e:
-        console.print(f"[yellow]Could not execute query (DB running?): {e}[/yellow]")
+        if mock or not items:
+            console.print(
+                f"[yellow]Database offline ({e}). Using mock radar dataset for query...[/yellow]"
+            )
+            items = _get_mock_radar_items()
+            if ring:
+                items = [
+                    it
+                    for it in items
+                    if (
+                        it.recommended_ring
+                        if isinstance(it.recommended_ring, str)
+                        else it.recommended_ring.value
+                    )
+                    == ring
+                ]
+            if category:
+                items = [
+                    it
+                    for it in items
+                    if (it.category if isinstance(it.category, str) else it.category.value)
+                    == category
+                ]
+            items = [
+                it
+                for it in items
+                if it.viability_score >= min_viability and it.hype_score <= max_hype
+            ]
+        else:
+            console.print(f"[yellow]Could not execute query (DB running?): {e}[/yellow]")
+            return
+
+    if query_string:
+        items = _filter_items_by_query_string(items, query_string)
+
+    table = Table(
+        title=f"Radar Query Results ({len(items)} items)",
+        show_header=True,
+        header_style="bold magenta",
+    )
+    table.add_column("Ring", style="bold", justify="center", width=8)
+    table.add_column("Technology", style="bold", width=22)
+    table.add_column("QE Pillar", style="cyan", width=24)
+    table.add_column("Trajectory", justify="center", width=12)
+    table.add_column("Viability", justify="right", width=9)
+    table.add_column("Hype", justify="right", width=7)
+    table.add_column("Key Innovation", style="dim", width=40)
+
+    for it in items:
+        ring_display = (
+            it.recommended_ring
+            if isinstance(it.recommended_ring, str)
+            else it.recommended_ring.value
+        )
+        cat_display = it.category if isinstance(it.category, str) else it.category.value
+        traj_display = (
+            it.lifecycle_stage if isinstance(it.lifecycle_stage, str) else it.lifecycle_stage.value
+        )
+        table.add_row(
+            ring_display,
+            it.name[:20],
+            cat_display,
+            traj_display,
+            f"{it.viability_score:.2f}",
+            f"{it.hype_score:.2f}",
+            (it.key_innovation[:38] + "...") if len(it.key_innovation) > 38 else it.key_innovation,
+        )
+    console.print(table)
 
 
-async def _run_export(export_format: str, output: str) -> None:
-    """Export radar items to JSON or CSV."""
+async def _run_export(export_format: str, output: str, mock: bool = False) -> None:
+    """Export radar items to standard JSON bundle or CSV."""
     console.print(
         f"[bold magenta]Exporting radar data to:[/bold magenta] {output} ({export_format})"
     )
     out_path = Path(output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    db_items: list[Any] = []
+    embeddings: list[list[float]] = []
 
     try:
         from radar.db.repository import RadarRepository
@@ -530,43 +799,94 @@ async def _run_export(export_format: str, output: str) -> None:
 
         async with get_db_session() as session:
             repo = RadarRepository(session)
-            db_items = await repo.query_radar_items()
+            items_with_embeds = await repo.get_items_with_embeddings()
+            db_items = [row[0] for row in items_with_embeds]
+            embeddings = [
+                row[1] if row[1] is not None else [0.0] * 1536 for row in items_with_embeds
+            ]
     except Exception as e:
-        console.print(f"[yellow]Could not fetch records from database: {e}[/yellow]")
-        db_items = []
+        if mock or not db_items:
+            console.print(
+                f"[yellow]Database offline ({e}). Generating export with mock radar fixtures...[/yellow]"
+            )
+            db_items = _get_mock_radar_items()
+            embeddings = [
+                [0.1 * i, 0.2 * (i % 3), 0.3 * (i % 2)] + [0.0] * 1533 for i in range(len(db_items))
+            ]
+        else:
+            console.print(f"[yellow]Could not fetch records from database: {e}[/yellow]")
 
-    data = [
-        {
-            "id": str(it.id),
-            "name": it.name,
-            "category": it.category,
-            "source_url": it.source_url,
-            "evidence_tier": it.evidence_tier,
-            "recommended_ring": it.recommended_ring,
-            "lifecycle_stage": it.lifecycle_stage,
-            "viability_score": it.viability_score,
-            "hype_score": it.hype_score,
-            "corroboration_count": it.corroboration_count,
-            "key_innovation": it.key_innovation,
-            "enterprise_risks": it.enterprise_risks,
-            "prerequisites": it.prerequisites,
-        }
-        for it in db_items
-    ]
+    # Compute 2D spatial coordinates via UMAP / PCA
+    from radar.presentation.projection import project_embeddings_to_2d
+
+    coords = project_embeddings_to_2d(embeddings) if embeddings else [(0.0, 0.0)] * len(db_items)
+
+    item_dicts: list[dict[str, Any]] = []
+    for i, it in enumerate(db_items):
+        cx, cy = coords[i] if i < len(coords) else (0.0, 0.0)
+        ring_val = (
+            it.recommended_ring
+            if isinstance(it.recommended_ring, str)
+            else it.recommended_ring.value
+        )
+        cat_val = it.category if isinstance(it.category, str) else it.category.value
+        tier_val = it.evidence_tier if isinstance(it.evidence_tier, str) else it.evidence_tier.value
+        stage_val = (
+            it.lifecycle_stage if isinstance(it.lifecycle_stage, str) else it.lifecycle_stage.value
+        )
+
+        item_dicts.append(
+            {
+                "id": str(it.id),
+                "name": it.name,
+                "category": cat_val,
+                "source_url": it.source_url,
+                "evidence_tier": tier_val,
+                "recommended_ring": ring_val,
+                "lifecycle_stage": stage_val,
+                "viability_score": round(float(it.viability_score), 2),
+                "hype_score": round(float(it.hype_score), 2),
+                "validity_score": round(
+                    float(getattr(it, "validity_score", 1.0 - it.hype_score)), 2
+                ),
+                "corroboration_count": it.corroboration_count,
+                "velocity_score": round(float(getattr(it, "velocity_score", 0.0)), 1),
+                "corroborating_sources": getattr(it, "corroborating_sources", []),
+                "key_innovation": it.key_innovation,
+                "enterprise_risks": it.enterprise_risks,
+                "prerequisites": it.prerequisites,
+                "cluster_x": cx,
+                "cluster_y": cy,
+            }
+        )
 
     if export_format == "json":
-        out_path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        radar_bundle = {
+            "radar_title": "AI Test Engineering Trend Horizon Radar",
+            "generated_at": datetime.now(UTC).isoformat(),
+            "rings": ["Adopt", "Trial", "Assess", "Hold"],
+            "categories": [
+                "Spec & Model",
+                "Test Synthesis",
+                "Execution & Optimization",
+                "Triage & Self-Healing",
+                "Agent Systems",
+                "Governance & Evals",
+            ],
+            "items": item_dicts,
+        }
+        out_path.write_text(json.dumps(radar_bundle, indent=2), encoding="utf-8")
     elif export_format == "csv":
-        if data:
-            fieldnames = list(data[0].keys())
+        if item_dicts:
+            fieldnames = list(item_dicts[0].keys())
             with out_path.open("w", newline="", encoding="utf-8") as f:
                 writer = csv.DictWriter(f, fieldnames=fieldnames)
                 writer.writeheader()
-                writer.writerows(data)
+                writer.writerows(item_dicts)
         else:
             out_path.write_text("", encoding="utf-8")
 
-    console.print(f"[bold green]Exported {len(data)} items to {out_path}[/bold green]")
+    console.print(f"[bold green]Exported {len(item_dicts)} items to {out_path}[/bold green]")
 
 
 async def _run_inspect(item_id: str, mock: bool = False) -> None:
@@ -733,23 +1053,32 @@ def evaluate(batch_size: int, mock: bool) -> None:
 
 
 @main.command()
+@click.argument("query_string", required=False)
 @click.option("--ring", type=click.Choice(["Adopt", "Trial", "Assess", "Hold"]))
 @click.option("--category", help="Filter by QE category pillar.")
 @click.option("--min-viability", type=float, default=0.0)
 @click.option("--max-hype", type=float, default=1.0)
+@click.option("--sql", help="Ad-hoc SQL query string to execute against database.")
+@click.option("--mock", is_flag=True, help="Query mock data fixtures if database is offline.")
 def query(
+    query_string: str | None,
     ring: str | None,
     category: str | None,
     min_viability: float,
     max_hype: float,
+    sql: str | None,
+    mock: bool,
 ) -> None:
-    """Query evaluated radar signals."""
+    """Query evaluated radar signals using free-text, tokens, or ad-hoc SQL."""
     asyncio.run(
         _run_query(
             ring=ring,
             category=category,
             min_viability=min_viability,
             max_hype=max_hype,
+            sql=sql,
+            query_string=query_string,
+            mock=mock,
         )
     )
 
@@ -786,9 +1115,10 @@ def report(output: str, mock: bool) -> None:
     default="json",
 )
 @click.option("--output", default="data/export/radar.json", help="Destination path.")
-def export(export_format: str, output: str) -> None:
-    """Export evaluated signals to static distribution files."""
-    asyncio.run(_run_export(export_format=export_format, output=output))
+@click.option("--mock", is_flag=True, help="Export mock data fixtures if database is offline.")
+def export(export_format: str, output: str, mock: bool) -> None:
+    """Export evaluated signals to static distribution files with 2D UMAP projection."""
+    asyncio.run(_run_export(export_format=export_format, output=output, mock=mock))
 
 
 if __name__ == "__main__":

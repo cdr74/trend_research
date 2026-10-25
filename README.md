@@ -156,6 +156,7 @@ flowchart TD
   - [ADR 0014: Stage 4 Radar Categorizer and Lifecycle Trajectory](docs/adr/0014-stage-4-radar-categorizer-and-lifecycle-trajectory.md)
   - [ADR 0015: Golden Benchmark Evaluation Test Suite and Regression Gates](docs/adr/0015-golden-benchmark-evaluation-test-suite.md)
   - [ADR 0016: Executive Markdown Intelligence Digest Generator](docs/adr/0016-executive-markdown-intelligence-digest-generator.md)
+  - [ADR 0017: JSON Data Bundle Exporter and Interactive Web Dashboard](docs/adr/0017-json-data-bundle-exporter-and-interactive-web-dashboard.md)
 - [System Design & Architecture Document](docs/design/architecture.md)
 - [Product & Engineering Backlog](docs/BACKLOG.md)
 - [User Guide & Operations Manual](docs/USER_GUIDE.md)

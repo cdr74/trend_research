@@ -1,6 +1,6 @@
 {
   "radar_title": "Trend Horizon Radar",
-  "generated_at": "2026-10-23T18:00:00Z",
+  "generated_at": "2026-10-25T09:00:00Z",
   "rings": ["Adopt", "Trial", "Assess", "Hold"],
   "categories": [
     "Spec & Model",
@@ -33,7 +33,9 @@
         "Requires local Playwright browser container runtime."
       ],
       "prerequisites": ["Node.js 20+", "Docker or Podman"],
-      "source_url": "https://github.com/cdr74/playwright-invariance"
+      "source_url": "https://github.com/cdr74/playwright-invariance",
+      "cluster_x": -0.65,
+      "cluster_y": 0.45
     },
     {
       "id": "e3e847c2-1e9d-476a-93be-1153e77f0002",
@@ -56,7 +58,9 @@
         "Requires historical CI test outcome database for training."
       ],
       "prerequisites": ["PostgreSQL", "Python 3.12"],
-      "source_url": "https://arxiv.org/abs/2405.00001"
+      "source_url": "https://arxiv.org/abs/2405.00001",
+      "cluster_x": -0.45,
+      "cluster_y": -0.55
     },
     {
       "id": "e3e847c2-1e9d-476a-93be-1153e77f0003",
@@ -78,7 +82,9 @@
         "Complex schema recursive models may require prompt tuning."
       ],
       "prerequisites": ["Hypothesis test runner"],
-      "source_url": "https://github.com/cdr74/spec-property-gen"
+      "source_url": "https://github.com/cdr74/spec-property-gen",
+      "cluster_x": 0.35,
+      "cluster_y": -0.30
     },
     {
       "id": "e3e847c2-1e9d-476a-93be-1153e77f0004",
@@ -100,7 +106,9 @@
         "Requires OpenTelemetry trace instrumentation."
       ],
       "prerequisites": ["OpenTelemetry collector"],
-      "source_url": "https://github.com/cdr74/rca-tracer"
+      "source_url": "https://github.com/cdr74/rca-tracer",
+      "cluster_x": 0.15,
+      "cluster_y": 0.60
     },
     {
       "id": "e3e847c2-1e9d-476a-93be-1153e77f0005",
@@ -120,7 +128,9 @@
         "High token consumption; non-deterministic execution paths without fixed seeds."
       ],
       "prerequisites": ["Ollama or Gemini API"],
-      "source_url": "https://arxiv.org/abs/2408.00002"
+      "source_url": "https://arxiv.org/abs/2408.00002",
+      "cluster_x": 0.60,
+      "cluster_y": 0.20
     },
     {
       "id": "e3e847c2-1e9d-476a-93be-1153e77f0006",
@@ -142,7 +152,9 @@
         "High hallucination risk."
       ],
       "prerequisites": ["Vendor cloud subscription"],
-      "source_url": "https://vendor-hype-example.com/repair"
+      "source_url": "https://vendor-hype-example.com/repair",
+      "cluster_x": 0.85,
+      "cluster_y": 0.80
     }
   ]
 }

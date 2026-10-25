@@ -2,13 +2,18 @@ import React, { useEffect, useState, useMemo } from "react";
 import { RadarData, RadarItem, RadarRing, QECategory, EvidenceTier } from "./types";
 import { RadarChart } from "./components/RadarChart";
 import { TableView } from "./components/TableView";
+import { ScatterPlot } from "./components/ScatterPlot";
+import { ClusterMap } from "./components/ClusterMap";
 import { FilterSidebar } from "./components/FilterSidebar";
 import { ItemDetailModal } from "./components/ItemDetailModal";
+import { parseSearchQuery, matchesQuery } from "./utils/tokenSearch";
+
+type ViewMode = "radar" | "table" | "scatter" | "cluster";
 
 export const App: React.FC = () => {
   const [data, setData] = useState<RadarData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeView, setActiveView] = useState<"radar" | "table">("radar");
+  const [activeView, setActiveView] = useState<ViewMode>("radar");
 
   // Filter States
   const [selectedRings, setSelectedRings] = useState<Set<RadarRing>>(
@@ -77,23 +82,53 @@ export const App: React.FC = () => {
     });
   };
 
+  const resetFilters = () => {
+    setSelectedRings(new Set(["Adopt", "Trial", "Assess", "Hold"]));
+    setSelectedCategories(
+      new Set([
+        "Spec & Model",
+        "Test Synthesis",
+        "Execution & Optimization",
+        "Triage & Self-Healing",
+        "Agent Systems",
+        "Governance & Evals",
+      ])
+    );
+    setSelectedEvidenceTiers(
+      new Set([
+        "Academic Peer-Reviewed",
+        "Open Source Repo",
+        "Engineering Post-Mortem",
+        "Vendor Announcement",
+      ])
+    );
+    setMinViability(0.0);
+    setMaxHype(1.0);
+    setSearchTerm("");
+  };
+
   const filteredItems = useMemo(() => {
     if (!data) return [];
+    const parsedQuery = parseSearchQuery(searchTerm);
+
     return data.items.filter((item) => {
       if (!selectedRings.has(item.recommended_ring)) return false;
       if (!selectedCategories.has(item.category)) return false;
       if (!selectedEvidenceTiers.has(item.evidence_tier)) return false;
       if (item.viability_score < minViability) return false;
       if (item.hype_score > maxHype) return false;
-      if (searchTerm.trim() !== "") {
-        const query = searchTerm.toLowerCase();
-        const matchesName = item.name.toLowerCase().includes(query);
-        const matchesClaim = item.key_innovation.toLowerCase().includes(query);
-        if (!matchesName && !matchesClaim) return false;
-      }
+      if (!matchesQuery(item, parsedQuery)) return false;
       return true;
     });
-  }, [data, selectedRings, selectedCategories, selectedEvidenceTiers, minViability, maxHype, searchTerm]);
+  }, [
+    data,
+    selectedRings,
+    selectedCategories,
+    selectedEvidenceTiers,
+    minViability,
+    maxHype,
+    searchTerm,
+  ]);
 
   if (loading) {
     return (
@@ -104,7 +139,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] flex flex-col">
+    <div className="min-h-screen bg-[#0b0f19] flex flex-col font-sans">
       {/* Top Header */}
       <header className="border-b border-[#1f293d] bg-[#121826]/80 backdrop-blur sticky top-0 z-40 px-8 py-4 flex justify-between items-center">
         <div>
@@ -115,15 +150,15 @@ export const App: React.FC = () => {
             </h1>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
-            Zero-Hype Signal Extraction & Tier-1 Banking Enterprise Viability Vetting
+            Deterministic Anti-Hype Penalties & Tier-1 Banking Enterprise Viability Vetting
           </p>
         </div>
 
-        {/* View Switcher */}
-        <div className="flex items-center space-x-2 bg-[#0b0f19] p-1 rounded-xl border border-[#1f293d]">
+        {/* 4 View Modes Switcher */}
+        <div className="flex items-center space-x-1.5 bg-[#0b0f19] p-1 rounded-xl border border-[#1f293d]">
           <button
             onClick={() => setActiveView("radar")}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
               activeView === "radar"
                 ? "bg-blue-600 text-white shadow"
                 : "text-slate-400 hover:text-slate-200"
@@ -133,13 +168,33 @@ export const App: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveView("table")}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
               activeView === "table"
                 ? "bg-blue-600 text-white shadow"
                 : "text-slate-400 hover:text-slate-200"
             }`}
           >
             Matrix Table ({filteredItems.length})
+          </button>
+          <button
+            onClick={() => setActiveView("scatter")}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+              activeView === "scatter"
+                ? "bg-blue-600 text-white shadow"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            Scatter Matrix
+          </button>
+          <button
+            onClick={() => setActiveView("cluster")}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+              activeView === "cluster"
+                ? "bg-blue-600 text-white shadow"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            Semantic Clusters (UMAP)
           </button>
         </div>
       </header>
@@ -160,18 +215,34 @@ export const App: React.FC = () => {
           onChangeMaxHype={setMaxHype}
           searchTerm={searchTerm}
           onChangeSearchTerm={setSearchTerm}
+          onResetFilters={resetFilters}
         />
 
         {/* Center Presentation View */}
         <div className="flex-1 flex flex-col items-center">
-          {activeView === "radar" ? (
+          {activeView === "radar" && (
             <RadarChart
               items={filteredItems}
               selectedItem={selectedItem}
               onSelectItem={setSelectedItem}
             />
-          ) : (
+          )}
+          {activeView === "table" && (
             <TableView
+              items={filteredItems}
+              selectedItem={selectedItem}
+              onSelectItem={setSelectedItem}
+            />
+          )}
+          {activeView === "scatter" && (
+            <ScatterPlot
+              items={filteredItems}
+              selectedItem={selectedItem}
+              onSelectItem={setSelectedItem}
+            />
+          )}
+          {activeView === "cluster" && (
+            <ClusterMap
               items={filteredItems}
               selectedItem={selectedItem}
               onSelectItem={setSelectedItem}
