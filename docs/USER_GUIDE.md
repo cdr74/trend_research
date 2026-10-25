@@ -75,8 +75,8 @@ The platform is designed around a **local-first, on-demand execution model**:
 ```mermaid
 flowchart TD
     A["Operator runs 'radar sync'"] --> B{"Sync State exists in 'data/.sync_state.json'?"}
-    B -- No / --reset --> C["Initial Baseline Lookback (365 days)"]
-    B -- Yes --> D["Incremental Delta Query (since last_synced_at - 2 days)"]
+    B -->|"No (or --reset)"| C["Initial Baseline Lookback (365 days)"]
+    B -->|"Yes"| D["Incremental Delta Query (since last_synced_at - 2 days)"]
     C --> E["Multi-Channel Ingestors (arXiv, GitHub, RSS)"]
     D --> E
     E --> F["Stage 1: Heuristic Noise Sieve (Drop Hype > 0.60)"]
