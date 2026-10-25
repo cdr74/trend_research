@@ -149,11 +149,17 @@
 
 ---
 
-## Milestone 5: Continuous Delivery, Release & Ops Automation (IN PROGRESS)
+## Milestone 5: Continuous Delivery, Release & Ops Automation (Completed)
 - [x] **M5-T1: Automated SemVer Release Tagging & Changelog Automation**
   - Integrated Google Release Please (`.release-please-config.json`, `.release-please-manifest.json`, `CHANGELOG.md`).
   - Automated Release PR generation on pushes to `main` analyzing Conventional Commits.
   - Automated packaging of Python wheels/sdists (`uv build`) and static web dashboard archive (`radar-web-dashboard.tar.gz`) uploaded to GitHub Releases on PR merge.
   - *Acceptance Criteria:* Release Please GitHub Actions workflow configured and validated. (Ref: ADR-0018)
-- [ ] **M5-T2: Scheduled Cron Ingestion & Evaluation Automation**
-  - Scheduled cron workflow for periodic automated ingestion and evaluation runs.
+- [x] **M5-T2: On-Demand Incremental Sync & Watermark Pipeline**
+  - Local-first delta synchronization (`radar sync`) eliminating cloud cron schedules per user operational requirements.
+  - Stateful `WatermarkManager` in `src/radar/core/watermark.py` persisting to `data/.sync_state.json`.
+  - Configurable lookback buffer (`--days`, defaulting to 365-day initial baseline load to establish historical trend context).
+  - Source-level watermark resets (`--reset-source <id>`) and global state resets (`--reset`).
+  - Automated integration with declarative source catalog in `data/seeds/sources.yaml`.
+  - Single-command orchestration running incremental multi-channel ingestion, noise filtering, and 4-stage evaluation DAG.
+  - *Acceptance Criteria:* Full unit test coverage for watermark manager and CLI sync command, verified state reset and incremental ingestion flows. (Ref: ADR-0019)

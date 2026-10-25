@@ -98,6 +98,28 @@ def test_cli_report_command_offline_safety_and_mock(tmp_path: Path) -> None:
     assert "AutoMut-ADS" in out_report.read_text(encoding="utf-8")
 
 
+def test_cli_sync_command_mock_and_resets() -> None:
+    runner = CliRunner()
+
+    # Run sync in mock mode
+    res = runner.invoke(main, ["sync", "--mock"])
+    assert res.exit_code == 0
+    assert "Trend Horizon Radar: On-Demand Incremental Sync" in res.output
+    assert "Sync complete!" in res.output
+
+    # Run sync with --reset
+    reset_res = runner.invoke(main, ["sync", "--mock", "--reset", "--days", "365"])
+    assert reset_res.exit_code == 0
+    assert "Reset all source watermarks" in reset_res.output
+
+    # Run sync with --reset-source
+    reset_src_res = runner.invoke(
+        main, ["sync", "--mock", "--reset-source", "github-topic-test-generation"]
+    )
+    assert reset_src_res.exit_code == 0
+    assert "Reset watermark for source 'github-topic-test-generation'" in reset_src_res.output
+
+
 @pytest.mark.asyncio
 async def test_run_ingest_arxiv(sample_arxiv_xml: str) -> None:
     def handler(request: httpx.Request) -> httpx.Response:

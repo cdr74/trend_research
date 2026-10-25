@@ -34,6 +34,10 @@ htmlcov/
 .env.local
 *.env
 
+# Executive Reports
+reports/*.md
+!reports/.gitkeep
+
 # Database & Local Data
 data/*
 !data/seeds/

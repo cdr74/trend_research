@@ -158,6 +158,7 @@ flowchart TD
   - [ADR 0016: Executive Markdown Intelligence Digest Generator](docs/adr/0016-executive-markdown-intelligence-digest-generator.md)
   - [ADR 0017: JSON Data Bundle Exporter and Interactive Web Dashboard](docs/adr/0017-json-data-bundle-exporter-and-interactive-web-dashboard.md)
   - [ADR 0018: Automated SemVer Release Tagging and Changelog Automation via Release Please](docs/adr/0018-automated-semver-release-and-changelog-automation.md)
+  - [ADR 0019: Incremental Delta Sync and Watermark Tracking for On-Demand WSL Execution](docs/adr/0019-incremental-delta-sync-and-watermark-tracking.md)
 - [System Design & Architecture Document](docs/design/architecture.md)
 - [Product & Engineering Backlog](docs/BACKLOG.md)
 - [User Guide & Operations Manual](docs/USER_GUIDE.md)

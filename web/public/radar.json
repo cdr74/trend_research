@@ -1,7 +1,12 @@
 {
-  "radar_title": "Trend Horizon Radar",
-  "generated_at": "2026-10-25T09:00:00Z",
-  "rings": ["Adopt", "Trial", "Assess", "Hold"],
+  "radar_title": "AI Test Engineering Trend Horizon Radar",
+  "generated_at": "2026-10-25T12:24:07.815872+00:00",
+  "rings": [
+    "Adopt",
+    "Trial",
+    "Assess",
+    "Hold"
+  ],
   "categories": [
     "Spec & Model",
     "Test Synthesis",
@@ -12,66 +17,68 @@
   ],
   "items": [
     {
-      "id": "e3e847c2-1e9d-476a-93be-1153e77f0001",
+      "id": "90c488f4-074b-4bf6-b760-f3fef5654e6f",
       "name": "Playwright-Invariance-Agent",
       "category": "Test Synthesis",
+      "source_url": "https://github.com/cdr74/playwright-invariance",
       "evidence_tier": "Open Source Repo",
-      "hype_score": 0.15,
-      "viability_score": 0.92,
-      "validity_score": 0.85,
       "recommended_ring": "Adopt",
       "lifecycle_stage": "Consolidated",
+      "viability_score": 0.92,
+      "hype_score": 0.15,
+      "validity_score": 0.85,
       "corroboration_count": 4,
       "velocity_score": 82.5,
       "corroborating_sources": [
         "https://arxiv.org/abs/2403.0001",
-        "https://github.com/cdr74/playwright-invariance",
-        "https://engineering.uber.com/deterministic-testing"
+        "https://github.com/cdr74/playwright-invariance"
       ],
       "key_innovation": "Deterministic DOM-invariant locator synthesis with zero-egress local visual diffing.",
       "enterprise_risks": [
         "Requires local Playwright browser container runtime."
       ],
-      "prerequisites": ["Node.js 20+", "Docker or Podman"],
-      "source_url": "https://github.com/cdr74/playwright-invariance",
-      "cluster_x": -0.65,
-      "cluster_y": 0.45
+      "prerequisites": [
+        "Node.js 20+",
+        "Docker or Podman"
+      ],
+      "cluster_x": -0.1741,
+      "cluster_y": 0.1977
     },
     {
-      "id": "e3e847c2-1e9d-476a-93be-1153e77f0002",
-      "name": "Graph-PTS (Predictive Test Selection)",
+      "id": "2a4d8cd5-25ef-4095-a108-921d1958fe16",
+      "name": "AutoMut-ADS",
       "category": "Execution & Optimization",
+      "source_url": "https://arxiv.org/abs/2410.18021",
       "evidence_tier": "Academic Peer-Reviewed",
-      "hype_score": 0.18,
-      "viability_score": 0.89,
-      "validity_score": 0.82,
       "recommended_ring": "Adopt",
       "lifecycle_stage": "Consolidated",
+      "viability_score": 0.88,
+      "hype_score": 0.15,
+      "validity_score": 0.85,
       "corroboration_count": 3,
-      "velocity_score": 64.0,
+      "velocity_score": 28.5,
       "corroborating_sources": [
-        "https://arxiv.org/abs/2405.00001",
-        "https://github.com/facebook/predictive-test"
+        "https://arxiv.org/abs/2410.18021"
       ],
-      "key_innovation": "Commit-graph GNN embeddings for sub-second test selection reducing CI compute by 68%.",
-      "enterprise_risks": [
-        "Requires historical CI test outcome database for training."
+      "key_innovation": "Automated mutation synthesis optimizing test coverage.",
+      "enterprise_risks": [],
+      "prerequisites": [
+        "High memory CI runner"
       ],
-      "prerequisites": ["PostgreSQL", "Python 3.12"],
-      "source_url": "https://arxiv.org/abs/2405.00001",
-      "cluster_x": -0.45,
-      "cluster_y": -0.55
+      "cluster_x": 0.3048,
+      "cluster_y": 1.0
     },
     {
-      "id": "e3e847c2-1e9d-476a-93be-1153e77f0003",
+      "id": "7ae9518b-bc03-4d51-96d2-aebaf3339491",
       "name": "SpecToProperty-LLM",
       "category": "Spec & Model",
+      "source_url": "https://github.com/cdr74/spec-property-gen",
       "evidence_tier": "Engineering Post-Mortem",
-      "hype_score": 0.28,
-      "viability_score": 0.78,
-      "validity_score": 0.72,
       "recommended_ring": "Trial",
       "lifecycle_stage": "Emerging",
+      "viability_score": 0.78,
+      "hype_score": 0.28,
+      "validity_score": 0.72,
       "corroboration_count": 2,
       "velocity_score": 45.0,
       "corroborating_sources": [
@@ -81,21 +88,23 @@
       "enterprise_risks": [
         "Complex schema recursive models may require prompt tuning."
       ],
-      "prerequisites": ["Hypothesis test runner"],
-      "source_url": "https://github.com/cdr74/spec-property-gen",
-      "cluster_x": 0.35,
-      "cluster_y": -0.30
+      "prerequisites": [
+        "Hypothesis test runner"
+      ],
+      "cluster_x": -1.0,
+      "cluster_y": 0.1547
     },
     {
-      "id": "e3e847c2-1e9d-476a-93be-1153e77f0004",
+      "id": "c3c9e9a8-2890-4620-b4ae-a2f7ab2ffb8b",
       "name": "RCA-Tracer Agent",
       "category": "Triage & Self-Healing",
+      "source_url": "https://github.com/cdr74/rca-tracer",
       "evidence_tier": "Open Source Repo",
-      "hype_score": 0.32,
-      "viability_score": 0.75,
-      "validity_score": 0.68,
       "recommended_ring": "Trial",
       "lifecycle_stage": "Emerging",
+      "viability_score": 0.75,
+      "hype_score": 0.32,
+      "validity_score": 0.68,
       "corroboration_count": 2,
       "velocity_score": 38.0,
       "corroborating_sources": [
@@ -105,21 +114,23 @@
       "enterprise_risks": [
         "Requires OpenTelemetry trace instrumentation."
       ],
-      "prerequisites": ["OpenTelemetry collector"],
-      "source_url": "https://github.com/cdr74/rca-tracer",
-      "cluster_x": 0.15,
-      "cluster_y": 0.60
+      "prerequisites": [
+        "OpenTelemetry collector"
+      ],
+      "cluster_x": 1.0,
+      "cluster_y": 0.0681
     },
     {
-      "id": "e3e847c2-1e9d-476a-93be-1153e77f0005",
+      "id": "a123d10b-b893-40ec-8311-9983017980b1",
       "name": "Multi-Agent Red-Team Explorer",
       "category": "Agent Systems",
+      "source_url": "https://arxiv.org/abs/2408.00002",
       "evidence_tier": "Academic Peer-Reviewed",
-      "hype_score": 0.45,
-      "viability_score": 0.58,
-      "validity_score": 0.55,
       "recommended_ring": "Assess",
       "lifecycle_stage": "Emerging",
+      "viability_score": 0.58,
+      "hype_score": 0.45,
+      "validity_score": 0.55,
       "corroboration_count": 1,
       "velocity_score": 52.0,
       "corroborating_sources": [],
@@ -127,34 +138,36 @@
       "enterprise_risks": [
         "High token consumption; non-deterministic execution paths without fixed seeds."
       ],
-      "prerequisites": ["Ollama or Gemini API"],
-      "source_url": "https://arxiv.org/abs/2408.00002",
-      "cluster_x": 0.60,
-      "cluster_y": 0.20
+      "prerequisites": [
+        "Ollama or Gemini API"
+      ],
+      "cluster_x": -0.2668,
+      "cluster_y": -1.0
     },
     {
-      "id": "e3e847c2-1e9d-476a-93be-1153e77f0006",
+      "id": "4135e0c7-79eb-4418-b19f-5a79d0c55315",
       "name": "Hype-Fix 99.9% AutoBugRepair",
       "category": "Triage & Self-Healing",
+      "source_url": "https://vendor-hype-example.com/repair",
       "evidence_tier": "Vendor Announcement",
-      "hype_score": 0.85,
-      "viability_score": 0.22,
-      "validity_score": 0.15,
       "recommended_ring": "Hold",
       "lifecycle_stage": "Fading",
+      "viability_score": 0.22,
+      "hype_score": 0.85,
+      "validity_score": 0.15,
       "corroboration_count": 1,
       "velocity_score": 5.0,
       "corroborating_sources": [],
       "key_innovation": "Claims automated bug repair across any codebase; un-augmented prompt wrapper over proprietary LLM.",
       "enterprise_risks": [
         "Transmits full private source code to vendor third-party endpoint.",
-        "Non-deterministic code patches with zero formal verification.",
-        "High hallucination risk."
+        "Non-deterministic code patches with zero formal verification."
       ],
-      "prerequisites": ["Vendor cloud subscription"],
-      "source_url": "https://vendor-hype-example.com/repair",
-      "cluster_x": 0.85,
-      "cluster_y": 0.80
+      "prerequisites": [
+        "Vendor cloud subscription"
+      ],
+      "cluster_x": 0.7403,
+      "cluster_y": -0.8208
     }
   ]
 }

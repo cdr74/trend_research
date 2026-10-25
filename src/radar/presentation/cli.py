@@ -3,7 +3,7 @@
 import asyncio
 import csv
 import json
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 from uuid import UUID
@@ -23,9 +23,11 @@ from radar.core.models import (
     SourcePayload,
     SourceType,
 )
+from radar.core.watermark import DEFAULT_INITIAL_LOOKBACK_DAYS, WatermarkManager
 from radar.ingestion.arxiv import ArxivIngestor
 from radar.ingestion.github import GithubIngestor
 from radar.ingestion.rss import RssFeedIngestor
+from radar.ingestion.sources import load_source_catalog
 from radar.pipeline.categorizer import RadarCategorizer
 from radar.pipeline.convergence import TopicConvergenceEngine
 from radar.pipeline.evaluator import MultiLensEvaluator
@@ -1119,6 +1121,228 @@ def report(output: str, mock: bool) -> None:
 def export(export_format: str, output: str, mock: bool) -> None:
     """Export evaluated signals to static distribution files with 2D UMAP projection."""
     asyncio.run(_run_export(export_format=export_format, output=output, mock=mock))
+
+
+async def _run_sync(
+    days: int | None = None,
+    since: str | None = None,
+    reset: bool = False,
+    reset_source: str | None = None,
+    limit_per_source: int = 20,
+    no_eval: bool = False,
+    no_report: bool = False,
+    no_export: bool = False,
+    mock: bool = False,
+    state_path: Path | None = None,
+    catalog_path: Path | None = None,
+) -> None:
+    """Execute on-demand incremental ingestion, evaluation, and dashboard refresh."""
+    sync_start = datetime.now(UTC)
+    manager = WatermarkManager(state_path=state_path or Path("data/.sync_state.json"))
+
+    if reset:
+        manager.reset_all(lookback_days=days or DEFAULT_INITIAL_LOOKBACK_DAYS)
+        console.print(
+            f"[bold yellow]Reset all source watermarks to {days or DEFAULT_INITIAL_LOOKBACK_DAYS} days lookback.[/bold yellow]"
+        )
+
+    if reset_source:
+        manager.reset_source(reset_source, lookback_days=days or DEFAULT_INITIAL_LOOKBACK_DAYS)
+        console.print(
+            f"[bold yellow]Reset watermark for source '{reset_source}' to {days or DEFAULT_INITIAL_LOOKBACK_DAYS} days lookback.[/bold yellow]"
+        )
+
+    since_override: datetime | None = None
+    if since:
+        try:
+            since_override = datetime.fromisoformat(since)
+            if since_override.tzinfo is None:
+                since_override = since_override.replace(tzinfo=UTC)
+        except ValueError:
+            console.print(f"[red]Invalid ISO date format for --since: '{since}'.[/red]")
+            return
+    elif days is not None:
+        since_override = sync_start - timedelta(days=days)
+
+    try:
+        catalog = load_source_catalog(catalog_path)
+        enabled_sources = catalog.get_enabled()
+    except Exception as e:
+        console.print(
+            f"[yellow]Could not load source catalog ({e}). Falling back to baseline channels.[/yellow]"
+        )
+        enabled_sources = []
+
+    console.print(
+        Panel.fit(
+            f"[bold magenta]Trend Horizon Radar: On-Demand Incremental Sync[/bold magenta]\n"
+            f"[cyan]Active Sources:[/cyan] {len(enabled_sources)} enabled streams\n"
+            f"[cyan]Default Lookback:[/cyan] {DEFAULT_INITIAL_LOOKBACK_DAYS} days (Initial Baseline)\n"
+            f"[cyan]Execution Time:[/cyan] {sync_start.strftime('%Y-%m-%d %H:%M:%S UTC')}",
+            border_style="magenta",
+        )
+    )
+
+    all_ingested: list[SourcePayload] = []
+    sieve = NoiseSieve()
+    qualified_signals: list[QualifiedSignal] = []
+
+    if mock or not enabled_sources:
+        console.print("[dim]Executing sync with deterministic mock fixtures...[/dim]")
+        mock_items = _get_mock_radar_items()
+        all_ingested = [
+            SourcePayload(
+                source_type=SourceType.GITHUB,
+                source_url=it.source_url,
+                title=it.name,
+                raw_content=it.key_innovation,
+            )
+            for it in mock_items
+        ]
+        for p in all_ingested:
+            _, qualified = sieve.evaluate(p)
+            if qualified:
+                qualified_signals.append(qualified)
+    else:
+        for src in enabled_sources:
+            src_since = since_override or manager.get_watermark(
+                src.id, default_lookback_days=DEFAULT_INITIAL_LOOKBACK_DAYS
+            )
+            console.print(
+                f"[bold cyan]Syncing source stream:[/bold cyan] {src.name} ([dim]since {src_since.strftime('%Y-%m-%d')}[/dim])"
+            )
+
+            src_records: list[SourcePayload] = []
+            try:
+                if src.channel in ("academic", "arxiv"):
+                    query = src.query_params.get("search_query", "cat:cs.SE")
+                    arxiv_ingestor = ArxivIngestor(
+                        search_query=query,
+                        authority_weight=src.authority_weight,
+                    )
+                    async for payload in arxiv_ingestor.fetch_records(
+                        since=src_since, limit=limit_per_source
+                    ):
+                        src_records.append(payload)
+                elif src.channel == "github":
+                    query = src.query_params.get("q", "topic:test-generation sort:updated")
+                    gh_ingestor = GithubIngestor(
+                        search_query=query,
+                        authority_weight=src.authority_weight,
+                    )
+                    async for payload in gh_ingestor.fetch_records(
+                        since=src_since, limit=limit_per_source
+                    ):
+                        src_records.append(payload)
+                elif src.channel in ("rss", "community"):
+                    rss_ingestor = RssFeedIngestor(
+                        endpoint_url=src.endpoint_url,
+                        authority_weight=src.authority_weight,
+                    )
+                    async for payload in rss_ingestor.fetch_records(
+                        since=src_since, limit=limit_per_source
+                    ):
+                        src_records.append(payload)
+
+                all_ingested.extend(src_records)
+                manager.update_source_watermark(src.id, sync_start)
+                console.print(f"  [green]✓ Ingested {len(src_records)} new record(s)[/green]")
+            except Exception as e:
+                console.print(f"  [yellow]⚠ Source {src.name} sync encountered error: {e}[/yellow]")
+
+        for p in all_ingested:
+            _, qualified = sieve.evaluate(p)
+            if qualified:
+                qualified_signals.append(qualified)
+
+    # Persist raw payloads if DB available
+    try:
+        from radar.db.repository import RadarRepository
+        from radar.db.session import get_db_session
+
+        async with get_db_session() as session:
+            repo = RadarRepository(session)
+            for p in all_ingested:
+                await repo.save_source_payload(p)
+    except Exception:
+        pass
+
+    evaluated_count = 0
+    if not no_eval and qualified_signals:
+        console.print(
+            f"[bold cyan]Running 4-stage evaluation DAG on {len(qualified_signals)} qualified signals...[/bold cyan]"
+        )
+        dossiers = await _run_evaluate(
+            batch_size=len(qualified_signals),
+            mock=mock,
+            signals_override=[q.payload for q in qualified_signals],
+        )
+        evaluated_count = len(dossiers)
+
+    if not no_export:
+        console.print("[cyan]Updating static radar data bundle (web/public/radar.json)...[/cyan]")
+        await _run_export(export_format="json", output="web/public/radar.json", mock=mock)
+
+    if not no_report:
+        report_path = f"reports/{sync_start.strftime('%Y-W%V')}.md"
+        console.print(f"[cyan]Generating executive Markdown digest ({report_path})...[/cyan]")
+        await _run_report(output=report_path, mock=mock)
+
+    manager.record_sync_completion(
+        ingested_count=len(all_ingested),
+        qualified_count=len(qualified_signals),
+        evaluated_count=evaluated_count,
+        completed_at=sync_start,
+    )
+
+    console.print(
+        f"[bold green]Sync complete! Ingested: {len(all_ingested)} | Qualified: {len(qualified_signals)} | Evaluated: {evaluated_count}[/bold green]"
+    )
+
+
+@main.command()
+@click.option(
+    "--days",
+    type=int,
+    help="Override lookback window in days (e.g. 365 for 1-year baseline).",
+)
+@click.option("--since", help="Override sync start timestamp (ISO format: YYYY-MM-DD).")
+@click.option(
+    "--reset", is_flag=True, help="Reset all source watermarks back to baseline lookback."
+)
+@click.option(
+    "--reset-source", help="Reset watermark for a specific source ID (from sources.yaml)."
+)
+@click.option("--limit-per-source", default=20, help="Maximum records to fetch per source stream.")
+@click.option("--no-eval", is_flag=True, help="Skip running the 4-stage evaluation DAG.")
+@click.option("--no-report", is_flag=True, help="Skip generating the executive Markdown report.")
+@click.option("--no-export", is_flag=True, help="Skip exporting web/public/radar.json.")
+@click.option("--mock", is_flag=True, help="Execute offline sync using mock fixtures.")
+def sync(
+    days: int | None,
+    since: str | None,
+    reset: bool,
+    reset_source: str | None,
+    limit_per_source: int,
+    no_eval: bool,
+    no_report: bool,
+    no_export: bool,
+    mock: bool,
+) -> None:
+    """Synchronize trends incrementally since last run and update web radar."""
+    asyncio.run(
+        _run_sync(
+            days=days,
+            since=since,
+            reset=reset,
+            reset_source=reset_source,
+            limit_per_source=limit_per_source,
+            no_eval=no_eval,
+            no_report=no_report,
+            no_export=no_export,
+            mock=mock,
+        )
+    )
 
 
 if __name__ == "__main__":
