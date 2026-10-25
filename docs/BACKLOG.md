@@ -149,6 +149,11 @@
 
 ---
 
-## Milestone 5: Continuous Delivery, Release & Ops Automation
-- [ ] Automated SemVer release tagging and changelog generation.
-- [ ] Scheduled cron workflow for periodic automated ingestion and evaluation runs.
+## Milestone 5: Continuous Delivery, Release & Ops Automation (IN PROGRESS)
+- [x] **M5-T1: Automated SemVer Release Tagging & Changelog Automation**
+  - Integrated Google Release Please (`.release-please-config.json`, `.release-please-manifest.json`, `CHANGELOG.md`).
+  - Automated Release PR generation on pushes to `main` analyzing Conventional Commits.
+  - Automated packaging of Python wheels/sdists (`uv build`) and static web dashboard archive (`radar-web-dashboard.tar.gz`) uploaded to GitHub Releases on PR merge.
+  - *Acceptance Criteria:* Release Please GitHub Actions workflow configured and validated. (Ref: ADR-0018)
+- [ ] **M5-T2: Scheduled Cron Ingestion & Evaluation Automation**
+  - Scheduled cron workflow for periodic automated ingestion and evaluation runs.
