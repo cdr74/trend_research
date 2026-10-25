@@ -163,3 +163,11 @@
   - Automated integration with declarative source catalog in `data/seeds/sources.yaml`.
   - Single-command orchestration running incremental multi-channel ingestion, noise filtering, and 4-stage evaluation DAG.
   - *Acceptance Criteria:* Full unit test coverage for watermark manager and CLI sync command, verified state reset and incremental ingestion flows. (Ref: ADR-0019)
+- [x] **M5-T3: Interactive Database Container Lifecycle & User Consent Startup**
+  - Probe database health in `src/radar/db/container.py` before executing persistence flows.
+  - Prompt user with interactive Rich confirmation when PostgreSQL is offline to start via `podman compose up -d`.
+  - Asynchronous container startup, health poll, and schema bootstrap via `init_db()`.
+  - Non-interactive / CI / `--mock` bypass safety to avoid hanging headless processes.
+  - Added CLI overrides `--auto-start-db` and `--no-db` across `sync`, `evaluate`, and `query`.
+  - *Acceptance Criteria:* Full unit test coverage for container probe and interactive consent flow in CLI. (Ref: ADR-0020)
+  - *Acceptance Criteria:* Full unit test coverage for container probe and interactive consent flow in CLI. (Ref: ADR-0020)

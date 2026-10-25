@@ -219,11 +219,43 @@ def ingest(sources: str, limit: int, query: str | None, save: bool) -> None:
     asyncio.run(_run_ingest(sources=sources, limit=limit, query=query, save=save))
 
 
+def _prompt_start_db() -> bool:
+    """Prompt user for consent to start local PostgreSQL container if offline."""
+    from rich.prompt import Confirm
+
+    console.print(
+        "[bold yellow]Notice: PostgreSQL database (radar-postgres) is not running on localhost:5432.[/bold yellow]"
+    )
+    return Confirm.ask(
+        "Would you like to start it now via 'podman compose up -d'?",
+        default=True,
+    )
+
+
+async def _ensure_db_ready(
+    auto_start: bool = False,
+    no_db: bool = False,
+    mock: bool = False,
+) -> bool:
+    """Check database availability and prompt user for container startup if offline."""
+    if no_db or mock:
+        return False
+    from radar.db.container import ensure_db_running
+
+    return await ensure_db_running(
+        auto_start=auto_start,
+        prompt_fn=_prompt_start_db,
+    )
+
+
 async def _run_evaluate(
     batch_size: int,
     mock: bool,
     provider_override: LLMProvider | None = None,
     signals_override: list[SourcePayload] | None = None,
+    auto_start_db: bool = False,
+    no_db: bool = False,
+    db_available: bool | None = None,
 ) -> list[SignalDossier]:
     """Execute Stage 1 Sieve and Stage 2 Deep Extractor against pending signals."""
     console.print(
@@ -238,9 +270,14 @@ async def _run_evaluate(
 
     records_to_evaluate: list[SourcePayload] = []
 
+    if db_available is None:
+        db_ready = await _ensure_db_ready(auto_start=auto_start_db, no_db=no_db, mock=mock)
+    else:
+        db_ready = db_available
+
     if signals_override is not None:
         records_to_evaluate = signals_override
-    else:
+    elif db_ready:
         try:
             from radar.db.repository import RadarRepository
             from radar.db.session import get_db_session
@@ -440,26 +477,27 @@ async def _run_evaluate(
         f"[bold green]Published {len(radar_items)} item(s) to Horizon Radar.[/bold green]"
     )
 
-    try:
-        from radar.db.repository import RadarRepository
-        from radar.db.session import get_db_session
+    if db_ready:
+        try:
+            from radar.db.repository import RadarRepository
+            from radar.db.session import get_db_session
 
-        async with get_db_session() as session:
-            repo = RadarRepository(session)
-            for t in topics:
-                await repo.save_topic(t)
-            for d in dossiers:
-                await repo.save_dossier(d)
-            for evaluation in evaluations:
-                await repo.save_evaluation(evaluation)
-            for item in radar_items:
-                await repo.save_radar_item(item)
-        console.print(
-            f"[bold green]Persisted {len(topics)} topic(s), {len(dossiers)} dossier(s), and {len(radar_items)} radar item(s) to PostgreSQL.[/bold green]"
-        )
-    except Exception:
-        # DB optional for offline/dry-run execution
-        pass
+            async with get_db_session() as session:
+                repo = RadarRepository(session)
+                for t in topics:
+                    await repo.save_topic(t)
+                for d in dossiers:
+                    await repo.save_dossier(d)
+                for evaluation in evaluations:
+                    await repo.save_evaluation(evaluation)
+                for item in radar_items:
+                    await repo.save_radar_item(item)
+            console.print(
+                f"[bold green]Persisted {len(topics)} topic(s), {len(dossiers)} dossier(s), and {len(radar_items)} radar item(s) to PostgreSQL.[/bold green]"
+            )
+        except Exception:
+            # DB optional for offline/dry-run execution
+            pass
 
     return dossiers
 
@@ -663,9 +701,18 @@ async def _run_query(
     sql: str | None = None,
     query_string: str | None = None,
     mock: bool = False,
+    auto_start_db: bool = False,
+    no_db: bool = False,
 ) -> None:
     """Query evaluated radar signals via standard filters, tokens, or ad-hoc SQL."""
+    db_ready = await _ensure_db_ready(auto_start=auto_start_db, no_db=no_db, mock=mock)
+
     if sql:
+        if not db_ready:
+            console.print(
+                "[red]Error: Direct SQL queries require an active PostgreSQL instance.[/red]"
+            )
+            return
         console.print(f"[bold cyan]Executing ad-hoc SQL query:[/bold cyan]\n[dim]{sql}[/dim]")
         try:
             from radar.db.repository import RadarRepository
@@ -691,32 +738,36 @@ async def _run_query(
             console.print(table)
             return
         except Exception as e:
-            console.print(f"[red]Could not execute SQL query (DB running?): {e}[/red]")
+            console.print(f"[red]Could not execute SQL query: {e}[/red]")
             return
 
     console.print(
         f"[bold cyan]Querying radar:[/bold cyan] query='{query_string or ''}' ring={ring}, category={category}, min_viability={min_viability}, max_hype={max_hype}"
     )
     items: list[Any] = []
-    try:
-        from radar.db.repository import RadarRepository
-        from radar.db.session import get_db_session
+    if db_ready:
+        try:
+            from radar.db.repository import RadarRepository
+            from radar.db.session import get_db_session
 
-        parsed_ring = RadarRing(ring) if ring else None
-        parsed_cat = QECategory(category) if category else None
+            parsed_ring = RadarRing(ring) if ring else None
+            parsed_cat = QECategory(category) if category else None
 
-        async with get_db_session() as session:
-            repo = RadarRepository(session)
-            items = await repo.query_radar_items(
-                ring=parsed_ring,
-                category=parsed_cat,
-                min_viability=min_viability,
-                max_hype=max_hype,
-            )
-    except Exception as e:
-        if mock or not items:
+            async with get_db_session() as session:
+                repo = RadarRepository(session)
+                items = await repo.query_radar_items(
+                    ring=parsed_ring,
+                    category=parsed_cat,
+                    min_viability=min_viability,
+                    max_hype=max_hype,
+                )
+        except Exception as e:
+            console.print(f"[yellow]Could not query database for radar items: {e}[/yellow]")
+
+    if not items:
+        if mock or not db_ready:
             console.print(
-                f"[yellow]Database offline ({e}). Using mock radar dataset for query...[/yellow]"
+                "[dim]Database offline or query returned 0 rows. Using mock radar dataset for query...[/dim]"
             )
             items = _get_mock_radar_items()
             if ring:
@@ -743,7 +794,7 @@ async def _run_query(
                 if it.viability_score >= min_viability and it.hype_score <= max_hype
             ]
         else:
-            console.print(f"[yellow]Could not execute query (DB running?): {e}[/yellow]")
+            console.print("[yellow]Could not execute query (PostgreSQL is offline).[/yellow]")
             return
 
     if query_string:
@@ -891,9 +942,18 @@ async def _run_export(export_format: str, output: str, mock: bool = False) -> No
     console.print(f"[bold green]Exported {len(item_dicts)} items to {out_path}[/bold green]")
 
 
-async def _run_inspect(item_id: str, mock: bool = False) -> None:
+async def _run_inspect(
+    item_id: str,
+    mock: bool = False,
+    auto_start_db: bool = False,
+) -> None:
     """Inspect detailed evaluation dossier, critiques, and risks for an item."""
     console.print(f"[bold cyan]Inspecting radar item:[/bold cyan] {item_id}")
+    db_ready = await _ensure_db_ready(auto_start=auto_start_db, mock=mock)
+    if not db_ready and not mock:
+        console.print("[red]Could not query database (PostgreSQL database is offline).[/red]")
+        return
+
     try:
         from radar.db.repository import RadarRepository
         from radar.db.session import get_db_session
@@ -1049,9 +1109,17 @@ async def _run_report(output: str, mock: bool = False) -> None:
 @main.command()
 @click.option("--batch-size", default=20, help="Number of records to evaluate.")
 @click.option("--mock", is_flag=True, help="Force mock LLM provider.")
-def evaluate(batch_size: int, mock: bool) -> None:
+@click.option(
+    "--auto-start-db",
+    is_flag=True,
+    help="Auto-start database container without prompting if offline.",
+)
+@click.option("--no-db", is_flag=True, help="Skip database persistence and run in offline mode.")
+def evaluate(batch_size: int, mock: bool, auto_start_db: bool, no_db: bool) -> None:
     """Run the 4-stage evaluation DAG against pending signals."""
-    asyncio.run(_run_evaluate(batch_size=batch_size, mock=mock))
+    asyncio.run(
+        _run_evaluate(batch_size=batch_size, mock=mock, auto_start_db=auto_start_db, no_db=no_db)
+    )
 
 
 @main.command()
@@ -1062,6 +1130,11 @@ def evaluate(batch_size: int, mock: bool) -> None:
 @click.option("--max-hype", type=float, default=1.0)
 @click.option("--sql", help="Ad-hoc SQL query string to execute against database.")
 @click.option("--mock", is_flag=True, help="Query mock data fixtures if database is offline.")
+@click.option(
+    "--auto-start-db",
+    is_flag=True,
+    help="Auto-start database container without prompting if offline.",
+)
 def query(
     query_string: str | None,
     ring: str | None,
@@ -1070,6 +1143,7 @@ def query(
     max_hype: float,
     sql: str | None,
     mock: bool,
+    auto_start_db: bool,
 ) -> None:
     """Query evaluated radar signals using free-text, tokens, or ad-hoc SQL."""
     asyncio.run(
@@ -1081,6 +1155,7 @@ def query(
             sql=sql,
             query_string=query_string,
             mock=mock,
+            auto_start_db=auto_start_db,
         )
     )
 
@@ -1088,9 +1163,14 @@ def query(
 @main.command()
 @click.option("--id", "item_id", required=True, help="UUID of the radar item to inspect.")
 @click.option("--mock", is_flag=True, help="Display mock inspection if database is offline.")
-def inspect(item_id: str, mock: bool) -> None:
+@click.option(
+    "--auto-start-db",
+    is_flag=True,
+    help="Auto-start database container without prompting if offline.",
+)
+def inspect(item_id: str, mock: bool, auto_start_db: bool) -> None:
     """Inspect detailed evaluation dossier, critiques, and risks for an item."""
-    asyncio.run(_run_inspect(item_id=item_id, mock=mock))
+    asyncio.run(_run_inspect(item_id=item_id, mock=mock, auto_start_db=auto_start_db))
 
 
 @main.command()
@@ -1133,12 +1213,22 @@ async def _run_sync(
     no_report: bool = False,
     no_export: bool = False,
     mock: bool = False,
+    auto_start_db: bool = False,
+    no_db: bool = False,
     state_path: Path | None = None,
     catalog_path: Path | None = None,
 ) -> None:
     """Execute on-demand incremental ingestion, evaluation, and dashboard refresh."""
     sync_start = datetime.now(UTC)
     manager = WatermarkManager(state_path=state_path or Path("data/.sync_state.json"))
+
+    db_ready = await _ensure_db_ready(auto_start=auto_start_db, no_db=no_db, mock=mock)
+    if db_ready:
+        console.print("[dim]✓ PostgreSQL database connection active.[/dim]")
+    elif not mock and not no_db:
+        console.print(
+            "[dim]Operating in offline mode (signals will not be persisted to PostgreSQL).[/dim]"
+        )
 
     if reset:
         manager.reset_all(lookback_days=days or DEFAULT_INITIAL_LOOKBACK_DAYS)
@@ -1256,16 +1346,18 @@ async def _run_sync(
                 qualified_signals.append(qualified)
 
     # Persist raw payloads if DB available
-    try:
-        from radar.db.repository import RadarRepository
-        from radar.db.session import get_db_session
+    if db_ready:
+        try:
+            from radar.db.repository import RadarRepository
+            from radar.db.session import get_db_session
 
-        async with get_db_session() as session:
-            repo = RadarRepository(session)
-            for p in all_ingested:
-                await repo.save_source_payload(p)
-    except Exception:
-        pass
+            async with get_db_session() as session:
+                repo = RadarRepository(session)
+                for p in all_ingested:
+                    await repo.save_source_payload(p)
+            console.print(f"  [dim]Saved {len(all_ingested)} raw payload(s) to PostgreSQL.[/dim]")
+        except Exception as e:
+            console.print(f"  [yellow]Failed to persist payloads to PostgreSQL: {e}[/yellow]")
 
     evaluated_count = 0
     if not no_eval and qualified_signals:
@@ -1276,6 +1368,7 @@ async def _run_sync(
             batch_size=len(qualified_signals),
             mock=mock,
             signals_override=[q.payload for q in qualified_signals],
+            db_available=db_ready,
         )
         evaluated_count = len(dossiers)
 
@@ -1318,6 +1411,16 @@ async def _run_sync(
 @click.option("--no-report", is_flag=True, help="Skip generating the executive Markdown report.")
 @click.option("--no-export", is_flag=True, help="Skip exporting web/public/radar.json.")
 @click.option("--mock", is_flag=True, help="Execute offline sync using mock fixtures.")
+@click.option(
+    "--auto-start-db",
+    is_flag=True,
+    help="Auto-start database container without prompting if offline.",
+)
+@click.option(
+    "--no-db",
+    is_flag=True,
+    help="Run in offline mode without database persistence.",
+)
 def sync(
     days: int | None,
     since: str | None,
@@ -1328,6 +1431,8 @@ def sync(
     no_report: bool,
     no_export: bool,
     mock: bool,
+    auto_start_db: bool,
+    no_db: bool,
 ) -> None:
     """Synchronize trends incrementally since last run and update web radar."""
     asyncio.run(
@@ -1341,6 +1446,8 @@ def sync(
             no_report=no_report,
             no_export=no_export,
             mock=mock,
+            auto_start_db=auto_start_db,
+            no_db=no_db,
         )
     )
 

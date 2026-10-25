@@ -50,12 +50,16 @@ The platform is designed around a **local-first, on-demand execution model**:
    | `RADAR_INITIAL_LOOKBACK_DAYS` | Default lookback for first-time sync | `365` |
    | `RADAR_WATERMARK_BUFFER_DAYS` | Overlap safety buffer for delta queries | `2` |
 
-4. **Start PostgreSQL with pgvector:**
-   Launch the database container via Podman Compose:
-   ```bash
-   podman compose up -d
-   ```
-   *Note: If using Docker, run `docker compose up -d`.*
+4. **Local Database & Container Lifecycle:**
+   Radar uses PostgreSQL 16 + pgvector declared in `compose.yaml`.
+   - **Manual Start (optional):** `podman compose up -d` (or `docker compose up -d`).
+   - **Interactive Auto-Start with Consent:** You do **not** need to manually start or stop the database every session! If you open a fresh WSL session after a reboot and run `radar sync`, Radar detects that PostgreSQL is offline and asks for your consent:
+     ```text
+     Notice: PostgreSQL database (radar-postgres) is not running on localhost:5432.
+     Would you like to start it now via 'podman compose up -d'? [Y/n]:
+     ```
+     Pressing `Y` (the default) will automatically start the container in the background, wait ~1 second for health checks to pass, initialize schemas (`init_db()`), and proceed seamlessly.
+   - **Stopping the Database:** You do **not** need to stop it after each session. It sits idle in the background consuming ~25 MB RAM and 0% CPU, and all data is preserved in the `pgdata` volume.
 
 5. **Verify Installation with an Offline Smoke Test:**
    Execute a dry run using the mock provider:
@@ -132,7 +136,13 @@ uv run radar sync
 #### Useful Flags:
 ```bash
 # Limit the batch size per source to process updates quickly
-uv run radar sync --limit 15
+uv run radar sync --limit-per-source 15
+
+# Automatically start PostgreSQL container without interactive prompt if offline
+uv run radar sync --auto-start-db
+
+# Run strictly in offline mode without database persistence or container checks
+uv run radar sync --no-db
 
 # Run using offline mock LLM (ideal when checking pipeline mechanics without using API tokens)
 uv run radar sync --mock

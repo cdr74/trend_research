@@ -232,3 +232,35 @@ async def test_run_evaluate_with_mock_signals() -> None:
     assert dossiers[0].source_id == genuine_payload.id
     assert dossiers[0].embedding is not None
     assert len(dossiers[0].embedding) == 1536
+
+
+def test_cli_sync_auto_start_and_no_db() -> None:
+    runner = CliRunner()
+
+    # Test sync with --no-db
+    res = runner.invoke(
+        main,
+        ["sync", "--mock", "--no-db", "--limit-per-source", "2"],
+    )
+    assert res.exit_code == 0
+    assert "Sync complete!" in res.output
+
+    # Test sync with --auto-start-db
+    res_auto = runner.invoke(
+        main,
+        ["sync", "--mock", "--auto-start-db", "--limit-per-source", "2"],
+    )
+    assert res_auto.exit_code == 0
+    assert "Sync complete!" in res_auto.output
+
+
+def test_prompt_start_db() -> None:
+    from unittest.mock import patch
+
+    from radar.presentation.cli import _prompt_start_db
+
+    with patch("rich.prompt.Confirm.ask", return_value=True):
+        assert _prompt_start_db() is True
+
+    with patch("rich.prompt.Confirm.ask", return_value=False):
+        assert _prompt_start_db() is False
