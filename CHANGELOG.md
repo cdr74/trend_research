@@ -5,6 +5,18 @@ All notable changes to the Trend Horizon Radar platform will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0](https://github.com/cdr74/trend_research/compare/v0.3.0...v0.4.0) (2026-10-25)
+
+
+### Features
+
+* **cli:** prompt for user consent to start database container when offline (Ref: ADR-0020, Backlog M5-T3) ([96b5b45](https://github.com/cdr74/trend_research/commit/96b5b45b28acf58740e497fa480f5d44f89a58c9))
+
+
+### Bug Fixes
+
+* **docs:** resolve Mermaid syntax error in USER_GUIDE.md ([847f26e](https://github.com/cdr74/trend_research/commit/847f26e78be6ff5c61f90ff8854dbbfd29aa8760))
+
 ## [0.3.0](https://github.com/cdr74/trend_research/compare/v0.2.0...v0.3.0) (2026-10-25)
 
 
