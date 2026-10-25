@@ -1,8 +1,6 @@
 name: Deploy Radar Dashboard to GitHub Pages
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
