@@ -23,25 +23,25 @@ jobs:
 
       # Build and publish release distribution assets when a release PR is merged
       - name: Checkout Code
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.releases_created == 'true' }}
         uses: actions/checkout@v4
 
       - name: Setup uv and Python
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.releases_created == 'true' }}
         uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
 
       - name: Install Python 3.12
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.releases_created == 'true' }}
         run: uv python install 3.12
 
       - name: Build Python Distribution Packages (Wheel & sdist)
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.releases_created == 'true' }}
         run: uv build
 
       - name: Setup Node.js
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.releases_created == 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -49,7 +49,7 @@ jobs:
           cache-dependency-path: web/package-lock.json
 
       - name: Build Static Web Dashboard Bundle
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.releases_created == 'true' }}
         run: |
           cd web
           npm ci
@@ -57,7 +57,7 @@ jobs:
           tar -czf ../dist/radar-web-dashboard.tar.gz dist
 
       - name: Upload Release Artifacts to GitHub Release
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.releases_created == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
