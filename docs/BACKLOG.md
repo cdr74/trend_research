@@ -113,14 +113,18 @@
 
 ---
 
-## Milestone 4: Presentation, CLI & Decoupled Interactive Web Dashboard (NEXT UP)
+## Milestone 4: Presentation, CLI & Decoupled Interactive Web Dashboard (IN PROGRESS)
 **Goal:** Deliver flexible multi-view visualization, filtering, and automated intelligence reporting.
 
 ### Stories & Tasks:
-- [ ] **M4-T1: CLI Operations Tool (`radar`)**
-  - Implement CLI with commands: `radar ingest`, `radar evaluate`, `radar query`, `radar export`.
-- [ ] **M4-T2: Bi-Weekly Markdown Executive Digest Generator**
-  - Automated generation of `reports/YYYY-WW.md` detailing ring movements, new entries, and key skeptic findings.
+- [x] **M4-T1: CLI Operations Tool (`radar`)**
+  - Implement CLI with commands: `radar ingest`, `radar evaluate`, `radar query`, `radar export`, `radar inspect`.
+  - JSON and CSV export formats, ring/trajectory querying, and detailed item dossier inspection.
+  - *Acceptance Criteria:* Full CLI unit and integration test coverage across all subcommands. (Ref: ADR-0014, ADR-0016)
+- [x] **M4-T2: Bi-Weekly Markdown Executive Digest Generator (`radar report`)**
+  - Automated generation of Markdown executive intelligence digest detailing ring distributions, trajectory movements, new entries, skeptic critique highlights, and top recommendations.
+  - Database offline safety guard: halts if DB unreachable without creating offline report unless `--mock` is explicitly passed.
+  - *Acceptance Criteria:* Dedicated Markdown generator unit tests and CLI integration tests passing. (Ref: ADR-0016)
 - [ ] **M4-T3: JSON Data Bundle Exporter (`radar.json`)**
   - Export complete evaluated corpus with 2D UMAP projection coordinates for semantic clustering.
 - [ ] **M4-T4: Interactive Web Radar Dashboard (Vite + React + Tailwind + D3)**

@@ -1,5 +1,7 @@
 """Unit tests for the Radar command line interface."""
 
+from pathlib import Path
+
 import httpx
 import pytest
 from click.testing import CliRunner
@@ -19,7 +21,7 @@ def test_cli_version() -> None:
     assert "radar" in result.output.lower() or "version" in result.output.lower()
 
 
-def test_cli_query_and_export_commands() -> None:
+def test_cli_query_and_export_commands(tmp_path: Path) -> None:
     runner = CliRunner()
 
     eval_res = runner.invoke(main, ["evaluate", "--batch-size", "10", "--mock"])
@@ -30,9 +32,43 @@ def test_cli_query_and_export_commands() -> None:
     assert query_res.exit_code == 0
     assert "Querying radar" in query_res.output
 
-    export_res = runner.invoke(main, ["export", "--format", "json"])
-    assert export_res.exit_code == 0
-    assert "Exporting radar data" in export_res.output
+    out_json = str(tmp_path / "radar.json")
+    export_json_res = runner.invoke(main, ["export", "--format", "json", "--output", out_json])
+    assert export_json_res.exit_code == 0
+    assert "Exporting radar data" in export_json_res.output
+
+    out_csv = str(tmp_path / "radar.csv")
+    export_csv_res = runner.invoke(main, ["export", "--format", "csv", "--output", out_csv])
+    assert export_csv_res.exit_code == 0
+    assert "Exporting radar data" in export_csv_res.output
+
+
+def test_cli_inspect_command() -> None:
+    runner = CliRunner()
+    res = runner.invoke(main, ["inspect", "--id", "11111111-1111-1111-1111-111111111111", "--mock"])
+    assert res.exit_code == 0
+    assert "Inspecting radar item" in res.output
+    assert "Mock-Innovation" in res.output
+
+
+def test_cli_report_command_offline_safety_and_mock(tmp_path: Path) -> None:
+    runner = CliRunner()
+    out_report = tmp_path / "digest.md"
+
+    # Offline without mock: should refuse to generate report and warn user
+    offline_res = runner.invoke(main, ["report", "--output", str(out_report)])
+    assert (
+        "Cannot generate executive report offline" in offline_res.output
+        or "Database unavailable" in offline_res.output
+    )
+    assert not out_report.exists()
+
+    # Offline with --mock: should generate test report
+    mock_res = runner.invoke(main, ["report", "--output", str(out_report), "--mock"])
+    assert mock_res.exit_code == 0
+    assert "Report successfully generated" in mock_res.output
+    assert out_report.exists()
+    assert "AutoMut-ADS" in out_report.read_text(encoding="utf-8")
 
 
 @pytest.mark.asyncio

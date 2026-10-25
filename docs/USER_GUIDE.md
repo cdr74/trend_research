@@ -89,8 +89,14 @@ Export the static dataset and generate executive trend briefings:
 # Export static JSON for web dashboard
 uv run radar export --format json --output web/public/radar.json
 
-# Generate bi-weekly Markdown intelligence digest
-uv run radar digest --output reports/$(date +%Y-W%V).md
+# Export CSV summary
+uv run radar export --format csv --output data/radar_export.csv
+
+# Generate bi-weekly executive Markdown intelligence digest
+uv run radar report --output reports/$(date +%Y-W%V).md
+
+# Generate test report in offline mock mode (no live DB connection needed)
+uv run radar report --output reports/test_digest.md --mock
 ```
 
 ---

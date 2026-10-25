@@ -206,6 +206,20 @@ class RadarRepository:
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
+    async def get_radar_item_by_id(self, item_id: UUID) -> RadarItemTable | None:
+        """Retrieve a specific radar item by primary key."""
+        stmt = select(RadarItemTable).where(RadarItemTable.id == item_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
+
+    async def get_evaluation_by_id(self, evaluation_id: UUID) -> EnterpriseEvaluationTable | None:
+        """Retrieve an evaluation record by primary key."""
+        stmt = select(EnterpriseEvaluationTable).where(
+            EnterpriseEvaluationTable.id == evaluation_id
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
+
     async def find_similar_dossiers(
         self, embedding: list[float], limit: int = 5, exclude_id: UUID | None = None
     ) -> list[SignalDossierTable]:

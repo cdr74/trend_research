@@ -4,15 +4,18 @@ import asyncio
 import csv
 import json
 from pathlib import Path
+from uuid import UUID
 
 import click
 from rich.console import Console
+from rich.panel import Panel
 from rich.table import Table
 
 from radar.core.config import LLMProviderType
 from radar.core.models import (
     QECategory,
     QualifiedSignal,
+    RadarItem,
     RadarRing,
     SignalDossier,
     SourcePayload,
@@ -26,6 +29,7 @@ from radar.pipeline.convergence import TopicConvergenceEngine
 from radar.pipeline.evaluator import MultiLensEvaluator
 from radar.pipeline.extractor import DeepExtractor
 from radar.pipeline.noise_sieve import NoiseSieve
+from radar.presentation.report import MarkdownReportGenerator
 from radar.providers import LLMProvider, get_llm_provider
 
 console = Console()
@@ -565,6 +569,161 @@ async def _run_export(export_format: str, output: str) -> None:
     console.print(f"[bold green]Exported {len(data)} items to {out_path}[/bold green]")
 
 
+async def _run_inspect(item_id: str, mock: bool = False) -> None:
+    """Inspect detailed evaluation dossier, critiques, and risks for an item."""
+    console.print(f"[bold cyan]Inspecting radar item:[/bold cyan] {item_id}")
+    try:
+        from radar.db.repository import RadarRepository
+        from radar.db.session import get_db_session
+
+        uid = UUID(item_id)
+        async with get_db_session() as session:
+            repo = RadarRepository(session)
+            item = await repo.get_radar_item_by_id(uid)
+            if not item:
+                console.print(f"[yellow]Radar item with ID {item_id} not found.[/yellow]")
+                return
+
+            evaluation = (
+                await repo.get_evaluation_by_id(item.evaluation_id) if item.evaluation_id else None
+            )
+            topic = await repo.get_topic_by_id(item.topic_id) if item.topic_id else None
+
+        info_lines = [
+            f"[bold]Name:[/bold] {item.name}",
+            f"[bold]Ring:[/bold] {item.recommended_ring} | [bold]Category:[/bold] {item.category}",
+            f"[bold]Trajectory:[/bold] {item.lifecycle_stage} | [bold]Velocity:[/bold] {item.velocity_score:.1f}",
+            f"[bold]Scores:[/bold] Viability: {item.viability_score:.2f} | Validity: {item.validity_score:.2f} | Hype: {item.hype_score:.2f}",
+            f"[bold]Evidence Tier:[/bold] {item.evidence_tier}",
+            f"[bold]Source URL:[/bold] {item.source_url}",
+            f"[bold]Key Innovation:[/bold] {item.key_innovation}",
+        ]
+        if topic:
+            info_lines.append(
+                f"[bold]Converged Topic:[/bold] {topic.name} (Corroborations: {topic.corroboration_count})"
+            )
+        if evaluation:
+            info_lines.extend(
+                [
+                    "",
+                    "[bold yellow]Adversarial Multi-Lens Scores & Critiques:[/bold yellow]",
+                    f"  - Security Score ({evaluation.security_score:.2f}): {evaluation.security_critique or 'N/A'}",
+                    f"  - CI/CD Score ({evaluation.cicd_score:.2f}): {evaluation.cicd_critique or 'N/A'}",
+                    f"  - Technical Score ({evaluation.qe_score:.2f}): {evaluation.qe_critique or 'N/A'}",
+                    f"  - Skeptic Verdict: {evaluation.skeptic_critique}",
+                ]
+            )
+        if item.enterprise_risks:
+            info_lines.extend(
+                [
+                    "",
+                    "[bold red]Enterprise Risk Flags:[/bold red]",
+                    *(f"  - ⚠️ {r}" for r in item.enterprise_risks),
+                ]
+            )
+        if item.prerequisites:
+            info_lines.extend(
+                [
+                    "",
+                    "[bold green]Adoption Prerequisites:[/bold green]",
+                    *(f"  - ✅ {p}" for p in item.prerequisites),
+                ]
+            )
+
+        console.print(
+            Panel("\n".join(info_lines), title=f"Radar Item Dossier: {item.name}", expand=False)
+        )
+    except Exception as e:
+        if mock:
+            console.print(f"[bold cyan][MOCK] Inspecting item {item_id}:[/bold cyan]")
+            mock_text = (
+                "Name: Mock-Innovation\n"
+                "Ring: Adopt | Category: Execution & Optimization\n"
+                "Viability: 0.88 | Hype: 0.12 | Trajectory: Consolidated\n"
+                "Key Innovation: Automated mutation testing optimization."
+            )
+            console.print(Panel(mock_text, title=f"Radar Item: {item_id}", expand=False))
+        else:
+            console.print(f"[red]Could not query database (is Podman DB running?): {e}[/red]")
+
+
+async def _run_report(output: str, mock: bool = False) -> None:
+    """Generate executive Markdown report."""
+    console.print(f"[bold magenta]Generating executive Markdown digest to:[/bold magenta] {output}")
+    try:
+        from radar.db.repository import RadarRepository
+        from radar.db.session import get_db_session
+
+        async with get_db_session() as session:
+            repo = RadarRepository(session)
+            items = await repo.query_radar_items()
+            topic_ids = {it.topic_id for it in items if it.topic_id}
+            topics = []
+            for tid in topic_ids:
+                t = await repo.get_topic_by_id(tid)
+                if t:
+                    topics.append(t)
+
+            eval_ids = {it.evaluation_id for it in items if it.evaluation_id}
+            evaluations = []
+            for eid in eval_ids:
+                ev = await repo.get_evaluation_by_id(eid)
+                if ev:
+                    evaluations.append(ev)
+
+        if not items:
+            console.print(
+                "[yellow]No evaluated radar items found in database to generate report.[/yellow]"
+            )
+            return
+
+        generator = MarkdownReportGenerator()
+        path = generator.generate_and_save(
+            items=items,
+            output_path=output,
+            topics=topics,
+            evaluations=evaluations,
+        )
+        console.print(f"[bold green]Report successfully generated at: {path}[/bold green]")
+    except Exception as e:
+        if mock:
+            console.print(
+                f"[yellow]Database offline ({e}). Generating test report with mock data...[/yellow]"
+            )
+            from radar.core.models import (
+                EvidenceTier,
+                LifecycleStage,
+            )
+
+            mock_items = [
+                RadarItem(
+                    name="AutoMut-ADS",
+                    category=QECategory.EXECUTION_AND_OPTIMIZATION,
+                    source_url="https://arxiv.org/abs/2410.18021",
+                    evidence_tier=EvidenceTier.ACADEMIC_PEER_REVIEWED,
+                    hype_score=0.15,
+                    viability_score=0.88,
+                    validity_score=0.85,
+                    recommended_ring=RadarRing.ADOPT,
+                    lifecycle_stage=LifecycleStage.CONSOLIDATED,
+                    corroboration_count=3,
+                    velocity_score=28.5,
+                    key_innovation="Automated mutation synthesis optimizing test coverage.",
+                    enterprise_risks=[],
+                    prerequisites=["High memory CI runner"],
+                ),
+            ]
+            generator = MarkdownReportGenerator()
+            path = generator.generate_and_save(items=mock_items, output_path=output)
+            console.print(
+                f"[bold green][MOCK] Report successfully generated at: {path}[/bold green]"
+            )
+        else:
+            console.print(
+                f"[red]Database unavailable ({e}). Cannot generate executive report offline unless --mock is specified.[/red]"
+            )
+
+
 @main.command()
 @click.option("--batch-size", default=20, help="Number of records to evaluate.")
 @click.option("--mock", is_flag=True, help="Force mock LLM provider.")
@@ -593,6 +752,30 @@ def query(
             max_hype=max_hype,
         )
     )
+
+
+@main.command()
+@click.option("--id", "item_id", required=True, help="UUID of the radar item to inspect.")
+@click.option("--mock", is_flag=True, help="Display mock inspection if database is offline.")
+def inspect(item_id: str, mock: bool) -> None:
+    """Inspect detailed evaluation dossier, critiques, and risks for an item."""
+    asyncio.run(_run_inspect(item_id=item_id, mock=mock))
+
+
+@main.command()
+@click.option(
+    "--output",
+    default="reports/digest.md",
+    help="Destination file path for the Markdown report.",
+)
+@click.option(
+    "--mock",
+    is_flag=True,
+    help="Generate test report with mock fixture data if database is offline.",
+)
+def report(output: str, mock: bool) -> None:
+    """Generate an executive Markdown intelligence digest."""
+    asyncio.run(_run_report(output=output, mock=mock))
 
 
 @main.command()
