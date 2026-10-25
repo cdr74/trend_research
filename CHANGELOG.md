@@ -5,6 +5,13 @@ All notable changes to the Trend Horizon Radar platform will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0](https://github.com/cdr74/trend_research/compare/v0.2.0...v0.3.0) (2026-10-25)
+
+
+### Features
+
+* **pipeline:** implement on-demand incremental sync and watermark tracking (Ref: ADR-0019, Backlog M5-T2) ([722ce71](https://github.com/cdr74/trend_research/commit/722ce71f13ee6e276507e2f8b262c5c6edaea748))
+
 ## [0.2.0](https://github.com/cdr74/trend_research/compare/v0.1.0...v0.2.0) (2026-10-25)
 
 
