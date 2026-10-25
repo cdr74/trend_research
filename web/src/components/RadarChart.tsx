@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { RadarItem, RadarRing, QECategory } from "../types";
 
 interface RadarChartProps {
@@ -26,6 +26,7 @@ const CATEGORIES: QECategory[] = [
 export const RadarChart: React.FC<RadarChartProps> = ({ items, selectedItem, onSelectItem }) => {
   const size = 800;
   const center = size / 2;
+  const [hoveredItem, setHoveredItem] = useState<RadarItem | null>(null);
 
   // Calculate position of a blip deterministically from category and ring
   const getBlipPosition = (item: RadarItem, index: number) => {
@@ -54,6 +55,8 @@ export const RadarChart: React.FC<RadarChartProps> = ({ items, selectedItem, onS
       y: center + r * Math.sin(angle),
     };
   };
+
+  const hoveredPos = hoveredItem ? getBlipPosition(hoveredItem, items.indexOf(hoveredItem)) : null;
 
   return (
     <div className="relative flex justify-center items-center bg-[#121826] border border-[#1f293d] rounded-xl p-6 shadow-2xl overflow-hidden">
@@ -127,41 +130,56 @@ export const RadarChart: React.FC<RadarChartProps> = ({ items, selectedItem, onS
         {items.map((item, idx) => {
           const pos = getBlipPosition(item, idx);
           const isSelected = selectedItem?.id === item.id;
+          const isHovered = hoveredItem?.id === item.id;
           const color = RING_CONFIG[item.recommended_ring].color;
 
           return (
             <g
               key={item.id}
-              className="cursor-pointer transition-transform hover:scale-125"
+              className="cursor-pointer"
               onClick={() => onSelectItem(item)}
+              onMouseEnter={() => setHoveredItem(item)}
+              onMouseLeave={() => setHoveredItem(null)}
             >
+              {/* Soft ambient halo on hover or selection */}
+              {(isSelected || isHovered) && (
+                <circle
+                  cx={pos.x}
+                  cy={pos.y}
+                  r="16"
+                  fill={color}
+                  fillOpacity="0.25"
+                  className="pointer-events-none animate-pulse"
+                />
+              )}
               {isSelected && (
                 <circle
                   cx={pos.x}
                   cy={pos.y}
-                  r="14"
+                  r="18"
                   fill="none"
                   stroke={color}
                   strokeWidth="2"
-                  className="animate-ping opacity-75"
+                  className="pointer-events-none animate-ping opacity-75"
                 />
               )}
               <circle
                 cx={pos.x}
                 cy={pos.y}
-                r={isSelected ? "9" : "7"}
+                r={isSelected || isHovered ? "9" : "7"}
                 fill={color}
                 stroke="#0b0f19"
                 strokeWidth="2"
+                className="transition-all duration-150"
               />
               <text
                 x={pos.x}
                 y={pos.y - 12}
-                fill="#f1f5f9"
-                fontSize="10"
-                fontWeight="600"
+                fill={isSelected || isHovered ? "#ffffff" : "#cbd5e1"}
+                fontSize={isSelected || isHovered ? "11" : "10"}
+                fontWeight={isSelected || isHovered ? "700" : "600"}
                 textAnchor="middle"
-                className="pointer-events-none drop-shadow-md"
+                className="pointer-events-none drop-shadow-md select-none transition-colors duration-150"
               >
                 {item.name}
               </text>
@@ -169,6 +187,50 @@ export const RadarChart: React.FC<RadarChartProps> = ({ items, selectedItem, onS
           );
         })}
       </svg>
+
+      {/* Floating Tooltip */}
+      {hoveredItem && hoveredPos && (
+        <div
+          className="absolute z-50 bg-[#1e293b] border border-slate-700 text-slate-100 rounded-xl p-3 shadow-2xl pointer-events-none max-w-xs transition-opacity duration-150"
+          style={{
+            left: Math.min(Math.max(hoveredPos.x - 60, 20), size - 240),
+            top: Math.max(hoveredPos.y - 95, 20),
+          }}
+        >
+          <div className="flex items-center justify-between mb-1">
+            <span className="font-bold text-xs text-white">{hoveredItem.name}</span>
+            <span
+              className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
+              style={{
+                backgroundColor: `${RING_CONFIG[hoveredItem.recommended_ring].color}20`,
+                color: RING_CONFIG[hoveredItem.recommended_ring].color,
+              }}
+            >
+              {hoveredItem.recommended_ring}
+            </span>
+          </div>
+          <div className="text-[11px] text-slate-400 mb-1.5 line-clamp-2">
+            {hoveredItem.key_innovation}
+          </div>
+          <div className="flex justify-between text-[10px] text-slate-400 border-t border-slate-700/60 pt-1">
+            <span>
+              Viability:{" "}
+              <strong className="text-emerald-400">
+                {hoveredItem.viability_score.toFixed(2)}
+              </strong>
+            </span>
+            <span>
+              Hype:{" "}
+              <strong className="text-amber-400">
+                {hoveredItem.hype_score.toFixed(2)}
+              </strong>
+            </span>
+            <span>
+              Corrob: <strong>{hoveredItem.corroboration_count}x</strong>
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

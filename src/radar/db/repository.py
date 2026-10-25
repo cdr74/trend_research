@@ -32,7 +32,20 @@ class RadarRepository:
         self.session = session
 
     async def save_source_payload(self, payload: SourcePayload) -> IngestedSourceTable:
-        """Persist a raw ingested source payload with engagement metrics."""
+        """Persist a raw ingested source payload with engagement metrics (upsert)."""
+        stmt = select(IngestedSourceTable).where(
+            IngestedSourceTable.source_url == payload.source_url
+        )
+        res = await self.session.execute(stmt)
+        existing = res.scalars().first()
+        if existing is not None:
+            existing.engagement_metrics = payload.engagement_metrics
+            existing.raw_content = payload.raw_content
+            existing.title = payload.title
+            payload.id = existing.id
+            await self.session.flush()
+            return existing
+
         record = IngestedSourceTable(
             id=payload.id,
             source_type=payload.source_type.value,
@@ -113,7 +126,26 @@ class RadarRepository:
             await self.session.flush()
 
     async def save_dossier(self, dossier: SignalDossier) -> SignalDossierTable:
-        """Persist a Stage 2 extracted technical dossier."""
+        """Persist a Stage 2 extracted technical dossier (upsert)."""
+        stmt = select(SignalDossierTable).where(SignalDossierTable.source_id == dossier.source_id)
+        res = await self.session.execute(stmt)
+        existing = res.scalars().first()
+        if existing is not None:
+            existing.name = dossier.name
+            existing.category = dossier.category.value
+            existing.evidence_tier = dossier.evidence_tier.value
+            existing.key_innovation = dossier.key_innovation
+            existing.technical_claims = dossier.technical_claims
+            existing.has_reproducible_benchmark = dossier.has_reproducible_benchmark
+            existing.has_open_source_repo = dossier.has_open_source_repo
+            existing.is_superficial_wrapper = dossier.is_superficial_wrapper
+            existing.embedding = dossier.embedding
+            existing.engagement_metrics = dossier.engagement_metrics
+            existing.topic_id = dossier.topic_id
+            dossier.id = existing.id
+            await self.session.flush()
+            return existing
+
         record = SignalDossierTable(
             id=dossier.id,
             source_id=dossier.source_id,
@@ -135,7 +167,27 @@ class RadarRepository:
         return record
 
     async def save_evaluation(self, evaluation: EnterpriseEvaluation) -> EnterpriseEvaluationTable:
-        """Persist a Stage 3 multi-lens committee evaluation."""
+        """Persist a Stage 3 multi-lens committee evaluation (upsert)."""
+        stmt = select(EnterpriseEvaluationTable).where(
+            EnterpriseEvaluationTable.dossier_id == evaluation.dossier_id
+        )
+        res = await self.session.execute(stmt)
+        existing = res.scalars().first()
+        if existing is not None:
+            existing.security_score = evaluation.security_score
+            existing.cicd_score = evaluation.cicd_score
+            existing.qe_score = evaluation.qe_score
+            existing.composite_viability_score = evaluation.composite_viability_score
+            existing.enterprise_risks = evaluation.enterprise_risks
+            existing.prerequisites = evaluation.prerequisites
+            existing.security_critique = evaluation.security_critique
+            existing.cicd_critique = evaluation.cicd_critique
+            existing.qe_critique = evaluation.qe_critique
+            existing.skeptic_critique = evaluation.skeptic_critique
+            evaluation.id = existing.id
+            await self.session.flush()
+            return existing
+
         record = EnterpriseEvaluationTable(
             id=evaluation.id,
             dossier_id=evaluation.dossier_id,
@@ -155,7 +207,32 @@ class RadarRepository:
         return record
 
     async def save_radar_item(self, item: RadarItem) -> RadarItemTable:
-        """Persist a Stage 4 final radar publication entity."""
+        """Persist a Stage 4 final radar publication entity (upsert)."""
+        stmt = select(RadarItemTable).where(RadarItemTable.source_url == item.source_url)
+        res = await self.session.execute(stmt)
+        existing = res.scalars().first()
+        if existing is not None:
+            existing.name = item.name
+            existing.category = item.category.value
+            existing.evidence_tier = item.evidence_tier.value
+            existing.hype_score = item.hype_score
+            existing.viability_score = item.viability_score
+            existing.validity_score = item.validity_score
+            existing.recommended_ring = item.recommended_ring.value
+            existing.lifecycle_stage = item.lifecycle_stage.value
+            existing.corroboration_count = item.corroboration_count
+            existing.velocity_score = item.velocity_score
+            existing.corroborating_sources = item.corroborating_sources
+            existing.key_innovation = item.key_innovation
+            existing.enterprise_risks = item.enterprise_risks
+            existing.prerequisites = item.prerequisites
+            existing.active = item.active
+            existing.evaluation_id = item.evaluation_id
+            existing.topic_id = item.topic_id
+            item.id = existing.id
+            await self.session.flush()
+            return existing
+
         record = RadarItemTable(
             id=item.id,
             evaluation_id=item.evaluation_id,

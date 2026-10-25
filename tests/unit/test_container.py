@@ -40,13 +40,17 @@ def test_find_compose_file(tmp_path: Path) -> None:
 
 @pytest.mark.asyncio
 async def test_ensure_db_running_already_healthy() -> None:
-    with patch("radar.db.container.check_db_health", new_callable=AsyncMock) as mock_health:
+    with (
+        patch("radar.db.container.check_db_health", new_callable=AsyncMock) as mock_health,
+        patch("radar.db.container.init_db", new_callable=AsyncMock) as mock_init,
+    ):
         mock_health.return_value = True
         prompt = MagicMock(return_value=True)
 
         ready = await ensure_db_running(prompt_fn=prompt)
         assert ready is True
         prompt.assert_not_called()
+        mock_init.assert_called_once()
 
 
 @pytest.mark.asyncio

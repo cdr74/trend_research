@@ -495,9 +495,10 @@ async def _run_evaluate(
             console.print(
                 f"[bold green]Persisted {len(topics)} topic(s), {len(dossiers)} dossier(s), and {len(radar_items)} radar item(s) to PostgreSQL.[/bold green]"
             )
-        except Exception:
-            # DB optional for offline/dry-run execution
-            pass
+        except Exception as e:
+            console.print(
+                f"[yellow]Warning: Could not persist radar evaluations to PostgreSQL: {e}[/yellow]"
+            )
 
     return dossiers
 
@@ -1032,6 +1033,35 @@ async def _run_inspect(
 async def _run_report(output: str, mock: bool = False) -> None:
     """Generate executive Markdown report."""
     console.print(f"[bold magenta]Generating executive Markdown digest to:[/bold magenta] {output}")
+    if mock:
+        from radar.core.models import (
+            EvidenceTier,
+            LifecycleStage,
+        )
+
+        mock_items = [
+            RadarItem(
+                name="AutoMut-ADS",
+                category=QECategory.EXECUTION_AND_OPTIMIZATION,
+                source_url="https://arxiv.org/abs/2410.18021",
+                evidence_tier=EvidenceTier.ACADEMIC_PEER_REVIEWED,
+                hype_score=0.15,
+                viability_score=0.88,
+                validity_score=0.85,
+                recommended_ring=RadarRing.ADOPT,
+                lifecycle_stage=LifecycleStage.CONSOLIDATED,
+                corroboration_count=3,
+                velocity_score=28.5,
+                key_innovation="Automated mutation synthesis optimizing test coverage.",
+                enterprise_risks=[],
+                prerequisites=["High memory CI runner"],
+            ),
+        ]
+        generator = MarkdownReportGenerator()
+        path = generator.generate_and_save(items=mock_items, output_path=output)
+        console.print(f"[bold green]Report successfully generated at: {path}[/bold green]")
+        return
+
     try:
         from radar.db.repository import RadarRepository
         from radar.db.session import get_db_session
@@ -1068,42 +1098,9 @@ async def _run_report(output: str, mock: bool = False) -> None:
         )
         console.print(f"[bold green]Report successfully generated at: {path}[/bold green]")
     except Exception as e:
-        if mock:
-            console.print(
-                f"[yellow]Database offline ({e}). Generating test report with mock data...[/yellow]"
-            )
-            from radar.core.models import (
-                EvidenceTier,
-                LifecycleStage,
-            )
-
-            mock_items = [
-                RadarItem(
-                    name="AutoMut-ADS",
-                    category=QECategory.EXECUTION_AND_OPTIMIZATION,
-                    source_url="https://arxiv.org/abs/2410.18021",
-                    evidence_tier=EvidenceTier.ACADEMIC_PEER_REVIEWED,
-                    hype_score=0.15,
-                    viability_score=0.88,
-                    validity_score=0.85,
-                    recommended_ring=RadarRing.ADOPT,
-                    lifecycle_stage=LifecycleStage.CONSOLIDATED,
-                    corroboration_count=3,
-                    velocity_score=28.5,
-                    key_innovation="Automated mutation synthesis optimizing test coverage.",
-                    enterprise_risks=[],
-                    prerequisites=["High memory CI runner"],
-                ),
-            ]
-            generator = MarkdownReportGenerator()
-            path = generator.generate_and_save(items=mock_items, output_path=output)
-            console.print(
-                f"[bold green][MOCK] Report successfully generated at: {path}[/bold green]"
-            )
-        else:
-            console.print(
-                f"[red]Database unavailable ({e}). Cannot generate executive report offline unless --mock is specified.[/red]"
-            )
+        console.print(
+            f"[red]Database unavailable ({e}). Cannot generate executive report offline unless --mock is specified.[/red]"
+        )
 
 
 @main.command()
@@ -1203,6 +1200,147 @@ def export(export_format: str, output: str, mock: bool) -> None:
     asyncio.run(_run_export(export_format=export_format, output=output, mock=mock))
 
 
+def is_port_in_use(port: int, host: str = "127.0.0.1") -> bool:
+    """Check if a network port is accepting TCP connections."""
+    import socket
+
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.5)
+        return s.connect_ex((host, port)) == 0
+
+
+async def _run_ui(
+    port: int = 5173,
+    host: str = "localhost",
+    no_open: bool = False,
+    mock: bool = False,
+    auto_start_db: bool = True,
+    web_dir: Path | None = None,
+) -> None:
+    """Launch and orchestrate the Vite web dashboard."""
+    base_dir = web_dir or Path("web")
+    console.print(
+        Panel.fit(
+            f"[bold magenta]Trend Horizon Radar: Web Dashboard[/bold magenta]\n"
+            f"[cyan]Target URL:[/cyan] http://{host}:{port}\n"
+            f"[dim]Verifying dependencies, database, and radar dataset bundle...[/dim]",
+            border_style="magenta",
+        )
+    )
+
+    # 1. Verify database readiness
+    db_ready = await _ensure_db_ready(auto_start=auto_start_db, mock=mock)
+    if db_ready:
+        console.print("[dim]✓ Database connection active and schema synchronized.[/dim]")
+
+    # 2. Check radar data bundle
+    bundle_path = base_dir / "public" / "radar.json"
+    bundle_needs_update = True
+    if bundle_path.exists():
+        try:
+            raw_data = json.loads(bundle_path.read_text(encoding="utf-8"))
+            if raw_data.get("items"):
+                bundle_needs_update = False
+                console.print(
+                    f"[dim]✓ Radar dataset bundle verified ({len(raw_data['items'])} items).[/dim]"
+                )
+        except Exception:
+            bundle_needs_update = True
+
+    if bundle_needs_update:
+        console.print("[yellow]Notice: web/public/radar.json is empty or unpopulated.[/yellow]")
+        console.print("[cyan]Exporting current radar signals from database to web bundle...[/cyan]")
+        await _run_export(export_format="json", output=str(bundle_path), mock=mock)
+
+    # 3. Check web/node_modules
+    if not (base_dir / "node_modules").exists():
+        console.print(
+            "[cyan]Frontend dependencies not found. Installing via 'npm ci' in web/...[/cyan]"
+        )
+        proc = await asyncio.create_subprocess_exec(
+            "npm",
+            "ci",
+            cwd=str(base_dir),
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        _, err = await proc.communicate()
+        if proc.returncode != 0:
+            console.print(f"[red]Failed to install frontend dependencies: {err.decode()}[/red]")
+            return
+
+    # 4. Check if dashboard server is already running
+    url = f"http://{host}:{port}"
+    if is_port_in_use(port, "127.0.0.1"):
+        console.print(f"[bold green]✓ Web dashboard is already running at {url}[/bold green]")
+        if not no_open:
+            import webbrowser
+
+            webbrowser.open(url)
+        return
+
+    # 5. Launch Vite server in foreground
+    console.print(
+        f"[bold green]Starting Vite server on {url}... (Press Ctrl+C to stop)[/bold green]"
+    )
+    if not no_open:
+        import webbrowser
+
+        asyncio.get_event_loop().call_later(1.5, lambda: webbrowser.open(url))
+
+    dev_proc = await asyncio.create_subprocess_exec(
+        "npm",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        str(port),
+        "--host",
+        host,
+        cwd=str(base_dir),
+    )
+    try:
+        await dev_proc.wait()
+    except (asyncio.CancelledError, KeyboardInterrupt):
+        console.print("\n[dim]Shutting down web dashboard server...[/dim]")
+        dev_proc.terminate()
+        await dev_proc.wait()
+
+
+@main.command()
+@click.option("--port", default=5173, type=int, help="Port for the web dashboard server.")
+@click.option("--host", default="localhost", help="Host interface to bind.")
+@click.option("--no-open", is_flag=True, help="Do not automatically open the web browser.")
+@click.option("--mock", is_flag=True, help="Populate mock data if database is empty.")
+@click.option(
+    "--auto-start-db/--no-auto-start-db",
+    default=True,
+    help="Auto-start database container if offline.",
+)
+def ui(port: int, host: str, no_open: bool, mock: bool, auto_start_db: bool) -> None:
+    """Launch the interactive Trend Horizon Radar web dashboard."""
+    asyncio.run(
+        _run_ui(port=port, host=host, no_open=no_open, mock=mock, auto_start_db=auto_start_db)
+    )
+
+
+@main.command()
+@click.option("--port", default=5173, type=int, help="Port for the web dashboard server.")
+@click.option("--host", default="localhost", help="Host interface to bind.")
+@click.option("--no-open", is_flag=True, help="Do not automatically open the web browser.")
+@click.option("--mock", is_flag=True, help="Populate mock data if database is empty.")
+@click.option(
+    "--auto-start-db/--no-auto-start-db",
+    default=True,
+    help="Auto-start database container if offline.",
+)
+def serve(port: int, host: str, no_open: bool, mock: bool, auto_start_db: bool) -> None:
+    """Alias for 'radar ui' - launch the interactive web dashboard."""
+    asyncio.run(
+        _run_ui(port=port, host=host, no_open=no_open, mock=mock, auto_start_db=auto_start_db)
+    )
+
+
 async def _run_sync(
     days: int | None = None,
     since: str | None = None,
@@ -1215,6 +1353,7 @@ async def _run_sync(
     mock: bool = False,
     auto_start_db: bool = False,
     no_db: bool = False,
+    ui: bool = False,
     state_path: Path | None = None,
     catalog_path: Path | None = None,
 ) -> None:
@@ -1340,6 +1479,15 @@ async def _run_sync(
             except Exception as e:
                 console.print(f"  [yellow]⚠ Source {src.name} sync encountered error: {e}[/yellow]")
 
+        # Deduplicate all_ingested in-memory by source_url
+        seen_urls: set[str] = set()
+        deduped: list[SourcePayload] = []
+        for p in all_ingested:
+            if p.source_url not in seen_urls:
+                seen_urls.add(p.source_url)
+                deduped.append(p)
+        all_ingested = deduped
+
         for p in all_ingested:
             _, qualified = sieve.evaluate(p)
             if qualified:
@@ -1351,11 +1499,13 @@ async def _run_sync(
             from radar.db.repository import RadarRepository
             from radar.db.session import get_db_session
 
+            saved_count = 0
             async with get_db_session() as session:
                 repo = RadarRepository(session)
                 for p in all_ingested:
                     await repo.save_source_payload(p)
-            console.print(f"  [dim]Saved {len(all_ingested)} raw payload(s) to PostgreSQL.[/dim]")
+                    saved_count += 1
+            console.print(f"  [dim]Saved/updated {saved_count} raw payload(s) in PostgreSQL.[/dim]")
         except Exception as e:
             console.print(f"  [yellow]Failed to persist payloads to PostgreSQL: {e}[/yellow]")
 
@@ -1392,6 +1542,17 @@ async def _run_sync(
         f"[bold green]Sync complete! Ingested: {len(all_ingested)} | Qualified: {len(qualified_signals)} | Evaluated: {evaluated_count}[/bold green]"
     )
 
+    dashboard_active = is_port_in_use(5173)
+    if dashboard_active:
+        console.print(
+            "[bold green]✓ Web dashboard is live at http://localhost:5173 (data bundle updated).[/bold green]"
+        )
+    elif ui:
+        console.print("[cyan]Launching web dashboard...[/cyan]")
+        await _run_ui(port=5173, mock=mock, auto_start_db=False)
+    else:
+        console.print("[dim]To view the dashboard, run: uv run radar ui[/dim]")
+
 
 @main.command()
 @click.option(
@@ -1410,6 +1571,7 @@ async def _run_sync(
 @click.option("--no-eval", is_flag=True, help="Skip running the 4-stage evaluation DAG.")
 @click.option("--no-report", is_flag=True, help="Skip generating the executive Markdown report.")
 @click.option("--no-export", is_flag=True, help="Skip exporting web/public/radar.json.")
+@click.option("--ui", is_flag=True, help="Launch web dashboard upon sync completion.")
 @click.option("--mock", is_flag=True, help="Execute offline sync using mock fixtures.")
 @click.option(
     "--auto-start-db",
@@ -1430,6 +1592,7 @@ def sync(
     no_eval: bool,
     no_report: bool,
     no_export: bool,
+    ui: bool,
     mock: bool,
     auto_start_db: bool,
     no_db: bool,
@@ -1445,6 +1608,7 @@ def sync(
             no_eval=no_eval,
             no_report=no_report,
             no_export=no_export,
+            ui=ui,
             mock=mock,
             auto_start_db=auto_start_db,
             no_db=no_db,

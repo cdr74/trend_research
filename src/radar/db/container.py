@@ -90,6 +90,7 @@ async def ensure_db_running(
         True if the database is running and ready, False otherwise.
     """
     if await check_db_health():
+        await init_db()
         return True
 
     # If auto-start flag is set, proceed without asking

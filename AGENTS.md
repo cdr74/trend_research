@@ -1,27 +1,39 @@
-# AGENTS.md / GEMINI.md - Agent Directives & Engineering Standards
+# AGENTS.md - Project Directives & Verification Standards
 
-## 1. Project Overview
-The **Trend Horizon Radar** is an autonomous intelligence platform for professionals that continuously monitors, filters, corroborates, and evaluates emerging technology trends. It enforces deterministic anti-hype penalties, multi-source topic convergence, audience engagement velocity tracking, and multi-lens adversarial evaluation via pluggable domain profiles.
+## 1. Execution Protocol & Phase Gates
 
-## 2. Engineering Standards & Strict Protocol
-1. **Never Take Shortcuts:** Strictly adhere to test-driven and backlog-driven execution. Every code change must trace to a task in `docs/BACKLOG.md` and an accepted Architecture Decision Record (`docs/adr/`).
-2. **Architectural Deliberation & Context:** Foundational system architecture and design choices must be captured in dedicated ADRs and discussed interactively with the engineer at length before locking. ADRs must provide rich context, alternative topologies, failure modes, and trade-off analyses rather than treating initial briefs as unquestioned blueprints.
-3. **Type Safety & Linting:** Strict typing (`mypy --strict`) and Ruff formatting/linting are mandatory. Code with type errors or lint warnings will fail CI.
-4. **Test-First Discipline:** Write unit and integration tests alongside all implementations. Tests must run deterministically without internet dependencies (use mock providers and fixtures).
-5. **Synchronized Commits:** Every commit must follow Conventional Commits and reference the relevant ADR and backlog story (e.g., `feat(models): implement Pydantic v2 signal schemas (Ref: ADR-0004, Backlog M1-T3)`).
+### Phase 1: Architectural Deliberation & Specification
+- When exploring, planning, or designing, deliverables are strictly limited to documentation: an Architecture Decision Record in `docs/adr/` or task specifications in `docs/BACKLOG.md`.
+- **Constraint:** Deliverables are strictly limited to `docs/adr/` or `docs/BACKLOG.md`. Do not create or edit files in `src/`, `tests/`, or `web/` during this phase. Wait for explicit user confirmation before writing implementation code.
 
-## 3. Essential Commands & Workflows
+### Phase 2: Autonomous Implementation
+- Once an ADR or specification is explicitly approved, execute implementation with full autonomy across code and test suites.
+- Adhere strictly to the agreed data structures, interfaces, and boundary constraints outlined in the referenced ADR.
+- Run tests and static analysis continuously until all local validation checks pass cleanly.
+
+---
+
+## 2. Essential Commands & Workflows
+
+### Backend (Python via `uv`)
 - **Environment Sync:** `uv sync`
-- **Lint & Format:** `uv run ruff check .` and `uv run ruff format .`
-- **Type Check:** `uv run mypy src tests`
-- **Execute Test Suite:** `uv run pytest -v`
-- **Start Local DB:** `podman compose up -d`
-- **Run Pipeline in Mock Mode:** `RADAR_LLM_PROVIDER=mock uv run radar evaluate`
+- **Lint & Auto-format:** `uv run ruff check --fix .` && `uv run ruff format .`
+- **Strict Type Check:** `uv run mypy src tests`
+- **Test Suite:** `uv run pytest -v`
+- **Local DB Infrastructure:** `podman compose up -d`
+- **Mock Pipeline Run:** `RADAR_LLM_PROVIDER=mock uv run radar evaluate`
 
-## 4. Key Architectural Boundaries
-- `src/radar/core/`: Immutable domain models, Pydantic v2 schemas, configuration. Zero dependencies on external providers or storage.
-- `src/radar/db/`: PostgreSQL + pgvector persistence via SQLAlchemy 2.0 (asyncio). All queries are asynchronous.
-- `src/radar/providers/`: Pluggable LLM interfaces implementing `LLMProvider`. Providers must handle structured JSON outputs and fallback gracefully.
-- `src/radar/pipeline/`: 4-stage Directed Acyclic Graph (DAG) executing discrete stage logic.
-- `src/radar/presentation/`: Decoupled serialization, CLI commands, and Markdown digest reporting.
-- `web/`: Decoupled Vite + React + TypeScript web application.
+### Frontend (`web/` via `npm`)
+- **Install Dependencies:** `cd web && npm ci`
+- **Type Check & Build:** `cd web && npm run build`
+
+---
+
+## 3. Engineering Constraints & Invariants
+
+- **Test Integrity:** All tests must run deterministically and pass offline without external network dependencies. Use local fixtures, database test instances, and mock providers.
+- **Type Rigor:** Full compliance with `mypy --strict`. No untyped public functions, bare `Any` types, or silenced type errors without documented justification.
+- **Async Database Layer:** All operations within `src/radar/db/` must use SQLAlchemy 2.0 async conventions (`async with`, `select()`, `await session.execute()`).
+- **Core Decoupling:** Domain models and schemas in `src/radar/core/` must remain pure Pydantic v2 models with zero dependencies on persistence layers (`src/radar/db/`) or external network clients (`src/radar/providers/`).
+- **Traceable Commits:** All git commits must adhere to Conventional Commits and explicitly reference the corresponding ADR and Backlog task ID:
+  `feat(domain): implement signal scoring schemas (Ref: ADR-0004, Backlog M1-T3)`

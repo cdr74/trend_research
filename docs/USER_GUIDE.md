@@ -1,5 +1,57 @@
 # Trend Horizon Radar: User Guide & Operator Manual
 
+## ⚡ Quick Reference Cheatsheet (TL;DR)
+
+If you only need the commands to get your work done, use these copy-pasteable recipes:
+
+| Workflow Intent | Command Line | What It Does |
+| :--- | :--- | :--- |
+| **1. First-Time Setup** | `uv sync && uv run radar ui` | Prepares backend, installs frontend dependencies, verifies DB, and launches dashboard. |
+| **2. Initial 1-Year Sync** | `uv run radar sync --days 365 --reset --ui` | Ingests 365-day baseline, evaluates, saves to DB, exports data bundle, and opens web UI. |
+| **3. Launch Web Dashboard** | `uv run radar ui` (or `radar serve`) | Verifies prerequisites, starts Vite server, and opens `http://localhost:5173`. |
+| **4. Routine Update (Delta)** | `uv run radar sync` | Ingests only *new* signals since your last sync, updates DB & web dashboard. |
+| **5. Full Reset & Rebuild** | `uv run radar sync --days 365 --reset` | Clears all watermarks and recalculates the complete radar from scratch. |
+| **6. Fast Offline Mock Run** | `uv run radar sync --mock --ui` | Zero-token smoke test using deterministic mock fixtures, opens dashboard immediately. |
+
+---
+
+### 📋 Common Task Recipes
+
+#### Recipe 1: First-Time Use (Single Command to Running Radar)
+```bash
+# Sync dependencies, ingest 1-year historical baseline, and launch the web UI:
+uv sync
+uv run radar sync --days 365 --reset --ui
+```
+
+#### Recipe 2: Launching / Opening the Web Dashboard
+```bash
+# Checks database health, validates data bundle, and launches Vite on http://localhost:5173:
+uv run radar ui
+```
+
+#### Recipe 3: Routine Update (Daily / Weekly Delta Ingestion)
+```bash
+# Delta sync: queries only newly published signals since the last run
+uv run radar sync
+```
+*(The web dashboard updates automatically if already open in your browser).*
+
+#### Recipe 4: Complete Reset (Wipe Watermarks & Re-baseline)
+```bash
+# Resets the state watermark file and runs a fresh 365-day historical re-evaluation
+uv run radar sync --days 365 --reset
+```
+
+#### Recipe 5: Instant Mock Preview (No Waiting, No API Keys)
+```bash
+# Populates mock items and opens web dashboard immediately:
+uv run radar export --mock
+uv run radar ui
+```
+
+---
+
 ## 1. Introduction & Operating Philosophy
 
 The **Trend Horizon Radar** is an autonomous intelligence platform designed for software engineering professionals and technology leaders. It continuously monitors, filters, corroborates, and evaluates emerging technology trends, enforcing deterministic anti-hype penalties, multi-source topic convergence, audience engagement velocity tracking, and multi-lens adversarial evaluation via domain profiles (default: Software Quality Engineering).

