@@ -12,7 +12,7 @@ Furthermore, commercial vendors frequently repackage existing open-source librar
 
 ## Requirements & Constraints
 1. **Configurable Thresholds:** Convergence and wrapper detection thresholds must not be hardcoded magic numbers; they must be configurable via `Settings` (`RADAR_TOPIC_CONVERGENCE_THRESHOLD`, `RADAR_WRAPPER_SIMILARITY_THRESHOLD`, `RADAR_WRAPPER_PENALTY`, `RADAR_CORROBORATION_CONSENSUS_BONUS`).
-2. **Semantic Similarity Metric:** Measure cosine similarity ($1.0 - \text{cosine\_distance}$) over 1536-dimensional embeddings:
+2. **Semantic Similarity Metric:** Measure cosine similarity (`1.0 - cosine_distance`) over 1536-dimensional embeddings:
    - Topic Convergence: $\text{Cosine Similarity} \ge \tau_{\text{converge}}$ (default: $0.82$).
    - Parasitic Wrapper Scrutiny: $\text{Cosine Similarity} \ge \tau_{\text{wrapper}}$ (default: $0.88$).
 3. **LLM Topic Synthesis:** When merging signals into a `TrendTopic` cluster, invoke the configured `LLMProvider` to synthesize a unified canonical name and 2-3 sentence technical summary reflecting the aggregated advances across all member dossiers.

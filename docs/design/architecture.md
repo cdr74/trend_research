@@ -97,7 +97,7 @@ flowchart LR
 When a signal is processed, the system queries historical dossiers in `pgvector`:
 1. **Convergence Condition:** If an ingested signal shares semantic similarity $> 0.82$ with existing dossiers from **different source channels or distinct authors**, the items are linked to a shared `TrendTopic`.
 2. **Corroboration Factor:**
-   $$C_{\text{factor}} = \min\left(1.0, \frac{N_{\text{distinct\_sources}}}{4}\right)$$
+   $$C_{\text{factor}} = \min\left(1.0, \frac{N_{\text{sources}}}{4}\right)$$
    A positive bonus ($+0.10$ to $+0.30$) is awarded to Signal Validity based on independent source convergence.
 3. **Wrapper Penalty:** If similarity $> 0.88$ with an existing tool/paper but the new submission introduces no new code, dataset, or empirical mechanism, a $-0.20$ wrapper deduction is applied.
 

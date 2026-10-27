@@ -116,7 +116,7 @@ flowchart TD
 ### The 4-Stage Processing Pipeline
 1. **Tier 1 & Stage 1: Noise Sieve & Relevance Gate:**
    - Drops incoming noise before any LLM invocations using strict token boundaries (`\b`), compound domain co-occurrence, and financial red-flag filters.
-   - Dual-Drop Threshold: $S_{\text{noise}} \le 0.60 \land S_{\text{domain\_relevance}} \ge 0.35$.
+   - Dual-Drop Threshold: Noise Score ≤ 0.60 and Domain Relevance Score ≥ 0.35.
 2. **Stage 2: Deep Extractor Agent:**
    - Extracts canonical technology names, primary QE pillars, verifiable technical claims, evidence tiers, and Dual-Track classification.
    - Generates dense 1536-dimensional semantic embeddings for vector search.
@@ -127,10 +127,10 @@ flowchart TD
      - *Operational Feasibility (35%):* CI footprint, determinism, maintenance overhead.
      - *Technical Rigor (30%):* Empirical benchmarks vs synthetic marketing.
 4. **Stage 4: Radar Categorizer & Decision Rings:**
-   - **Adopt (Established):** High viability ($\ge 0.75$), low hype ($\le 0.35$), proven artifact backing. *Mandatory implementation review.*
-   - **Trial (High-Confidence Pilot):** Viability $\ge 0.65$, hype $\le 0.50$. *Approved for sandboxed pilot evaluation.*
-   - **Assess (Emerging):** Viability $\ge 0.45$ or high velocity. *Track for 6–18 month horizon; too early for production.*
-   - **Hold (Prohibited / Flawed):** Viability $< 0.45$, excessive hype ($> 0.60$), superficial wrappers, or financial red flags.
+   - **Adopt (Established):** High viability (≥ 0.75), low hype (≤ 0.35), proven artifact backing. *Mandatory implementation review.*
+   - **Trial (High-Confidence Pilot):** Viability ≥ 0.65, hype ≤ 0.50. *Approved for sandboxed pilot evaluation.*
+   - **Assess (Emerging):** Viability ≥ 0.45 or high velocity. *Track for 6–18 month horizon; too early for production.*
+   - **Hold (Prohibited / Flawed):** Viability < 0.45, excessive hype (> 0.60), superficial wrappers, or financial red flags.
 
 ---
 

@@ -93,18 +93,18 @@ The radar operates as a directed acyclic pipeline (DAG) with four decoupled stag
 Every ingested item is evaluated on a composite 0.0 to 1.0 scoring index across two axes: **Signal Validity** and **Enterprise Viability**.
 
 ### 4.1 Anti-Hype & Financial Red-Flag Penalties
-- **$-0.40 (Critical Red Flag):** Promotion of "testing in production" on live operational/transactional environments without hermetic sandbox isolation.
-- **$-0.35 (Critical Red Flag):** "Autonomous bypass of human accountability" (e.g. agents auto-merging PRs without human review in core systems).
-- **$-0.30:** Absence of reproducible benchmark, raw dataset, or source repository.
-- **$-0.25:** Exclusive reliance on synthetic vanity metrics (e.g., "99% bug fixing" on trivial synthetic repos).
-- **$-0.20:** "Wrapper" architecture (direct un-augmented prompt wrapper without execution or validation harnesses).
-- **$-0.15:** Sponsored / promotional marketing without peer or practitioner review.
+- **-0.40 (Critical Red Flag):** Promotion of "testing in production" on live operational/transactional environments without hermetic sandbox isolation.
+- **-0.35 (Critical Red Flag):** "Autonomous bypass of human accountability" (e.g. agents auto-merging PRs without human review in core systems).
+- **-0.30:** Absence of reproducible benchmark, raw dataset, or source repository.
+- **-0.25:** Exclusive reliance on synthetic vanity metrics (e.g., "99% bug fixing" on trivial synthetic repos).
+- **-0.20:** "Wrapper" architecture (direct un-augmented prompt wrapper without execution or validation harnesses).
+- **-0.15:** Sponsored / promotional marketing without peer or practitioner review.
 
 ### 4.2 Positive Engineering Signals (Adequacy & Evidence Bonuses)
-- **$+0.30:** Verifiable evidence of test adequacy (mutation testing score, fault-injection proof, property-based invariants).
-- **$+0.25:** Calibrated confidence scoring for human-in-the-loop decision-making or formal change-risk blast-radius analysis.
-- **$+0.25:** Peer-reviewed empirical publication (IEEE TSE, ACM ICSE, ISSTA, arXiv SE) with reproducible artifact evaluation.
-- **$+0.20:** Production case studies or post-mortems from high-scale engineering organizations detailing edge-case failure modes in hermetic/pre-prod environments.
+- **+0.30:** Verifiable evidence of test adequacy (mutation testing score, fault-injection proof, property-based invariants).
+- **+0.25:** Calibrated confidence scoring for human-in-the-loop decision-making or formal change-risk blast-radius analysis.
+- **+0.25:** Peer-reviewed empirical publication (IEEE TSE, ACM ICSE, ISSTA, arXiv SE) with reproducible artifact evaluation.
+- **+0.20:** Production case studies or post-mortems from high-scale engineering organizations detailing edge-case failure modes in hermetic/pre-prod environments.
 
 ### 4.3 Enterprise Viability Filter (Financial Regulatory Constraints)
 The **Enterprise Skeptic** evaluates signals against 4 mandatory gates:

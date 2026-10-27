@@ -70,7 +70,7 @@ In `src/radar/pipeline/noise_sieve.py`:
   - Mutation testing, formal invariants, change-impact scoring, and calibrated confidence intervals receive substantial credibility credits ($-0.15$ to $-0.25$).
 - **Domain Relevance Score:** Calculates `domain_relevance_score` $\in [0.0, 1.0]$.
 - **Dual-Drop Threshold:**
-  $$\text{Qualified} \iff (\text{noise\_score} \le 0.60) \land (\text{domain\_relevance\_score} \ge 0.35)$$
+  $$\text{Qualified} \iff (\text{NoiseScore} \le 0.60) \land (\text{RelevanceScore} \ge 0.35)$$
 
 ### 3. Tier 3: Stage 2 Deep Extractor Dual-Track & Escape Valve
 In `src/radar/core/models.py` and `src/radar/pipeline/extractor.py`:

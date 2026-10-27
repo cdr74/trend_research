@@ -193,7 +193,7 @@
   - *Acceptance Criteria:* 100% unit test coverage, zero false-positive substring matches (e.g., `"ai"` in `"email"`, `"test"` in `"fastest"`).
 - [x] **M6-T3: Tier 2 Stage 1 Heuristic Domain Relevance Scoring (`NoiseSieve`)**
   - Add domain relevance evaluation to `NoiseSieve` in `src/radar/pipeline/noise_sieve.py`.
-  - Implement dual-drop threshold ($S_{\text{noise}} \le 0.60 \land S_{\text{domain\_relevance}} \ge 0.35$).
+  - Implement dual-drop threshold (`noise_score` ≤ 0.60 and `domain_relevance_score` ≥ 0.35).
   - Add financial enterprise red flags (testing in production on live systems, autonomous un-audited merges) and adequacy evidence credits.
   - *Acceptance Criteria:* Unit tests prove high-credibility non-SE papers (e.g. pure math, astrophysics) are dropped before LLM extraction.
 - [x] **M6-T4: Tier 3 Stage 2 Deep Extractor Dual-Track & Out-of-Domain Guardrail**
