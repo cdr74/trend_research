@@ -12,7 +12,7 @@ An autonomous intelligence platform designed for Quality Engineering (QE) leader
 
 ## 🎯 Executive Intent & Purpose
 
-Built from the operational perspective of a **Head of Test Engineering in a tier-1 global financial institution** (regulated across FINMA, MAS, PRA, Fed, DORA, and BCBS 239), the platform addresses three core mandates:
+Designed for high-assurance, heavily regulated enterprise environments (governed across standards such as FINMA, MAS, PRA, Fed, DORA, and BCBS 239), the platform addresses three core mandates:
 
 1. **AI-Augmented Traditional Software Testing:** How to leverage AI to test deterministic, traditional codebases faster and better (test synthesis, invariant generation, mutation-guided fuzzing, predictive test selection, and sandboxed self-healing).
 2. **AI Quality Engineering & Evaluation:** What quality engineering means when the system under test is probabilistic and non-deterministic (LLM evaluation harnesses, autonomous agent trajectory validation, behavioral drift, hallucination detection, and statistical confidence bounds).
@@ -199,7 +199,7 @@ uv run ruff check .
 | Document | Purpose |
 | :--- | :--- |
 | **[User Guide & Operator Manual](docs/USER_GUIDE.md)** | Step-by-step operator workflows, cheatsheet recipes, CLI commands, and troubleshooting FAQ. |
-| **[Intent & Architecture Specification](ai_test_engineering_radar_intent_architecture.md)** | Deep architectural deliberation of the tier-1 financial institute intent, Dual-Track taxonomy, and adequacy rubrics. |
+| **[Intent & Architecture Specification](ai_test_engineering_radar_intent_architecture.md)** | Deep architectural deliberation of high-assurance enterprise intent, Dual-Track taxonomy, and adequacy rubrics. |
 | **[System Design & Architecture](docs/design/architecture.md)** | Detailed component boundaries, schemas, state models, and persistence topology. |
 | **[Curated Data Sources Registry](docs/data_sources.md)** | Catalog of active arXiv categories, GitHub topic streams, and engineering RSS feeds. |
 | **[Product & Engineering Backlog](docs/BACKLOG.md)** | Milestone roadmaps, user stories, and completed delivery tasks. |
