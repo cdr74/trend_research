@@ -67,11 +67,11 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           type="text"
           value={searchTerm}
           onChange={(e) => onChangeSearchTerm(e.target.value)}
-          placeholder='e.g. ring:Adopt viability:>0.8 "visual"'
+          placeholder='e.g. track:testing ring:Adopt viability:>0.8'
           className="w-full bg-[#0b0f19] border border-[#1f293d] rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
         />
         <p className="text-[10px] text-slate-500 mt-1 leading-tight">
-          Supports: <code className="text-slate-400">ring:</code>, <code className="text-slate-400">tier:</code>, <code className="text-slate-400">viability:&gt;0.8</code>, <code className="text-slate-400">risk:</code>
+          Supports: <code className="text-slate-400">track:</code>, <code className="text-slate-400">ring:</code>, <code className="text-slate-400">pillar:</code>, <code className="text-slate-400">viability:&gt;0.8</code>
         </p>
       </div>
 

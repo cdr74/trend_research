@@ -104,20 +104,21 @@ def test_cli_report_command_offline_safety_and_mock(tmp_path: Path) -> None:
 def test_cli_sync_command_mock_and_resets() -> None:
     runner = CliRunner()
 
-    # Run sync in mock mode
-    res = runner.invoke(main, ["sync", "--mock"])
+    # Run sync in mock mode with --no-export to prevent clobbering production bundle
+    res = runner.invoke(main, ["sync", "--mock", "--no-export"])
     assert res.exit_code == 0
     assert "Trend Horizon Radar: On-Demand Incremental Sync" in res.output
     assert "Sync complete!" in res.output
 
     # Run sync with --reset
-    reset_res = runner.invoke(main, ["sync", "--mock", "--reset", "--days", "365"])
+    reset_res = runner.invoke(main, ["sync", "--mock", "--no-export", "--reset", "--days", "365"])
     assert reset_res.exit_code == 0
     assert "Reset all source watermarks" in reset_res.output
 
     # Run sync with --reset-source
     reset_src_res = runner.invoke(
-        main, ["sync", "--mock", "--reset-source", "github-topic-test-generation"]
+        main,
+        ["sync", "--mock", "--no-export", "--reset-source", "github-topic-test-generation"],
     )
     assert reset_src_res.exit_code == 0
     assert "Reset watermark for source 'github-topic-test-generation'" in reset_src_res.output
@@ -243,7 +244,7 @@ def test_cli_sync_auto_start_and_no_db() -> None:
     # Test sync with --no-db
     res = runner.invoke(
         main,
-        ["sync", "--mock", "--no-db", "--limit-per-source", "2"],
+        ["sync", "--mock", "--no-export", "--no-db", "--limit-per-source", "2"],
     )
     assert res.exit_code == 0
     assert "Sync complete!" in res.output
@@ -251,7 +252,7 @@ def test_cli_sync_auto_start_and_no_db() -> None:
     # Test sync with --auto-start-db
     res_auto = runner.invoke(
         main,
-        ["sync", "--mock", "--auto-start-db", "--limit-per-source", "2"],
+        ["sync", "--mock", "--no-export", "--auto-start-db", "--limit-per-source", "2"],
     )
     assert res_auto.exit_code == 0
     assert "Sync complete!" in res_auto.output

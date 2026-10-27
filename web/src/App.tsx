@@ -37,6 +37,7 @@ export const App: React.FC = () => {
       "Vendor Announcement",
     ])
   );
+  const [selectedTrack, setSelectedTrack] = useState<"all" | "testing" | "evaluation">("all");
   const [minViability, setMinViability] = useState<number>(0.0);
   const [maxHype, setMaxHype] = useState<number>(1.0);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -105,13 +106,27 @@ export const App: React.FC = () => {
     setMinViability(0.0);
     setMaxHype(1.0);
     setSearchTerm("");
+    setSelectedTrack("all");
   };
+
+  const testingCount = useMemo(
+    () => (data ? data.items.filter((it) => (it.track || "testing") === "testing").length : 0),
+    [data]
+  );
+  const evaluationCount = useMemo(
+    () => (data ? data.items.filter((it) => it.track === "evaluation").length : 0),
+    [data]
+  );
 
   const filteredItems = useMemo(() => {
     if (!data) return [];
     const parsedQuery = parseSearchQuery(searchTerm);
 
     return data.items.filter((item) => {
+      if (selectedTrack !== "all") {
+        const itemTrack = item.track || "testing";
+        if (itemTrack !== selectedTrack) return false;
+      }
       if (!selectedRings.has(item.recommended_ring)) return false;
       if (!selectedCategories.has(item.category)) return false;
       if (!selectedEvidenceTiers.has(item.evidence_tier)) return false;
@@ -122,6 +137,7 @@ export const App: React.FC = () => {
     });
   }, [
     data,
+    selectedTrack,
     selectedRings,
     selectedCategories,
     selectedEvidenceTiers,
@@ -198,6 +214,50 @@ export const App: React.FC = () => {
           </button>
         </div>
       </header>
+
+      {/* Sub-Header / Dual-Track Switcher Bar */}
+      <div className="border-b border-[#1f293d] bg-[#101622] px-8 py-2.5 flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <span className="text-xs uppercase font-bold text-slate-400 tracking-wider mr-2">
+            Domain Track:
+          </span>
+          <button
+            onClick={() => setSelectedTrack("all")}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              selectedTrack === "all"
+                ? "bg-slate-700 text-white shadow"
+                : "text-slate-400 hover:text-slate-200 hover:bg-[#1a233a]"
+            }`}
+          >
+            All Tracks ({data?.items.length ?? 0})
+          </button>
+          <button
+            onClick={() => setSelectedTrack("testing")}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              selectedTrack === "testing"
+                ? "bg-blue-600 text-white shadow"
+                : "text-slate-400 hover:text-slate-200 hover:bg-[#1a233a]"
+            }`}
+          >
+            Software Testing ({testingCount})
+          </button>
+          <button
+            onClick={() => setSelectedTrack("evaluation")}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+              selectedTrack === "evaluation"
+                ? "bg-purple-600 text-white shadow"
+                : "text-slate-400 hover:text-slate-200 hover:bg-[#1a233a]"
+            }`}
+          >
+            AI Evaluation ({evaluationCount})
+          </button>
+        </div>
+
+        <div className="text-xs text-slate-400">
+          Showing <span className="font-semibold text-slate-200">{filteredItems.length}</span> of{" "}
+          <span className="font-semibold text-slate-200">{data?.items.length ?? 0}</span> evaluated signals
+        </div>
+      </div>
 
       {/* Main Container */}
       <main className="flex-1 px-8 py-6 flex space-x-8">

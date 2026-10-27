@@ -486,11 +486,26 @@ async def _run_evaluate(
                 repo = RadarRepository(session)
                 for t in topics:
                     await repo.save_topic(t)
+
+                dossier_id_map: dict[UUID, UUID] = {}
                 for d in dossiers:
-                    await repo.save_dossier(d)
+                    orig_d_id = d.id
+                    saved_d = await repo.save_dossier(d)
+                    dossier_id_map[orig_d_id] = saved_d.id
+
+                eval_id_map: dict[UUID, UUID] = {}
                 for evaluation in evaluations:
-                    await repo.save_evaluation(evaluation)
+                    if evaluation.dossier_id in dossier_id_map:
+                        evaluation.dossier_id = dossier_id_map[evaluation.dossier_id]
+                    orig_eval_id = evaluation.id
+                    saved_eval = await repo.save_evaluation(evaluation)
+                    eval_id_map[orig_eval_id] = saved_eval.id
+
                 for item in radar_items:
+                    if item.dossier_id and item.dossier_id in dossier_id_map:
+                        item.dossier_id = dossier_id_map[item.dossier_id]
+                    if item.evaluation_id and item.evaluation_id in eval_id_map:
+                        item.evaluation_id = eval_id_map[item.evaluation_id]
                     await repo.save_radar_item(item)
             console.print(
                 f"[bold green]Persisted {len(topics)} topic(s), {len(dossiers)} dossier(s), and {len(radar_items)} radar item(s) to PostgreSQL.[/bold green]"
@@ -906,10 +921,17 @@ async def _run_export(export_format: str, output: str, mock: bool = False) -> No
             it.lifecycle_stage if isinstance(it.lifecycle_stage, str) else it.lifecycle_stage.value
         )
 
+        track_val = (
+            it.track.value
+            if hasattr(getattr(it, "track", None), "value")
+            else str(getattr(it, "track", "testing"))
+        )
+
         item_dicts.append(
             {
                 "id": str(it.id),
                 "name": it.name,
+                "track": track_val,
                 "category": cat_val,
                 "source_url": it.source_url,
                 "evidence_tier": tier_val,
@@ -1250,24 +1272,24 @@ async def _run_ui(
     if db_ready:
         console.print("[dim]✓ Database connection active and schema synchronized.[/dim]")
 
-    # 2. Check radar data bundle
+    # 2. Synchronize radar data bundle from active database
     bundle_path = base_dir / "public" / "radar.json"
-    bundle_needs_update = True
-    if bundle_path.exists():
+    if db_ready:
+        console.print("[cyan]Exporting active radar signals from database to web bundle...[/cyan]")
+        await _run_export(export_format="json", output=str(bundle_path), mock=mock)
+    elif not bundle_path.exists():
+        console.print(
+            "[yellow]Notice: web/public/radar.json not found and database offline.[/yellow]"
+        )
+        console.print("[cyan]Generating bundle with mock radar fixtures...[/cyan]")
+        await _run_export(export_format="json", output=str(bundle_path), mock=True)
+    else:
         try:
             raw_data = json.loads(bundle_path.read_text(encoding="utf-8"))
-            if raw_data.get("items"):
-                bundle_needs_update = False
-                console.print(
-                    f"[dim]✓ Radar dataset bundle verified ({len(raw_data['items'])} items).[/dim]"
-                )
+            count = len(raw_data.get("items", []))
+            console.print(f"[dim]✓ Using existing offline bundle ({count} items).[/dim]")
         except Exception:
-            bundle_needs_update = True
-
-    if bundle_needs_update:
-        console.print("[yellow]Notice: web/public/radar.json is empty or unpopulated.[/yellow]")
-        console.print("[cyan]Exporting current radar signals from database to web bundle...[/cyan]")
-        await _run_export(export_format="json", output=str(bundle_path), mock=mock)
+            await _run_export(export_format="json", output=str(bundle_path), mock=True)
 
     # 3. Check web/node_modules
     if not (base_dir / "node_modules").exists():

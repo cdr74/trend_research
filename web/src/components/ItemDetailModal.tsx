@@ -22,9 +22,22 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
         {/* Header */}
         <div className="flex justify-between items-start p-6 border-b border-[#1f293d]">
           <div>
-            <span className="text-xs uppercase font-bold tracking-widest text-blue-400">
-              {item.category}
-            </span>
+            <div className="flex items-center space-x-2">
+              <span
+                className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider border ${
+                  item.track === "evaluation"
+                    ? "bg-purple-950/50 text-purple-300 border-purple-500/40"
+                    : "bg-blue-950/50 text-blue-300 border-blue-500/40"
+                }`}
+              >
+                {item.track === "evaluation"
+                  ? "Track: AI Evaluation"
+                  : "Track: Software Testing"}
+              </span>
+              <span className="text-xs uppercase font-bold tracking-widest text-slate-400">
+                • {item.category}
+              </span>
+            </div>
             <h2 className="text-2xl font-bold text-slate-100 mt-1">{item.name}</h2>
             <div className="flex items-center space-x-3 mt-2">
               <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">

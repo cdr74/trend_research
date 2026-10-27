@@ -14,6 +14,7 @@ export const TableView: React.FC<TableViewProps> = ({ items, selectedItem, onSel
         <table className="w-full text-left text-sm text-slate-300">
           <thead className="bg-[#161f33] text-xs uppercase text-slate-400 font-semibold tracking-wider">
             <tr>
+              <th className="px-6 py-4">Track</th>
               <th className="px-6 py-4">Trend / Innovation</th>
               <th className="px-6 py-4">Pillar</th>
               <th className="px-6 py-4">Ring</th>
@@ -51,6 +52,17 @@ export const TableView: React.FC<TableViewProps> = ({ items, selectedItem, onSel
                     isSelected ? "bg-blue-900/20" : "hover:bg-[#1a233a]"
                   }`}
                 >
+                  <td className="px-6 py-4 text-xs whitespace-nowrap">
+                    <span
+                      className={`px-2 py-0.5 rounded text-[11px] font-semibold border ${
+                        item.track === "evaluation"
+                          ? "bg-purple-950/40 text-purple-300 border-purple-600/30"
+                          : "bg-blue-950/40 text-blue-300 border-blue-600/30"
+                      }`}
+                    >
+                      {item.track === "evaluation" ? "AI Evaluation" : "Software Testing"}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 font-semibold text-slate-100">{item.name}</td>
                   <td className="px-6 py-4 text-xs">{item.category}</td>
                   <td className="px-6 py-4">

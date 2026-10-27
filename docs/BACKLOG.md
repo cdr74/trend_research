@@ -201,3 +201,9 @@
   - Update system prompt in `DeepExtractor` to classify out-of-domain signals and detect Dual-Track innovations.
   - Update presentation layer and Web UI with Dual-Track query tokens (`track:testing`, `track:evaluation`).
   - *Acceptance Criteria:* End-to-end unit and integration tests passing cleanly across all tiers.
+- [x] **M6-T5: Live Web Dashboard Synchronization & Dual-Track UI Switcher**
+  - Synchronize live PostgreSQL signals into web bundle automatically on `radar ui` startup.
+  - Add Dual-Track switcher tab bar to Web UI header (All Tracks, Software Testing, AI Evaluation) with reactive item counts.
+  - Propagate track field in bundle exports and add Track column to `TableView` and `ItemDetailModal`.
+  - Fix test runner export clobbering to isolate mock sync runs from production dashboard bundles.
+  - *Acceptance Criteria:* Web dashboard reflects all 23 live database signals without stale mock cache fallback.
