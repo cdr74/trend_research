@@ -5,6 +5,27 @@ All notable changes to the Trend Horizon Radar platform will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0](https://github.com/cdr74/trend_research/compare/v0.4.0...v0.5.0) (2026-10-27)
+
+
+### Features
+
+* **domain:** implement multi-tiered relevance filter and financial dual-track architecture (Ref: ADR-0021, Backlog M6) ([8495bb4](https://github.com/cdr74/trend_research/commit/8495bb42b60a13ba4f97424a76f86e5a51c2f4e1))
+* **presentation:** add radar ui command, database upserts, and fix radar blip hover jitter (Ref: Backlog M5-T4) ([e56ec11](https://github.com/cdr74/trend_research/commit/e56ec11472c9e5d0d19b9efa9efccc7d1e3e98fb))
+
+
+### Bug Fixes
+
+* **ui:** synchronize live database signals and implement dual-track switcher (Ref: Backlog M6-T5) ([09896f4](https://github.com/cdr74/trend_research/commit/09896f4d4f9af99f4b451e4b443917780915d6ca))
+
+
+### Documentation
+
+* **math:** fix KaTeX and math mode rendering errors across markdown files ([aa026a6](https://github.com/cdr74/trend_research/commit/aa026a632078d5eb27a3c77837f96a1cbd82b591))
+* **privacy:** sanitize documentation to remove role and personal references ([f4927cd](https://github.com/cdr74/trend_research/commit/f4927cd8503cd6ff2d76c7f4e22dd9d23a9ee5cd))
+* **readme:** rewrite README to explicitly articulate intent, dual-track architecture, and doc index (Ref: ADR-0021, Backlog M6) ([e9666d2](https://github.com/cdr74/trend_research/commit/e9666d25cdc5f27d2fc178df57e8d71b850d4cef))
+* update README and USER_GUIDE for dual-track architecture and UI switcher (Ref: ADR-0021, Backlog M6) ([797cf19](https://github.com/cdr74/trend_research/commit/797cf19167fcf04f38c26b7209fc7ea98f8857b6))
+
 ## [0.4.0](https://github.com/cdr74/trend_research/compare/v0.3.0...v0.4.0) (2026-10-25)
 
 
