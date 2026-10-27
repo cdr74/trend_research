@@ -460,15 +460,21 @@ The compiled output is emitted to `web/dist/`.
 
 ## 4. Understanding the Radar Scoring & Decision Model
 
-### 4.1 Tech Radar Rings
-Every evaluated signal is categorized into one of four rings:
+### 4.1 Tech Radar Rings & Financial Decision Posture
+Every evaluated signal is categorized into one of four rings reflecting executive urgency:
 
-| Ring | Criteria | Recommended Action |
-| :--- | :--- | :--- |
-| **Adopt** | Viability $\ge 0.85$, Validity $\ge 0.80$, low hype, confirmed corroboration | Recommend for immediate production pilot in target workflows. |
-| **Trial** | Viability $\ge 0.70$, Validity $\ge 0.60$ | Approved for sandboxed, non-critical team trials. |
-| **Assess** | Viability $\ge 0.50$ or high technical research novelty | Keep under close observation; track maturity evolution. |
-| **Hold** | Viability $< 0.50$, excessive hype ($> 0.60$), or prohibitive security risk | Avoid. Superficial wrapper or unverified claims. |
+| Ring | Financial Enterprise Posture | Criteria & Viability Standard | Recommended Action |
+| :--- | :--- | :--- | :--- |
+| **Adopt** | **Established (MUST LOOK / DEPLOY)** | Viability $\ge 0.85$, Validity $\ge 0.80$, low hype, confirmed corroboration, zero compliance blockers | Immediate production implementation in target enterprise workflows. |
+| **Trial** | **High-Confidence Pilot** | Viability $\ge 0.70$, Validity $\ge 0.60$ | Approved for sandboxed, non-critical internal banking applications or staging pipelines. |
+| **Assess** | **Emerging (TEAM SHOULD TRACK)** | High technical research novelty ($\ge 0.50$); novel agent/eval proof | Track evolution for 6–18 month horizon; too early to experiment in-bank. |
+| **Hold** | **Prohibited / High Risk** | Viability $< 0.50$, excessive hype ($> 0.60$), testing in prod, or prohibitive security risk | Avoid. Incompatible with financial regulations, superficial wrapper, or unverified claims. |
+
+### 4.2 Dual-Track Taxonomy: Testing vs. Evaluation
+The radar organizes signals across two distinct tracks:
+1. **Software Testing (Deterministic Systems):** Verifying traditional software codebases (unit, integration, property-based invariants, mutation testing, predictive test selection, flaky test healing).
+2. **AI Evaluation (Non-Deterministic Systems):** Assessing probabilistic models and agent systems (LLM benchmark harnesses, behavioral drift, hallucination detection, adversarial red-teaming, statistical confidence intervals).
+3. **Cross-Cutting Agentic SDLC & Adequacy Evidence:** Providing calibrated confidence scores to the accountable human-in-the-loop and mathematical evidence of test adequacy (mutation scores, formal invariants) before machine-generated code is deployed.
 
 ### 4.2 Adversarial Multi-Lens Committee
 Each candidate signal is evaluated across three weighted governance lenses:

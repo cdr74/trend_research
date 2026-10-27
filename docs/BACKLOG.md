@@ -176,3 +176,28 @@
   - Fix `ensure_db_running` to guarantee idempotent schema initialization (`init_db()`) whenever PostgreSQL is already running.
   - Reorganize `docs/USER_GUIDE.md` with top-level Quick Reference Cheatsheet for instant multi-project operational reference.
   - *Acceptance Criteria:* Full unit test coverage for `radar ui`, `radar serve`, `sync --ui`, and database schema auto-init.
+
+---
+
+## Milestone 6: Multi-Tiered Domain Relevance & Noise Immunity (Completed)
+**Goal:** Replace fragile substring keyword filtering with a 3-tier defense-in-depth domain relevance engine across ingestion, Stage 1 noise sieving, and Stage 2 deep extraction.
+
+### Stories & Tasks:
+- [x] **M6-T1: Architectural Specification: Multi-Tiered Domain Relevance (ADR-0021)**
+  - Author and approve ADR-0021 establishing the 3-tier defense-in-depth relevance architecture.
+  - Refine seed source catalog in `data/seeds/sources.yaml` and `docs/data_sources.md` (add verified `llm-red-teaming` and `property-based-testing`, patch HTTP 422 queries, purge low-signal sources).
+  - *Acceptance Criteria:* ADR-0021 committed, catalog validated via source loader.
+- [x] **M6-T2: Tier 1 Ingestion Boundary RelevanceFilter Engine**
+  - Implement `RelevanceFilter` with compiled token-boundary regexes, compound requirement rules (co-occurrence of generic terms with SE qualifiers), and negative exclusion rules.
+  - Integrate `RelevanceFilter` into `RssFeedIngestor` to replace naive `_matches_keywords`.
+  - *Acceptance Criteria:* 100% unit test coverage, zero false-positive substring matches (e.g., `"ai"` in `"email"`, `"test"` in `"fastest"`).
+- [x] **M6-T3: Tier 2 Stage 1 Heuristic Domain Relevance Scoring (`NoiseSieve`)**
+  - Add domain relevance evaluation to `NoiseSieve` in `src/radar/pipeline/noise_sieve.py`.
+  - Implement dual-drop threshold ($S_{\text{noise}} \le 0.60 \land S_{\text{domain\_relevance}} \ge 0.35$).
+  - Add financial enterprise red flags (testing in production on live systems, autonomous un-audited merges) and adequacy evidence credits.
+  - *Acceptance Criteria:* Unit tests prove high-credibility non-SE papers (e.g. pure math, astrophysics) are dropped before LLM extraction.
+- [x] **M6-T4: Tier 3 Stage 2 Deep Extractor Dual-Track & Out-of-Domain Guardrail**
+  - Extend `ExtractedInnovation` model with `track: TrackType`, `is_qe_relevant: bool`, and `adequacy_evidence: list[str]`.
+  - Update system prompt in `DeepExtractor` to classify out-of-domain signals and detect Dual-Track innovations.
+  - Update presentation layer and Web UI with Dual-Track query tokens (`track:testing`, `track:evaluation`).
+  - *Acceptance Criteria:* End-to-end unit and integration tests passing cleanly across all tiers.

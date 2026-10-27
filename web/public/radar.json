@@ -1,6 +1,6 @@
 {
   "radar_title": "AI Test Engineering Trend Horizon Radar",
-  "generated_at": "2026-10-25T13:50:27.739563+00:00",
+  "generated_at": "2026-10-27T07:51:25.247506+00:00",
   "rings": [
     "Adopt",
     "Trial",
@@ -17,7 +17,7 @@
   ],
   "items": [
     {
-      "id": "7282d89f-d1d8-4108-90f4-e7a06ed0da22",
+      "id": "2551a436-fd66-4ab4-a717-6860a9ee42fe",
       "name": "Playwright-Invariance-Agent",
       "category": "Test Synthesis",
       "source_url": "https://github.com/cdr74/playwright-invariance",
@@ -45,7 +45,7 @@
       "cluster_y": 0.1977
     },
     {
-      "id": "7f1bfacc-834e-4bc2-bdb9-8f77d37a1028",
+      "id": "fe1eb758-4204-4adb-9cd8-2819fd24302e",
       "name": "AutoMut-ADS",
       "category": "Execution & Optimization",
       "source_url": "https://arxiv.org/abs/2410.18021",
@@ -69,7 +69,7 @@
       "cluster_y": 1.0
     },
     {
-      "id": "924051e9-4386-4782-a8c5-1b13c7ae9085",
+      "id": "5ea319c4-f436-4190-bbcc-3b7a7cc74fa2",
       "name": "SpecToProperty-LLM",
       "category": "Spec & Model",
       "source_url": "https://github.com/cdr74/spec-property-gen",
@@ -95,7 +95,7 @@
       "cluster_y": 0.1547
     },
     {
-      "id": "ac602932-f254-49c3-a908-ea099ea6999a",
+      "id": "a092a112-88e1-47fe-94e5-587ee41ee9a6",
       "name": "RCA-Tracer Agent",
       "category": "Triage & Self-Healing",
       "source_url": "https://github.com/cdr74/rca-tracer",
@@ -121,7 +121,7 @@
       "cluster_y": 0.0681
     },
     {
-      "id": "b776fd0a-178e-46be-8141-a88e5cf13b14",
+      "id": "c0e341a4-dfd5-40ad-89e9-9744ecb2c953",
       "name": "Multi-Agent Red-Team Explorer",
       "category": "Agent Systems",
       "source_url": "https://arxiv.org/abs/2408.00002",
@@ -145,7 +145,7 @@
       "cluster_y": -1.0
     },
     {
-      "id": "50d4e944-df80-4779-998c-d3a5767e8b5d",
+      "id": "6ab9aee6-d93d-4c05-b3b7-c2920c955dc3",
       "name": "Hype-Fix 99.9% AutoBugRepair",
       "category": "Triage & Self-Healing",
       "source_url": "https://vendor-hype-example.com/repair",

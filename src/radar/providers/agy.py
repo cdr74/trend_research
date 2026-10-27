@@ -22,7 +22,7 @@ class AgyCliProvider(LLMProvider):
         self,
         binary_path: str | None = None,
         model_name: str | None = None,
-        timeout: float = 60.0,
+        timeout: float = 180.0,
     ) -> None:
         self.binary_path = binary_path or settings.agy_binary_path
         self.model_name = model_name or settings.agy_model_name
@@ -95,8 +95,14 @@ class AgyCliProvider(LLMProvider):
 
         raw_output = await self._run_command(cmd)
 
+        cleaned_output = raw_output
+        brace_idx = raw_output.find("{")
+        rbrace_idx = raw_output.rfind("}")
+        if brace_idx != -1 and rbrace_idx != -1 and rbrace_idx > brace_idx:
+            cleaned_output = raw_output[brace_idx : rbrace_idx + 1]
+
         try:
-            envelope = json.loads(raw_output)
+            envelope = json.loads(cleaned_output)
             # 1. Prefer native structured_output emitted by agy --json-schema
             if (
                 isinstance(envelope, dict)

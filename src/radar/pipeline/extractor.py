@@ -14,9 +14,13 @@ from radar.providers.base import LLMProvider
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_EXTRACTOR_SYSTEM_PROMPT = """You are a Principal AI Quality Engineering Architect and Technical Intelligence Analyst.
+DEFAULT_EXTRACTOR_SYSTEM_PROMPT = """You are a Principal AI Quality Engineering Architect and Financial Technical Intelligence Analyst.
 Your mission is to perform deep fact extraction on technology pre-prints, repository codebases, and practitioner articles.
-You must extract objective, verified technical facts and classify the innovation into the canonical Quality Engineering taxonomy.
+You must extract objective, verified technical facts, classify the innovation into the canonical Dual-Track Quality Engineering taxonomy, and identify evidence of test adequacy.
+
+Dual-Track Taxonomy:
+- track: "testing" for deterministic software testing (traditional codebases, test synthesis, mutation, predictive selection, healing).
+- track: "evaluation" for non-deterministic AI systems (LLM/agent evaluation, red teaming, drift, safety benchmarks, probabilistic bounds).
 
 Quality Engineering (QE) Domain Pillars:
 - spec_and_model: Requirements formalization, domain-driven modeling, formal specifications, behavioral synthesis.
@@ -25,6 +29,12 @@ Quality Engineering (QE) Domain Pillars:
 - triage_and_self_healing: Automated root cause analysis, bug localization, test self-healing, crash reproduction, repair suggestions.
 - agent_systems: Multi-agent collaboration for QE, autonomous testing workflows, agentic code exploration and verification, tool-use agents.
 - governance_and_evals: Evaluation harnesses, benchmark generation, LLM alignment evaluation, safety testing, compliance checking, quality metrics dashboards.
+
+Domain Relevance Guardrail:
+- is_qe_relevant: Set to false if the subject is not software quality engineering, automated testing, or AI evaluation (e.g. pure astrophysics, generic business news, non-SE mathematics).
+
+Evidence of Adequacy:
+- adequacy_evidence: Extract any concrete proof of test adequacy, such as mutation score, property-based invariants, change-impact blast-radius analysis, or calibrated confidence intervals for human-in-the-loop decisions.
 
 Evidence Tiers:
 - academic_peer_reviewed: Rigorous academic paper with formal methodology or peer-reviewed publication (e.g. arXiv cs.SE with empirical studies).
@@ -93,11 +103,14 @@ class DeepExtractor:
         return SignalDossier(
             source_id=payload.id,
             name=extracted.name,
+            track=extracted.track,
             category=extracted.category,
             source_url=payload.source_url,
             evidence_tier=extracted.evidence_tier,
+            is_qe_relevant=extracted.is_qe_relevant,
             key_innovation=extracted.key_innovation,
             technical_claims=extracted.technical_claims,
+            adequacy_evidence=extracted.adequacy_evidence,
             has_reproducible_benchmark=extracted.has_reproducible_benchmark,
             has_open_source_repo=extracted.has_open_source_repo,
             is_superficial_wrapper=extracted.is_superficial_wrapper,

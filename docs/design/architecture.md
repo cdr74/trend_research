@@ -39,9 +39,10 @@ flowchart TD
         DB_RADAR[("radar_items\n(Active Rings + Trajectory Deltas)")]
     end
 
-    subgraph Pipeline ["3. 4-Stage Processing DAG (Option 1C)"]
-        ING -->|"Raw Payloads + Metrics"| ST1["Stage 1: Noise Sieve\n(Domain Heuristic Filter; drops Hype > 0.60)"]
-        ST1 -->|"Qualified Signals"| ST2["Stage 2: Deep Extractor\n(Fact & Claim Extraction + Embeddings)"]
+    subgraph Pipeline ["3. 4-Stage Processing DAG (Ref: ADR-0021)"]
+        ING -->|"Candidate Payloads"| T1["Tier 1: RelevanceFilter\n(Token Boundaries & Compound Gate)"]
+        T1 -->|"Filtered Signals"| ST1["Stage 1: Noise & Relevance Sieve\n(Drop Noise > 0.60 OR Rel < 0.35)"]
+        ST1 -->|"Qualified Signals"| ST2["Stage 2: Deep Extractor\n(Dual-Track Fact Extraction + Embeddings)"]
         
         subgraph Stage3 ["Stage 3: Convergence & Multi-Lens Committee (Option 2C)"]
             direction TB
@@ -58,7 +59,7 @@ flowchart TD
         end
 
         ST2 -->|"Dossiers & Vectors"| Stage3
-        Stage3 -->|"Synthesized Topic & Critique"| ST4["Stage 4: Radar Categorizer\n(Adopt / Trial / Assess / Hold +\nLifecycle: Emerging / Consolidated / Fading)"]
+        Stage3 -->|"Synthesized Topic & Critique"| ST4["Stage 4: Radar Categorizer\n(Adopt: Established / Trial: Pilot / Assess: Emerging / Hold: Flawed +\nLifecycle: Emerging / Consolidated / Fading)"]
     end
 
     ING -.->|"Persist Raw"| DB_RAW

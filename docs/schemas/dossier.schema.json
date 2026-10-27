@@ -23,6 +23,15 @@
       ],
       "title": "QECategory",
       "type": "string"
+    },
+    "TrackType": {
+      "description": "Dual-track taxonomy: deterministic software testing vs non-deterministic AI evaluation.",
+      "enum": [
+        "testing",
+        "evaluation"
+      ],
+      "title": "TrackType",
+      "type": "string"
     }
   },
   "description": "Stage 2 structured technical extraction dossier.",
@@ -54,6 +63,10 @@
       "title": "Name",
       "type": "string"
     },
+    "track": {
+      "$ref": "#/$defs/TrackType",
+      "default": "testing"
+    },
     "category": {
       "$ref": "#/$defs/QECategory"
     },
@@ -64,6 +77,11 @@
     "evidence_tier": {
       "$ref": "#/$defs/EvidenceTier"
     },
+    "is_qe_relevant": {
+      "default": true,
+      "title": "Is Qe Relevant",
+      "type": "boolean"
+    },
     "key_innovation": {
       "title": "Key Innovation",
       "type": "string"
@@ -73,6 +91,13 @@
         "type": "string"
       },
       "title": "Technical Claims",
+      "type": "array"
+    },
+    "adequacy_evidence": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Adequacy Evidence",
       "type": "array"
     },
     "has_reproducible_benchmark": {

@@ -47,6 +47,7 @@ class TrendTopicTable(Base):
 
     id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    track: Mapped[str] = mapped_column(String(50), default="testing", index=True)
     category: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     summary: Mapped[str] = mapped_column(Text, nullable=False)
     corroboration_count: Mapped[int] = mapped_column(Integer, default=1, index=True)
@@ -79,11 +80,14 @@ class SignalDossierTable(Base):
         PGUUID(as_uuid=True), ForeignKey("trend_topics.id"), nullable=True, index=True
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    track: Mapped[str] = mapped_column(String(50), default="testing", index=True)
     category: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     source_url: Mapped[str] = mapped_column(Text, nullable=False)
     evidence_tier: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    is_qe_relevant: Mapped[bool] = mapped_column(Boolean, default=True)
     key_innovation: Mapped[str] = mapped_column(Text, nullable=False)
     technical_claims: Mapped[list[str]] = mapped_column(JSONB, default=list)
+    adequacy_evidence: Mapped[list[str]] = mapped_column(JSONB, default=list)
     has_reproducible_benchmark: Mapped[bool] = mapped_column(Boolean, default=False)
     has_open_source_repo: Mapped[bool] = mapped_column(Boolean, default=False)
     is_superficial_wrapper: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -148,6 +152,7 @@ class RadarItemTable(Base):
         PGUUID(as_uuid=True), ForeignKey("trend_topics.id"), nullable=True, index=True
     )
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    track: Mapped[str] = mapped_column(String(50), default="testing", index=True)
     category: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     source_url: Mapped[str] = mapped_column(Text, nullable=False)
     evidence_tier: Mapped[str] = mapped_column(String(100), nullable=False, index=True)

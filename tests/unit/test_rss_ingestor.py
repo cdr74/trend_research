@@ -183,3 +183,86 @@ async def test_rss_ingestor_check_health() -> None:
     async with httpx.AsyncClient(transport=fail_transport) as fail_client:
         failing_ingestor = RssFeedIngestor(client=fail_client, rate_limit_delay=0.0)
         assert await failing_ingestor.check_health() is False
+
+
+def test_relevance_filter_token_boundary_prevents_substring_matches() -> None:
+    from radar.ingestion.rss import RelevanceFilter
+
+    # Substring 'ai' in words like 'domain', 'email', 'contain', 'chair' MUST NOT match
+    assert (
+        RelevanceFilter.matches("Email domain management in cloud infrastructure", keywords=["ai"])
+        is False
+    )
+    assert (
+        RelevanceFilter.matches("Fastest train route planning algorithms", keywords=["test"])
+        is False
+    )
+
+    # Standalone 'ai' WITH software qualifiers MUST match
+    assert (
+        RelevanceFilter.matches(
+            "Applying AI to software test generation in CI/CD pipeline", keywords=["ai"]
+        )
+        is True
+    )
+
+    # Standalone 'ai' WITHOUT software qualifiers MUST NOT match
+    assert (
+        RelevanceFilter.matches(
+            "Forecasting space weather and atmospheric patterns with AI", keywords=["ai"]
+        )
+        is False
+    )
+
+
+def test_relevance_filter_negative_exclusions() -> None:
+    from radar.ingestion.rss import RelevanceFilter
+
+    assert (
+        RelevanceFilter.matches(
+            "Testing apps in our new marketplace growth program", keywords=["testing"]
+        )
+        is False
+    )
+    assert (
+        RelevanceFilter.matches(
+            "Our company is hiring now for quality assurance roles", keywords=["testing"]
+        )
+        is False
+    )
+    assert (
+        RelevanceFilter.matches("Get 50% off with promo code TESTPRO", keywords=["testing"])
+        is False
+    )
+
+
+def test_relevance_filter_dual_track_anchors_pass() -> None:
+    from radar.ingestion.rss import RelevanceFilter
+
+    # Track 1: Software Testing (Deterministic)
+    assert (
+        RelevanceFilter.matches("Recent advances in mutation testing and mutant killed ratios")
+        is True
+    )
+    assert (
+        RelevanceFilter.matches(
+            "Deploying property-based testing in financial ledger microservices"
+        )
+        is True
+    )
+    assert RelevanceFilter.matches("Eliminating flaky tests in monorepo pull requests") is True
+
+    # Track 2: AI Evaluation (Non-Deterministic)
+    assert (
+        RelevanceFilter.matches(
+            "Adversarial red-teaming and prompt regression harnesses for agents"
+        )
+        is True
+    )
+    assert (
+        RelevanceFilter.matches(
+            "Behavioral drift and hallucination detection in LLM-as-a-judge pipelines"
+        )
+        is True
+    )
+    assert RelevanceFilter.matches("Benchmarking autonomous agent reasoning trajectories") is True

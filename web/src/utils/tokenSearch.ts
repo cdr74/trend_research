@@ -2,6 +2,7 @@ import { RadarItem } from "../types";
 
 export interface ParsedQuery {
   ring?: string;
+  track?: string;
   category?: string;
   tier?: string;
   stage?: string;
@@ -40,6 +41,8 @@ export function parseSearchQuery(query: string): ParsedQuery {
 
       if (key === "ring") {
         parsed.ring = val.toLowerCase();
+      } else if (key === "track" || key === "type") {
+        parsed.track = val.toLowerCase();
       } else if (key === "category" || key === "pillar") {
         parsed.category = val.toLowerCase();
       } else if (key === "tier" || key === "evidence") {
@@ -87,6 +90,10 @@ export function parseSearchQuery(query: string): ParsedQuery {
 
 export function matchesQuery(item: RadarItem, parsed: ParsedQuery): boolean {
   if (parsed.ring && item.recommended_ring.toLowerCase() !== parsed.ring) {
+    return false;
+  }
+
+  if (parsed.track && item.track && !item.track.toLowerCase().includes(parsed.track)) {
     return false;
   }
 

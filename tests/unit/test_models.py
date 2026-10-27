@@ -134,3 +134,38 @@ def test_trend_topic_creation() -> None:
     )
     assert topic.corroboration_count == 4
     assert topic.lifecycle_stage == LifecycleStage.EMERGING
+
+
+def test_dual_track_and_adequacy_models() -> None:
+    from radar.core.models import ExtractedInnovation, NoiseFilterResult, TrackType
+
+    # TrackType enum verification
+    assert TrackType.TESTING.value == "testing"
+    assert TrackType.EVALUATION.value == "evaluation"
+
+    # NoiseFilterResult with financial red flags and domain relevance
+    noise_res = NoiseFilterResult(
+        payload_id=uuid4(),
+        passed=True,
+        noise_score=0.15,
+        domain_relevance_score=0.85,
+        matched_financial_red_flags=[],
+        matched_relevance_indicators=["Software Testing (Deterministic) anchor"],
+    )
+    assert noise_res.domain_relevance_score == 0.85
+    assert len(noise_res.matched_financial_red_flags) == 0
+
+    # ExtractedInnovation with Dual-Track and adequacy evidence
+    innovation = ExtractedInnovation(
+        name="HypoFuzz-Settlement",
+        track=TrackType.TESTING,
+        category=QECategory.TEST_SYNTHESIS,
+        evidence_tier=EvidenceTier.ENGINEERING_POST_MORTEM,
+        is_qe_relevant=True,
+        key_innovation="Property-based fuzzing with mutation-guided coverage for financial settlement.",
+        technical_claims=["Uncovers subtle race conditions in settlement ledgers."],
+        adequacy_evidence=["mutation score: 92%", "property-based invariants"],
+    )
+    assert innovation.track == TrackType.TESTING
+    assert innovation.is_qe_relevant is True
+    assert len(innovation.adequacy_evidence) == 2

@@ -68,6 +68,32 @@ async def init_db(engine: AsyncEngine | None = None) -> None:
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
         # Create all tables
         await conn.run_sync(Base.metadata.create_all)
+        # Migrate schema additions (idempotent DDL)
+        await conn.execute(
+            text(
+                "ALTER TABLE trend_topics ADD COLUMN IF NOT EXISTS track VARCHAR(50) DEFAULT 'testing' NOT NULL;"
+            )
+        )
+        await conn.execute(
+            text(
+                "ALTER TABLE signal_dossiers ADD COLUMN IF NOT EXISTS track VARCHAR(50) DEFAULT 'testing' NOT NULL;"
+            )
+        )
+        await conn.execute(
+            text(
+                "ALTER TABLE signal_dossiers ADD COLUMN IF NOT EXISTS is_qe_relevant BOOLEAN DEFAULT TRUE NOT NULL;"
+            )
+        )
+        await conn.execute(
+            text(
+                "ALTER TABLE signal_dossiers ADD COLUMN IF NOT EXISTS adequacy_evidence JSONB DEFAULT '[]'::jsonb NOT NULL;"
+            )
+        )
+        await conn.execute(
+            text(
+                "ALTER TABLE radar_items ADD COLUMN IF NOT EXISTS track VARCHAR(50) DEFAULT 'testing' NOT NULL;"
+            )
+        )
 
 
 async def check_db_health(engine: AsyncEngine | None = None) -> bool:

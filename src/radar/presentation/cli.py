@@ -505,11 +505,12 @@ async def _run_evaluate(
 
 def _get_mock_radar_items() -> list[RadarItem]:
     """Provide realistic mock radar items for offline testing, queries, and exports."""
-    from radar.core.models import EvidenceTier, LifecycleStage
+    from radar.core.models import EvidenceTier, LifecycleStage, TrackType
 
     return [
         RadarItem(
             name="Playwright-Invariance-Agent",
+            track=TrackType.TESTING,
             category=QECategory.TEST_SYNTHESIS,
             source_url="https://github.com/cdr74/playwright-invariance",
             evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
@@ -581,6 +582,7 @@ def _get_mock_radar_items() -> list[RadarItem]:
         ),
         RadarItem(
             name="Multi-Agent Red-Team Explorer",
+            track=TrackType.EVALUATION,
             category=QECategory.AGENT_SYSTEMS,
             source_url="https://arxiv.org/abs/2408.00002",
             evidence_tier=EvidenceTier.ACADEMIC_PEER_REVIEWED,
@@ -642,6 +644,17 @@ def _filter_items_by_query_string(items: list[Any], query_string: str) -> list[A
                         else it.recommended_ring.value
                     ).lower()
                     == val_clean
+                ]
+            elif key in ("track", "type"):
+                filtered = [
+                    it
+                    for it in filtered
+                    if val_clean
+                    in (
+                        it.track.value
+                        if hasattr(getattr(it, "track", None), "value")
+                        else str(getattr(it, "track", "testing"))
+                    ).lower()
                 ]
             elif key in ("category", "pillar"):
                 filtered = [
@@ -807,6 +820,7 @@ async def _run_query(
         header_style="bold magenta",
     )
     table.add_column("Ring", style="bold", justify="center", width=8)
+    table.add_column("Track", style="green", justify="center", width=12)
     table.add_column("Technology", style="bold", width=22)
     table.add_column("QE Pillar", style="cyan", width=24)
     table.add_column("Trajectory", justify="center", width=12)
@@ -820,12 +834,15 @@ async def _run_query(
             if isinstance(it.recommended_ring, str)
             else it.recommended_ring.value
         )
+        track_attr = getattr(it, "track", "testing")
+        track_display = str(track_attr.value if hasattr(track_attr, "value") else track_attr)
         cat_display = it.category if isinstance(it.category, str) else it.category.value
         traj_display = (
             it.lifecycle_stage if isinstance(it.lifecycle_stage, str) else it.lifecycle_stage.value
         )
         table.add_row(
             ring_display,
+            track_display,
             it.name[:20],
             cat_display,
             traj_display,

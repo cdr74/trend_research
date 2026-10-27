@@ -45,6 +45,8 @@ Open-source repositories provide live telemetry on actual adoption and technical
    - `https://github.com/topics/browser-automation`
    - `https://github.com/topics/evals`
    - `https://github.com/topics/agentic-testing`
+   - `https://github.com/topics/llm-red-teaming`
+   - `https://github.com/topics/property-based-testing`
    - **Telemetry:** Star velocity ($\Delta\text{stars}/\text{week}$), fork velocity, commit cadence, contributor count.
 
 2. **Core Quality & Testing Frameworks (Watchlist)**

@@ -22,6 +22,15 @@
       ],
       "title": "QECategory",
       "type": "string"
+    },
+    "TrackType": {
+      "description": "Dual-track taxonomy: deterministic software testing vs non-deterministic AI evaluation.",
+      "enum": [
+        "testing",
+        "evaluation"
+      ],
+      "title": "TrackType",
+      "type": "string"
     }
   },
   "description": "Synthesized cross-source trend topic entity (Option 3B).",
@@ -34,6 +43,10 @@
     "name": {
       "title": "Name",
       "type": "string"
+    },
+    "track": {
+      "$ref": "#/$defs/TrackType",
+      "default": "testing"
     },
     "category": {
       "$ref": "#/$defs/QECategory"

@@ -65,7 +65,7 @@ sources:
     authority_weight: 1.1
     enabled: true
     query_params:
-      q: "topic:evals OR topic:llm-evaluation sort:stars"
+      q: "topic:evals sort:stars"
     telemetry_fields: ["stars", "forks"]
     description: "Evaluation harnesses, LLM-as-a-judge test suites, and prompt regression tools."
 
@@ -76,9 +76,31 @@ sources:
     authority_weight: 1.1
     enabled: true
     query_params:
-      q: "topic:browser-automation OR topic:browser-use sort:updated"
+      q: "topic:browser-automation sort:updated"
     telemetry_fields: ["stars", "forks"]
     description: "Autonomous browser-use agents and exploratory testing controllers."
+
+  - id: "github-topic-llm-red-teaming"
+    name: "GitHub Topic: LLM Red Teaming & Adversarial Evals"
+    channel: "github"
+    endpoint_url: "https://api.github.com/search/repositories"
+    authority_weight: 1.1
+    enabled: true
+    query_params:
+      q: "topic:llm-red-teaming sort:updated"
+    telemetry_fields: ["stars", "forks", "open_issues"]
+    description: "Frameworks for safety evaluation, red-teaming, prompt injection testing, and behavioral boundary auditing."
+
+  - id: "github-topic-property-based-testing"
+    name: "GitHub Topic: Property-Based Testing"
+    channel: "github"
+    endpoint_url: "https://api.github.com/search/repositories"
+    authority_weight: 1.1
+    enabled: true
+    query_params:
+      q: "topic:property-based-testing sort:stars"
+    telemetry_fields: ["stars", "forks"]
+    description: "Generative and property-based test synthesis frameworks and automated invariant discovery tools."
 
   # ==========================================
   # Practitioner Engineering Blogs (Weight: 1.2)

@@ -44,6 +44,15 @@
       ],
       "title": "RadarRing",
       "type": "string"
+    },
+    "TrackType": {
+      "description": "Dual-track taxonomy: deterministic software testing vs non-deterministic AI evaluation.",
+      "enum": [
+        "testing",
+        "evaluation"
+      ],
+      "title": "TrackType",
+      "type": "string"
     }
   },
   "description": "Stage 4 final radar publication entity.",
@@ -69,6 +78,10 @@
     "name": {
       "title": "Name",
       "type": "string"
+    },
+    "track": {
+      "$ref": "#/$defs/TrackType",
+      "default": "testing"
     },
     "category": {
       "$ref": "#/$defs/QECategory"

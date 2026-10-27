@@ -74,9 +74,11 @@ class RadarRepository:
 
     async def save_topic(self, topic: TrendTopic) -> TrendTopicTable:
         """Persist a multi-source synthesized trend topic cluster."""
+        track_val = topic.track.value if hasattr(topic.track, "value") else str(topic.track)
         record = TrendTopicTable(
             id=topic.id,
             name=topic.name,
+            track=track_val,
             category=topic.category.value,
             summary=topic.summary,
             corroboration_count=topic.corroboration_count,
@@ -100,6 +102,7 @@ class RadarRepository:
         record = await self.get_topic_by_id(topic.id)
         if record is not None:
             record.name = topic.name
+            record.track = topic.track.value if hasattr(topic.track, "value") else str(topic.track)
             record.category = topic.category.value
             record.summary = topic.summary
             record.corroboration_count = topic.corroboration_count
@@ -130,12 +133,16 @@ class RadarRepository:
         stmt = select(SignalDossierTable).where(SignalDossierTable.source_id == dossier.source_id)
         res = await self.session.execute(stmt)
         existing = res.scalars().first()
+        track_val = dossier.track.value if hasattr(dossier.track, "value") else str(dossier.track)
         if existing is not None:
             existing.name = dossier.name
+            existing.track = track_val
             existing.category = dossier.category.value
             existing.evidence_tier = dossier.evidence_tier.value
+            existing.is_qe_relevant = dossier.is_qe_relevant
             existing.key_innovation = dossier.key_innovation
             existing.technical_claims = dossier.technical_claims
+            existing.adequacy_evidence = dossier.adequacy_evidence
             existing.has_reproducible_benchmark = dossier.has_reproducible_benchmark
             existing.has_open_source_repo = dossier.has_open_source_repo
             existing.is_superficial_wrapper = dossier.is_superficial_wrapper
@@ -151,11 +158,14 @@ class RadarRepository:
             source_id=dossier.source_id,
             topic_id=dossier.topic_id,
             name=dossier.name,
+            track=track_val,
             category=dossier.category.value,
             source_url=dossier.source_url,
             evidence_tier=dossier.evidence_tier.value,
+            is_qe_relevant=dossier.is_qe_relevant,
             key_innovation=dossier.key_innovation,
             technical_claims=dossier.technical_claims,
+            adequacy_evidence=dossier.adequacy_evidence,
             has_reproducible_benchmark=dossier.has_reproducible_benchmark,
             has_open_source_repo=dossier.has_open_source_repo,
             is_superficial_wrapper=dossier.is_superficial_wrapper,
@@ -211,8 +221,10 @@ class RadarRepository:
         stmt = select(RadarItemTable).where(RadarItemTable.source_url == item.source_url)
         res = await self.session.execute(stmt)
         existing = res.scalars().first()
+        track_val = item.track.value if hasattr(item.track, "value") else str(item.track)
         if existing is not None:
             existing.name = item.name
+            existing.track = track_val
             existing.category = item.category.value
             existing.evidence_tier = item.evidence_tier.value
             existing.hype_score = item.hype_score
@@ -238,6 +250,7 @@ class RadarRepository:
             evaluation_id=item.evaluation_id,
             topic_id=item.topic_id,
             name=item.name,
+            track=track_val,
             category=item.category.value,
             source_url=item.source_url,
             evidence_tier=item.evidence_tier.value,

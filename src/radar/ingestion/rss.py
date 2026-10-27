@@ -67,12 +67,107 @@ def _parse_feed_date(date_str: str | None) -> datetime | None:
     return None
 
 
-def _matches_keywords(text: str, keywords: list[str] | None) -> bool:
-    """Return True if keywords is empty or text contains any keyword."""
-    if not keywords:
+# Generic testing/eval terms that require co-occurring software qualifiers
+_GENERIC_TERMS = {
+    "testing",
+    "test",
+    "tests",
+    "verification",
+    "verified",
+    "verify",
+    "benchmarking",
+    "benchmark",
+    "benchmarks",
+    "evals",
+    "evaluation",
+    "evaluations",
+    "automation",
+    "automated",
+    "qa",
+    "quality",
+    "ai",
+}
+
+# Software engineering qualifiers required when generic terms match
+_SE_QUALIFIERS = re.compile(
+    r"\b(code|software|ci/cd|pipeline|runner|unit|integration|e2e|assertion|"
+    r"regression|harness|test\s+suite|developer|runtime|compiler|mutation|"
+    r"flaky|invariant|mock|stub|ast|symbolic|fuzz|bug|defect|commit|repo)\b",
+    re.IGNORECASE,
+)
+
+# High-confidence standalone terms that qualify immediately (Dual Track)
+_STANDALONE_QE_TERMS = re.compile(
+    r"\b("
+    # Track 1: Software Testing (Deterministic)
+    r"mutation\s+testing|property-based\s+testing|differential\s+fuzzing|"
+    r"flaky\s+test|predictive\s+test\s+selection|automated\s+program\s+repair|"
+    r"test\s+synthesis|concolic\s+execution|canary\s+analysis|chaos\s+engineering|"
+    r"test\s+runner|test\s+impact\s+analysis|coverage\s+analysis|fault\s+injection|"
+    # Track 2: AI Evaluation (Non-Deterministic)
+    r"llm\s+evals|llm-as-a-judge|prompt\s+regression|hallucination\s+detection|"
+    r"agent\s+benchmarking|behavioral\s+drift|prompt\s+injection|jailbreak\s+defense|"
+    r"adversarial\s+red-teaming|red\s+teaming|"
+    # Evidence of Adequacy & Governance
+    r"mutation\s+score|evidence\s+of\s+adequacy|proof\s+of\s+testing|confidence\s+score"
+    r")\b",
+    re.IGNORECASE,
+)
+
+# Negative exclusion patterns that disqualify non-technical articles
+_NEGATIVE_EXCLUSIONS = re.compile(
+    r"\b(marketplace\s+growth|pricing\s+plans?|webinar|hiring\s+now|salary\s+survey|"
+    r"promo\s+code|sponsored\s+post|discount\s+code|investor\s+relations)\b",
+    re.IGNORECASE,
+)
+
+
+class RelevanceFilter:
+    """Tier 1 token-boundary and compound domain relevance filter (Ref: ADR-0021)."""
+
+    @classmethod
+    def matches(cls, text: str, keywords: list[str] | None = None) -> bool:
+        """Evaluate text using token boundaries, compound co-occurrence, and exclusions."""
+        if not text:
+            return False
+
+        # Disqualify commercial marketing/job listings
+        if _NEGATIVE_EXCLUSIONS.search(text):
+            return False
+
+        # If explicit keywords provided, enforce word boundaries and disambiguation
+        if keywords:
+            for k in keywords:
+                cleaned_k = k.strip()
+                if not cleaned_k:
+                    continue
+                # Token-boundary regex to prevent 'ai' in 'email' or 'test' in 'fastest'
+                pattern = re.compile(rf"\b{re.escape(cleaned_k)}\b", re.IGNORECASE)
+                if pattern.search(text):
+                    lowered_k = cleaned_k.lower()
+                    if lowered_k in _GENERIC_TERMS:
+                        # Require co-occurrence with software engineering context
+                        if _SE_QUALIFIERS.search(text) or _STANDALONE_QE_TERMS.search(text):
+                            return True
+                    else:
+                        # Non-generic specific keyword (e.g. 'canary', 'flaky', 'mutation')
+                        return True
+            return False
+
+        # If no explicit keywords configured, default to standalone QE or generic+qualifier
+        if _STANDALONE_QE_TERMS.search(text):
+            return True
+        if re.search(r"\b(testing|verification|evals|qa)\b", text, re.I) and _SE_QUALIFIERS.search(
+            text
+        ):
+            return True
+
         return True
-    lowered = text.lower()
-    return any(k.lower() in lowered for k in keywords)
+
+
+def _matches_keywords(text: str, keywords: list[str] | None) -> bool:
+    """Evaluate text against keywords using the Tier 1 RelevanceFilter."""
+    return RelevanceFilter.matches(text, keywords)
 
 
 def _parse_rss2_item(

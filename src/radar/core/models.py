@@ -19,6 +19,13 @@ class QECategory(StrEnum):
     GOVERNANCE_AND_EVALS = "Governance & Evals"
 
 
+class TrackType(StrEnum):
+    """Dual-track taxonomy: deterministic software testing vs non-deterministic AI evaluation."""
+
+    TESTING = "testing"
+    EVALUATION = "evaluation"
+
+
 class EvidenceTier(StrEnum):
     """Evidence backing tiers for technical claims."""
 
@@ -75,8 +82,11 @@ class NoiseFilterResult(BaseModel):
     payload_id: UUID
     passed: bool
     noise_score: float = Field(..., ge=0.0, le=1.0)
+    domain_relevance_score: float = Field(default=1.0, ge=0.0, le=1.0)
     matched_hype_indicators: list[str] = Field(default_factory=list)
     matched_credibility_indicators: list[str] = Field(default_factory=list)
+    matched_relevance_indicators: list[str] = Field(default_factory=list)
+    matched_financial_red_flags: list[str] = Field(default_factory=list)
     rejection_reasons: list[str] = Field(default_factory=list)
     evaluated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
@@ -95,8 +105,16 @@ class ExtractedInnovation(BaseModel):
     """Structured technical claims and domain classification extracted by Stage 2."""
 
     name: str = Field(..., description="Canonical entity / tool / research paper name")
+    track: TrackType = Field(
+        default=TrackType.TESTING,
+        description="Domain track: testing (deterministic software) or evaluation (non-deterministic AI)",
+    )
     category: QECategory = Field(..., description="Primary QE domain pillar")
     evidence_tier: EvidenceTier = Field(..., description="Backing evidence tier")
+    is_qe_relevant: bool = Field(
+        default=True,
+        description="False if the topic is not software quality engineering, automated testing, or AI evaluation",
+    )
     key_innovation: str = Field(
         ...,
         description="1-2 concise sentences summarizing the core technological breakthrough",
@@ -104,6 +122,10 @@ class ExtractedInnovation(BaseModel):
     technical_claims: list[str] = Field(
         default_factory=list,
         description="2 to 5 verifiable, concrete technical claims made by authors/creators",
+    )
+    adequacy_evidence: list[str] = Field(
+        default_factory=list,
+        description="Verified adequacy indicators (e.g. mutation testing, property-based invariants, confidence score)",
     )
     has_reproducible_benchmark: bool = Field(
         default=False,
@@ -125,11 +147,14 @@ class SignalDossier(BaseModel):
     source_id: UUID
     topic_id: UUID | None = None
     name: str
+    track: TrackType = Field(default=TrackType.TESTING)
     category: QECategory
     source_url: str
     evidence_tier: EvidenceTier
+    is_qe_relevant: bool = Field(default=True)
     key_innovation: str
     technical_claims: list[str] = Field(default_factory=list)
+    adequacy_evidence: list[str] = Field(default_factory=list)
     has_reproducible_benchmark: bool = False
     has_open_source_repo: bool = False
     is_superficial_wrapper: bool = False
@@ -231,6 +256,7 @@ class TrendTopic(BaseModel):
 
     id: UUID = Field(default_factory=uuid4)
     name: str
+    track: TrackType = Field(default=TrackType.TESTING)
     category: QECategory
     summary: str
     corroboration_count: int = 1
@@ -247,6 +273,7 @@ class RadarItem(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     topic_id: UUID | None = None
     name: str
+    track: TrackType = Field(default=TrackType.TESTING)
     category: QECategory
     source_url: str
     evidence_tier: EvidenceTier

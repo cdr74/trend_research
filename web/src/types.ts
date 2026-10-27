@@ -16,9 +16,12 @@ export type EvidenceTier =
 
 export type LifecycleStage = "Emerging" | "Consolidated" | "Fading";
 
+export type TrackType = "testing" | "evaluation";
+
 export interface RadarItem {
   id: string;
   name: string;
+  track?: TrackType;
   category: QECategory;
   evidence_tier: EvidenceTier;
   hype_score: number;

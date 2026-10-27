@@ -15,14 +15,16 @@ The platform cuts through vendor marketing, unverified benchmarks, and superfici
 ## 🎯 Core Capabilities
 
 - **Zero-Hype Signal Extraction:** Algorithmic penalties for missing empirical datasets, synthetic vanity metrics, and un-augmented wrapper architectures.
+- **Dual-Track Signal Isolation:** Explicit separation between **Software Testing** (deterministic systems) and **AI Evaluation** (non-deterministic systems), linked by agentic SDLC governance.
+- **Evidence of Adequacy & Confidence Scoring:** Prioritizes mutation testing, property-based invariants, change-risk impact analysis, and calibrated confidence scores for the accountable human-in-the-loop.
+- **Financial Enterprise Guardrails:** Strict penalties for testing in production on live systems, autonomous un-audited merges, and unauthorized cloud code egress.
 - **Multi-Source Corroboration:** Semantic clustering (`pgvector`) identifies when independent trusted sources (pre-prints, open-source projects, engineering post-mortems) converge on the same core breakthrough, awarding a positive consensus boost.
 - **Audience Telemetry & Engagement Velocity:** Ingestion tracking of readers, viewers, citations, and repository stars with time-decayed velocity ($\Delta \text{metric}/\Delta t$) to differentiate real momentum from fading fads.
-- **Pluggable Domain Profiles:** Domain-agnostic core pipeline. Taxonomies, heuristics, and evaluation lenses are decoupled into modular profiles (Initial reference profile: *Software Quality Engineering & SDLC Innovations*).
 - **Multi-Lens Evaluator Committee:** Evaluates innovations across specialized lenses:
   1. *Security & Privacy* (data boundaries, zero-egress, secret protection)
   2. *Operational Feasibility* (deterministic reproducibility, execution footprint, integration ergonomics)
   3. *Technical Rigor* (empirical problem-solving vs synthetic benchmarks)
-- **Actionable Decision Velocity:** Bi-weekly executive intelligence briefings and an interactive ThoughtWorks-style Tech Radar (Adopt / Trial / Assess / Hold) with multi-criteria filtering.
+- **Actionable Decision Velocity:** Bi-weekly executive intelligence briefings and an interactive ThoughtWorks-style Tech Radar (Adopt: Established / Trial: Pilot / Assess: Emerging / Hold: Flawed) with multi-criteria filtering.
 
 ---
 

@@ -266,3 +266,72 @@ def test_noise_sieve_fallback_rejection_reason() -> None:
     assert qual is None
     assert len(res.matched_hype_indicators) == 0
     assert "exceeded threshold" in res.rejection_reasons[0].lower()
+
+
+def test_noise_sieve_financial_red_flag_testing_in_production_drops() -> None:
+    """Validate that testing in production on live systems triggers a financial red flag and drops."""
+    sieve = NoiseSieve()
+    payload = SourcePayload(
+        source_type=SourceType.RSS,
+        source_url="https://example.com/chaos-prod",
+        title="Testing in Production with Automated Chaos Fault Injection",
+        raw_content="Why we execute continuous testing in production against live transaction databases.",
+    )
+    res, qual = sieve.evaluate(payload, authority_weight=1.0)
+    assert res.passed is False
+    assert qual is None
+    assert any(
+        "financial red flag: testing in production" in f.lower()
+        for f in res.matched_financial_red_flags
+    )
+    assert any("testing in production" in r.lower() for r in res.rejection_reasons)
+
+
+def test_noise_sieve_financial_red_flag_autonomous_merge_drops() -> None:
+    """Validate that auto-merge without human oversight is flagged and dropped."""
+    sieve = NoiseSieve()
+    payload = SourcePayload(
+        source_type=SourceType.GITHUB,
+        source_url="https://github.com/example/auto-bot",
+        title="AutoMerge Agent: Zero Human Oversight",
+        raw_content="Automatic merge without human review for all synthesized unit tests.",
+    )
+    res, qual = sieve.evaluate(payload, authority_weight=1.0)
+    assert res.passed is False
+    assert qual is None
+    assert any(
+        "bypass of accountable human review" in f.lower() for f in res.matched_financial_red_flags
+    )
+
+
+def test_noise_sieve_evidence_of_adequacy_credit() -> None:
+    """Validate that mutation scores and calibrated confidence scores receive credibility credits."""
+    sieve = NoiseSieve()
+    payload = SourcePayload(
+        source_type=SourceType.ARXIV,
+        source_url="https://arxiv.org/abs/2410.9999",
+        title="Calibrated Confidence Scoring for Agentic Test Adequacy",
+        raw_content="We provide verifiable proof of testing with mutation score analysis, automated test synthesis, and blast-radius quantification for CI/CD pipelines.",
+    )
+    res, qual = sieve.evaluate(payload, authority_weight=1.2)
+    assert res.passed is True
+    assert qual is not None
+    assert res.noise_score <= 0.10
+    assert any("adequacy" in c.lower() for c in res.matched_credibility_indicators)
+    assert res.domain_relevance_score >= 0.70
+
+
+def test_noise_sieve_non_se_domain_relevance_drops() -> None:
+    """Validate that empirical non-SE papers (e.g. space weather, mathematics) drop on domain relevance."""
+    sieve = NoiseSieve()
+    payload = SourcePayload(
+        source_type=SourceType.ARXIV,
+        source_url="https://arxiv.org/abs/math.1234",
+        title="Solving a 31-Year-Old Grand Challenge in Mathematics",
+        raw_content="Empirical evaluation and controlled experiment proving the KLS conjecture in high-dimensional convex geometry.",
+    )
+    res, qual = sieve.evaluate(payload, authority_weight=1.3)
+    assert res.passed is False
+    assert qual is None
+    assert res.domain_relevance_score < 0.35
+    assert any("insufficient domain relevance" in r.lower() for r in res.rejection_reasons)
