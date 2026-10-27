@@ -514,10 +514,16 @@ The repository enforces Semantic Versioning (SemVer) driven by Conventional Comm
 - Pushes to `main` with `feat:` or `fix:` commits trigger the Release Please GitHub Actions workflow.
 - Release Please automatically creates and maintains a Release PR updating `CHANGELOG.md` and version numbers.
 - Merging the Release PR triggers the publishing workflow:
-  - Cuts a Git release tag (e.g., `v0.2.0`).
+  - Cuts a Git release tag (e.g., `v0.5.0`).
   - Builds Python distributions (`.whl` and `.tar.gz`) via `uv build`.
   - Packages the static web dashboard (`radar-web-dashboard.tar.gz`).
   - Publishes the GitHub Release with attached assets.
+
+### 5.3 GitHub Branch Protection & Safety Guardrails
+The default branch (`main`) is governed by an active GitHub Repository Ruleset (**Guardrail Protection for Main**):
+- **Non-Fast-Forward Protection (Block Force Pushes):** Prohibits `git push --force origin main`, preventing accidental history overwrites or commit loss.
+- **Deletion Protection:** Prohibits deletion of the default branch (`git push origin :main`).
+- **Direct Push Velocity:** Fast-forward pushes by repository maintainers remain fully supported following local verification (`pytest`, `mypy`, `ruff`), preserving seamless pair-programming iteration while maintaining structural safety. Release Please PR automation merges cleanly without artificial review blockades.
 
 ---
 
