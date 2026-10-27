@@ -33,10 +33,11 @@ The platform cuts through vendor marketing, unverified benchmarks, and superfici
 ```mermaid
 flowchart TD
     subgraph Ingestion ["1. Source Ingestion & Telemetry"]
-        A1["Academic Pre-prints\n(arXiv, Papers)"] --> ING["Ingestion Engine"]
-        A2["Open Source Velocity\n(GitHub Commits, Stars)"] --> ING
-        A3["Practitioner Publications\n(Engineering Blogs, Post-Mortems)"] --> ING
-        A4["Community Discussion\n(Telemetry, Views, Readers)"] --> ING
+        A1["Academic Pre-prints\n(arXiv, Papers)"] --> FILT["Tier 1: Relevance Boundary Filter\n(Regex token boundaries & compound co-occurrence)"]
+        A2["Open Source Velocity\n(GitHub Commits, Stars)"] --> FILT
+        A3["Practitioner Publications\n(Engineering Blogs, Post-Mortems)"] --> FILT
+        A4["Community Discussion\n(Telemetry, Views, Readers)"] --> FILT
+        FILT --> ING["Ingestion Engine"]
     end
 
     subgraph Storage ["2. Unified Persistence (Podman)"]
@@ -44,8 +45,8 @@ flowchart TD
     end
 
     subgraph Pipeline ["3. 4-Stage Processing DAG"]
-        ING -->|"Raw Payloads + Metrics"| S1["Stage 1: Noise Sieve\n(Heuristic filter; drops Hype > 0.60)"]
-        S1 -->|"Qualified Payloads"| S2["Stage 2: Deep Extractor\n(Fact & Claim Extraction + Embeddings)"]
+        ING -->|"Raw Payloads + Metrics"| S1["Stage 1: Noise Sieve & Financial Gate\n(Dual-drop: Noise <= 0.60 & Relevance >= 0.35;\nFinancial Red-Flag Disqualification)"]
+        S1 -->|"Qualified Payloads"| S2["Stage 2: Deep Extractor\n(Dual-Track Fact Extraction + Embeddings)"]
         
         subgraph S3 ["Stage 3: Convergence & Multi-Lens Review"]
             direction TB
@@ -55,7 +56,7 @@ flowchart TD
         end
 
         S2 -->|"Dossiers & Vectors"| S3
-        S3 -->|"Synthesized Topic & Critique"| S4["Stage 4: Radar Categorizer\n(Adopt / Trial / Assess / Hold +\nLifecycle: Emerging / Consolidated / Fading)"]
+        S3 -->|"Synthesized Topic & Critique"| S4["Stage 4: Radar Categorizer\n(Adopt / Trial / Assess / Hold +\nDual-Track: Testing vs Evaluation)"]
     end
 
     ING -.->|"Persist Raw"| DB
@@ -64,9 +65,9 @@ flowchart TD
     S4 -.->|"Persist Published State"| DB
 
     subgraph Presentation ["4. Presentation & Delivery"]
-        S4 --> CLI["CLI Tool (`radar`)"]
+        S4 --> CLI["CLI Tool (`radar query`, `radar sync`)"]
         S4 --> REP["Executive Trend Digest (`reports/`)"]
-        S4 --> WEB["Interactive Radar UI (`web/`)"]
+        S4 --> WEB["Interactive Radar UI (`web/`) with Dual-Track Switcher"]
     end
 ```
 
@@ -131,10 +132,9 @@ flowchart TD
 
 6. **Launch interactive web dashboard:**
    ```bash
-   cd web
-   npm install
-   npm run dev
+   uv run radar ui
    ```
+   *(Or navigate to `web/` and run `npm run dev`).*
 
 ---
 
@@ -162,6 +162,7 @@ flowchart TD
   - [ADR 0018: Automated SemVer Release Tagging and Changelog Automation via Release Please](docs/adr/0018-automated-semver-release-and-changelog-automation.md)
   - [ADR 0019: Incremental Delta Sync and Watermark Tracking for On-Demand WSL Execution](docs/adr/0019-incremental-delta-sync-and-watermark-tracking.md)
   - [ADR 0020: Interactive Database Lifecycle Probing and User Consent Startup](docs/adr/0020-interactive-db-startup-and-container-lifecycle.md)
+  - [ADR 0021: Multi-Tiered Domain Relevance and Topic Filtering with Financial Enterprise Guardrails](docs/adr/0021-multi-tiered-domain-relevance-and-topic-filtering.md)
 - [System Design & Architecture Document](docs/design/architecture.md)
 - [Product & Engineering Backlog](docs/BACKLOG.md)
 - [User Guide & Operations Manual](docs/USER_GUIDE.md)
@@ -175,8 +176,9 @@ flowchart TD
 - [x] **Milestone 1: Repository Baseline, Schemas & Tooling Harness**
 - [x] **Milestone 2: Multi-Channel Ingestion & Heuristic Noise Sieve**
 - [x] **Milestone 3: Topic Convergence, Adversarial Committee & Evaluation Pipeline**
-- [ ] **Milestone 4: Presentation, CLI & Decoupled Interactive Web Dashboard**
-- [ ] **Milestone 5: Continuous Delivery, Release & Ops Automation**
+- [x] **Milestone 4: Presentation, CLI & Decoupled Interactive Web Dashboard**
+- [x] **Milestone 5: Continuous Delivery, Release & Ops Automation**
+- [x] **Milestone 6: Domain Relevance, Financial Guardrails & Dual-Track Architecture**
 
 See [`docs/BACKLOG.md`](docs/BACKLOG.md) for detailed task breakdowns.
 

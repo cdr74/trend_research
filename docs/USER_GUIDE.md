@@ -442,11 +442,12 @@ npm run dev
 Open **`http://localhost:5173`** in your browser.
 
 #### 3. Dashboard Features & Views:
+- **Dual-Track Domain Switcher:** Sub-header tab bar allowing instant switching between **All Tracks**, **Software Testing (Deterministic)**, and **AI Evaluation (Non-Deterministic)** with live signal counts.
 - **Radar Quadrant View:** Polar visualization across 4 concentric rings (Adopt, Trial, Assess, Hold) partitioned into 6 Software Quality Engineering pillars. Hover over any blip for instant score breakdowns.
-- **Matrix Table View:** Comprehensive tabular data grid. Click any row to expand the Committee Audit Drawer featuring skeptic critiques and risk tags.
+- **Matrix Table View:** Comprehensive tabular data grid with a dedicated **Track** column. Click any row to expand the Committee Audit Drawer featuring skeptic critiques and risk tags.
 - **Scatter Matrix View:** Interactive 2-axis scatter chart plotting Viability ($E_v$) vs. Hype Score ($H$). Helps immediately spot genuine enterprise innovations in the "High Viability / Low Hype" quadrant.
 - **Semantic Cluster View:** 2D interactive spatial canvas projecting the 1536-dimensional embeddings into 2D space using UMAP. Enables visual detection of topical clustering and derivative wrappers.
-- **Search Omnibar:** Instant client-side search supporting structured tokens (`ring:Adopt`, `viability:>0.8`, `risk:egress`) and plain keywords.
+- **Search Omnibar:** Instant client-side search supporting structured tokens (`track:testing`, `track:evaluation`, `ring:Adopt`, `viability:>0.8`, `risk:egress`) and plain keywords.
 
 #### 4. Building Static Production Bundle
 To compile a static bundle ready for hosting on GitHub Pages, Nginx, or S3:
@@ -476,7 +477,7 @@ The radar organizes signals across two distinct tracks:
 2. **AI Evaluation (Non-Deterministic Systems):** Assessing probabilistic models and agent systems (LLM benchmark harnesses, behavioral drift, hallucination detection, adversarial red-teaming, statistical confidence intervals).
 3. **Cross-Cutting Agentic SDLC & Adequacy Evidence:** Providing calibrated confidence scores to the accountable human-in-the-loop and mathematical evidence of test adequacy (mutation scores, formal invariants) before machine-generated code is deployed.
 
-### 4.2 Adversarial Multi-Lens Committee
+### 4.3 Adversarial Multi-Lens Committee
 Each candidate signal is evaluated across three weighted governance lenses:
 1. **Security & Privacy Lens (35%):** Assesses egress boundaries, secret hygiene, code confidentiality, and local-model execution capabilities.
 2. **Operational Feasibility Lens (35%):** Assesses execution determinism, CI runner footprint, maintenance overhead, and flake rates.
@@ -485,7 +486,7 @@ Each candidate signal is evaluated across three weighted governance lenses:
 Composite Viability Formula:
 $$E_v = 0.35 \cdot S_{\text{sec}} + 0.35 \cdot S_{\text{ops}} + 0.30 \cdot S_{\text{tech}}$$
 
-### 4.3 Multi-Source Consensus Bonus & Wrapper Penalty
+### 4.4 Multi-Source Consensus Bonus & Wrapper Penalty
 - **Consensus Bonus (+0.25):** Awarded when independent sources from distinct channels (e.g. an arXiv paper, a GitHub repo, and an engineering blog) converge on the same algorithmic pattern.
 - **Wrapper Penalty (-0.20):** Deterministically applied when a tool has semantic cosine similarity $\ge 0.88$ to an existing model or paper without offering distinct architectural novelties or unique datasets.
 
@@ -497,7 +498,7 @@ $$E_v = 0.35 \cdot S_{\text{sec}} + 0.35 \cdot S_{\text{ops}} + 0.30 \cdot S_{\t
 Before submitting changes or creating pull requests, execute the automated test and lint suite:
 
 ```bash
-# 1. Run all unit and integration tests hermetically (130+ tests, ~18 seconds):
+# 1. Run all unit and integration tests hermetically (155 tests, ~18 seconds):
 uv run pytest -v
 
 # 2. Check code style and formatting:
