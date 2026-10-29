@@ -5,6 +5,19 @@ All notable changes to the Trend Horizon Radar platform will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0](https://github.com/cdr74/trend_research/compare/v0.6.0...v0.7.0) (2026-10-29)
+
+
+### Features
+
+* **domain:** implement dynamic bounded topic convergence and theme attribution (Ref: ADR-0023, Backlog M8) ([938f3d8](https://github.com/cdr74/trend_research/commit/938f3d8851f6cf3d0c783711281a9f8d2e943c9f))
+* **ui:** implement table sorting, deterministic blip layout, and spec-model coverage (Ref: ADR-0024, Backlog M9) ([9f20850](https://github.com/cdr74/trend_research/commit/9f208504c7e44b98feca8fc0ef1b61b5194e3768))
+
+
+### Bug Fixes
+
+* **domain:** inherit consensus topic category in radar categorizer (Ref: ADR-0023, Backlog M8) ([381aec2](https://github.com/cdr74/trend_research/commit/381aec28e65ea5b8e337694f0e900c3dc975ce9a))
+
 ## [0.6.0](https://github.com/cdr74/trend_research/compare/v0.5.1...v0.6.0) (2026-10-29)
 
 
