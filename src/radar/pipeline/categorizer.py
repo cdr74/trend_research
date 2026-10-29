@@ -153,6 +153,7 @@ class RadarCategorizer:
 
         sources = topic.sources if topic else [dossier.source_url]
         corroboration_count = topic.corroboration_count if topic else 1
+        category = topic.category if topic else dossier.category
 
         return RadarItem(
             dossier_id=dossier.id,
@@ -161,7 +162,7 @@ class RadarCategorizer:
             topic_name=topic.name if topic else None,
             name=dossier.name,
             track=dossier.track,
-            category=dossier.category,
+            category=category,
             source_url=dossier.source_url,
             evidence_tier=dossier.evidence_tier,
             hype_score=hype,

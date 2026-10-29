@@ -219,3 +219,39 @@ def test_categorize_batch(
     assert len(items) == 1
     assert items[0].name == high_signal_dossier.name
     assert items[0].active is True
+
+
+def test_categorizer_inherits_topic_consensus_category(
+    high_signal_dossier: SignalDossier,
+    high_viability_evaluation: EnterpriseEvaluation,
+) -> None:
+    categorizer = RadarCategorizer()
+
+    # Dossier has initial noisy category
+    high_signal_dossier.category = QECategory.TEST_SYNTHESIS
+
+    # Topic consensus category is TRIAGE_AND_FIX
+    topic = TrendTopic(
+        name="Automated Failure Diagnosis & Self-Healing",
+        category=QECategory.TRIAGE_AND_FIX,
+        summary="Automated triage and repair.",
+        corroboration_count=2,
+        average_viability=0.85,
+        average_validity=0.85,
+    )
+
+    item_with_topic = categorizer.categorize(
+        dossier=high_signal_dossier,
+        evaluation=high_viability_evaluation,
+        topic=topic,
+    )
+    assert item_with_topic.category == QECategory.TRIAGE_AND_FIX
+    assert item_with_topic.topic_name == "Automated Failure Diagnosis & Self-Healing"
+
+    # Without topic, falls back to dossier category
+    item_without_topic = categorizer.categorize(
+        dossier=high_signal_dossier,
+        evaluation=high_viability_evaluation,
+        topic=None,
+    )
+    assert item_without_topic.category == QECategory.TEST_SYNTHESIS
