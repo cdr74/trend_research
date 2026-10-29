@@ -21,6 +21,7 @@ export type TrackType = "testing" | "evaluation";
 export interface RadarItem {
   id: string;
   name: string;
+  topic_name?: string;
   track?: TrackType;
   category: QECategory;
   evidence_tier: EvidenceTier;

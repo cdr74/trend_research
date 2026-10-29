@@ -5,9 +5,17 @@ interface TableViewProps {
   items: RadarItem[];
   selectedItem: RadarItem | null;
   onSelectItem: (item: RadarItem) => void;
+  selectedTheme?: string | null;
+  onSelectTheme?: (theme: string | null) => void;
 }
 
-export const TableView: React.FC<TableViewProps> = ({ items, selectedItem, onSelectItem }) => {
+export const TableView: React.FC<TableViewProps> = ({
+  items,
+  selectedItem,
+  onSelectItem,
+  selectedTheme,
+  onSelectTheme,
+}) => {
   return (
     <div className="bg-[#121826] border border-[#1f293d] rounded-xl overflow-hidden shadow-2xl">
       <div className="overflow-x-auto">
@@ -16,6 +24,7 @@ export const TableView: React.FC<TableViewProps> = ({ items, selectedItem, onSel
             <tr>
               <th className="px-6 py-4">Track</th>
               <th className="px-6 py-4">Trend / Innovation</th>
+              <th className="px-6 py-4">Dynamic Theme</th>
               <th className="px-6 py-4">Pillar</th>
               <th className="px-6 py-4">Ring</th>
               <th className="px-6 py-4 text-center">Trajectory</th>
@@ -64,6 +73,32 @@ export const TableView: React.FC<TableViewProps> = ({ items, selectedItem, onSel
                     </span>
                   </td>
                   <td className="px-6 py-4 font-semibold text-slate-100">{item.name}</td>
+                  <td className="px-6 py-4 text-xs">
+                    {item.topic_name ? (
+                      <span
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onSelectTheme) {
+                            onSelectTheme(
+                              selectedTheme === item.topic_name
+                                ? null
+                                : item.topic_name || null
+                            );
+                          }
+                        }}
+                        className={`inline-block px-2.5 py-1 rounded-md text-[11px] font-medium border transition-colors ${
+                          selectedTheme === item.topic_name
+                            ? "bg-purple-900/50 text-purple-200 border-purple-400"
+                            : "bg-purple-950/30 text-purple-300 border-purple-500/30 hover:border-purple-400"
+                        }`}
+                        title="Click to filter by dynamic theme"
+                      >
+                        {item.topic_name}
+                      </span>
+                    ) : (
+                      <span className="text-slate-500 italic text-[11px]">Independent</span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 text-xs">{item.category}</td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${ringColor}`}>

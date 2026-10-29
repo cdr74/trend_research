@@ -525,6 +525,7 @@ def _get_mock_radar_items() -> list[RadarItem]:
     return [
         RadarItem(
             name="Playwright-Invariance-Agent",
+            topic_name="Autonomous Browser & UI Agent Systems",
             track=TrackType.TESTING,
             category=QECategory.TEST_SYNTHESIS,
             source_url="https://github.com/cdr74/playwright-invariance",
@@ -546,6 +547,7 @@ def _get_mock_radar_items() -> list[RadarItem]:
         ),
         RadarItem(
             name="AutoMut-ADS",
+            topic_name="Automated Mutation Testing & Fault Injection",
             category=QECategory.EXECUTION_AND_OPTIMIZATION,
             source_url="https://arxiv.org/abs/2410.18021",
             evidence_tier=EvidenceTier.ACADEMIC_PEER_REVIEWED,
@@ -563,6 +565,7 @@ def _get_mock_radar_items() -> list[RadarItem]:
         ),
         RadarItem(
             name="SpecToProperty-LLM",
+            topic_name="Model-Based & Spec-Driven Testing",
             category=QECategory.SPEC_AND_MODEL,
             source_url="https://github.com/cdr74/spec-property-gen",
             evidence_tier=EvidenceTier.ENGINEERING_POST_MORTEM,
@@ -580,6 +583,7 @@ def _get_mock_radar_items() -> list[RadarItem]:
         ),
         RadarItem(
             name="RCA-Tracer Agent",
+            topic_name="Automated Failure Diagnosis & Self-Healing",
             category=QECategory.TRIAGE_AND_FIX,
             source_url="https://github.com/cdr74/rca-tracer",
             evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
@@ -597,6 +601,7 @@ def _get_mock_radar_items() -> list[RadarItem]:
         ),
         RadarItem(
             name="Multi-Agent Red-Team Explorer",
+            topic_name="LLM Red-Teaming & Security Verification",
             track=TrackType.EVALUATION,
             category=QECategory.AGENT_SYSTEMS,
             source_url="https://arxiv.org/abs/2408.00002",
@@ -617,6 +622,7 @@ def _get_mock_radar_items() -> list[RadarItem]:
         ),
         RadarItem(
             name="Hype-Fix 99.9% AutoBugRepair",
+            topic_name="Automated Failure Diagnosis & Self-Healing",
             category=QECategory.TRIAGE_AND_FIX,
             source_url="https://vendor-hype-example.com/repair",
             evidence_tier=EvidenceTier.VENDOR_ANNOUNCEMENT,
@@ -689,6 +695,12 @@ def _filter_items_by_query_string(items: list[Any], query_string: str) -> list[A
                         else it.evidence_tier.value
                     ).lower()
                 ]
+            elif key in ("theme", "topic"):
+                filtered = [
+                    it
+                    for it in filtered
+                    if val_clean in (getattr(it, "topic_name", None) or "").lower()
+                ]
             elif key == "viability":
                 if val_clean.startswith(">"):
                     thresh = float(val_clean.lstrip(">="))
@@ -716,6 +728,7 @@ def _filter_items_by_query_string(items: list[Any], query_string: str) -> list[A
                 for it in filtered
                 if free in it.name.lower()
                 or free in it.key_innovation.lower()
+                or (getattr(it, "topic_name", None) and free in it.topic_name.lower())
                 or any(free in r.lower() for r in it.enterprise_risks)
             ]
 
@@ -931,6 +944,7 @@ async def _run_export(export_format: str, output: str, mock: bool = False) -> No
             {
                 "id": str(it.id),
                 "name": it.name,
+                "topic_name": getattr(it, "topic_name", None) or "Independent Innovation",
                 "track": track_val,
                 "category": cat_val,
                 "source_url": it.source_url,
@@ -1020,9 +1034,11 @@ async def _run_inspect(
             f"[bold]Source URL:[/bold] {item.source_url}",
             f"[bold]Key Innovation:[/bold] {item.key_innovation}",
         ]
-        if topic:
+        if getattr(item, "topic_name", None):
+            info_lines.append(f"[bold]Converged Topic / Theme:[/bold] {item.topic_name}")
+        elif topic:
             info_lines.append(
-                f"[bold]Converged Topic:[/bold] {topic.name} (Corroborations: {topic.corroboration_count})"
+                f"[bold]Converged Topic / Theme:[/bold] {topic.name} (Corroborations: {topic.corroboration_count})"
             )
         if evaluation:
             info_lines.extend(

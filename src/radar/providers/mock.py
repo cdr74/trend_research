@@ -49,6 +49,85 @@ class MockProvider(LLMProvider):
             if first_line:
                 extracted_body = first_line[:150]
 
+        if response_model.__name__ == "SynthesizedTopic":
+            from radar.core.models import QECategory
+
+            if any(
+                k in prompt_lower
+                for k in ("mutation", "mutant", "pitest", "stryker", "infection", "mull")
+            ):
+                name_val = "Automated Mutation Testing & Fault Injection"
+                summary_val = (
+                    "Automated mutation synthesis and execution engines verifying test suite "
+                    "adequacy across language runtimes."
+                )
+                cat_val = QECategory.EXECUTION_AND_OPTIMIZATION
+            elif any(
+                k in prompt_lower
+                for k in (
+                    "browser",
+                    "mcp",
+                    "agent",
+                    "lightpanda",
+                    "checkquest",
+                    "qaia",
+                    "xhimatty",
+                    "tagmanager",
+                    "orangepro",
+                )
+            ):
+                name_val = "Autonomous Browser & UI Agent Systems"
+                summary_val = (
+                    "Autonomous browser-driving agents and local execution runtimes for end-to-end "
+                    "UI verification."
+                )
+                cat_val = QECategory.AGENT_SYSTEMS
+            elif any(
+                k in prompt_lower
+                for k in ("pensive", "diagnosis", "failure", "sapienz", "heal", "rca")
+            ):
+                name_val = "Automated Failure Diagnosis & Self-Healing"
+                summary_val = (
+                    "Production-grade root cause analysis and automated test repair for flaky and "
+                    "failing test executions."
+                )
+                cat_val = QECategory.TRIAGE_AND_FIX
+            elif any(k in prompt_lower for k in ("blast", "radius", "api", "quasar", "ads event")):
+                name_val = "API Change Impact & Blast Radius Analysis"
+                summary_val = (
+                    "Static and dynamic dependency graph analysis measuring consumer blast radius for "
+                    "library and API changes."
+                )
+                cat_val = QECategory.TEST_SYNTHESIS
+            elif any(
+                k in prompt_lower for k in ("flowstep", "trajectory", "predict", "github action")
+            ):
+                name_val = "Predictive CI/CD & Trajectory Optimization"
+                summary_val = (
+                    "Machine learning architectures predicting CI pipeline execution and optimizing "
+                    "agentic trajectories."
+                )
+                cat_val = QECategory.TEST_SYNTHESIS
+            elif any(k in prompt_lower for k in ("redteam", "aigoat", "security", "banking")):
+                name_val = "LLM Red-Teaming & Security Verification"
+                summary_val = (
+                    "Adversarial evaluation frameworks and security vulnerability testbeds for "
+                    "enterprise LLM applications."
+                )
+                cat_val = QECategory.GOVERNANCE_AND_EVALS
+            else:
+                name_val = "Emerging AI Test Architecture"
+                summary_val = "Emerging paradigms in automated software quality engineering."
+                cat_val = QECategory.SPEC_AND_MODEL
+
+            return response_model.model_validate(
+                {
+                    "name": name_val,
+                    "summary": summary_val,
+                    "primary_category": cat_val,
+                }
+            )
+
         for name, field_info in fields.items():
             ann = field_info.annotation
             annotation_str = str(ann)
@@ -250,13 +329,116 @@ class MockProvider(LLMProvider):
         return response_model.model_validate(dummy_data)
 
     async def embed_text(self, text: str) -> list[float]:
-        """Generate deterministic pseudo-orthogonal unit vector based on text hash."""
-        seed = abs(hash(text))
-        vec = [
-            (float((seed * (i + 1) * 2654435761) % 1000) / 1000.0) - 0.5
-            for i in range(self.embedding_dim)
-        ]
-        norm = math.sqrt(sum(x * x for x in vec))
+        """Generate deterministic unit vector biased by semantic theme keywords for clustering."""
+        text_lower = text.lower()
+
+        # Identify thematic cluster seed for mock convergence
+        theme_seed: int | None = None
+        if any(
+            k in text_lower
+            for k in (
+                "mutation",
+                "mutant",
+                "pitest",
+                "stryker",
+                "infection",
+                "mull",
+                "mutmut",
+                "automut",
+            )
+        ):
+            theme_seed = 1010101
+        elif any(
+            k in text_lower
+            for k in (
+                "browser",
+                "mcp",
+                "agent",
+                "lightpanda",
+                "checkquest",
+                "qaia",
+                "xhimatty",
+                "tagmanager",
+                "orangepro",
+                "playwright",
+                "puppeteer",
+            )
+        ):
+            theme_seed = 2020202
+        elif any(
+            k in text_lower
+            for k in (
+                "pensive",
+                "diagnosis",
+                "failure",
+                "sapienz",
+                "heal",
+                "rca",
+                "root cause",
+                "flaky",
+            )
+        ):
+            theme_seed = 3030303
+        elif any(
+            k in text_lower
+            for k in (
+                "blast",
+                "radius",
+                "api",
+                "quasar",
+                "ads event",
+                "dependency graph",
+                "impact",
+            )
+        ):
+            theme_seed = 4040404
+        elif any(
+            k in text_lower
+            for k in (
+                "flowstep",
+                "trajectory",
+                "predict",
+                "github action",
+                "pipeline",
+            )
+        ):
+            theme_seed = 5050505
+        elif any(
+            k in text_lower
+            for k in (
+                "redteam",
+                "aigoat",
+                "security",
+                "banking",
+                "adversarial",
+                "jailbreak",
+            )
+        ):
+            theme_seed = 6060606
+
+        import hashlib
+        import random
+
+        # Fully deterministic 64-bit seed from text
+        text_seed = int.from_bytes(hashlib.sha256(text.encode("utf-8")).digest()[:8], "big")
+        ind_rng = random.Random(text_seed)
+        ind_vec = [ind_rng.gauss(0, 1) for _ in range(self.embedding_dim)]
+
+        if theme_seed is not None:
+            theme_rng = random.Random(theme_seed)
+            theme_base = [theme_rng.gauss(0, 1) for _ in range(self.embedding_dim)]
+            t_norm = math.sqrt(sum(x * x for x in theme_base))
+            if t_norm > 0:
+                theme_base = [x / t_norm for x in theme_base]
+            i_norm = math.sqrt(sum(x * x for x in ind_vec))
+            if i_norm > 0:
+                ind_vec = [x / i_norm for x in ind_vec]
+            # 85% theme base + 15% individual variation -> cosine similarity ~0.97 within theme
+            combined = [0.85 * tb + 0.15 * iv for tb, iv in zip(theme_base, ind_vec, strict=False)]
+        else:
+            combined = ind_vec
+
+        norm = math.sqrt(sum(x * x for x in combined))
         if norm > 0.0:
-            vec = [x / norm for x in vec]
-        return vec
+            combined = [x / norm for x in combined]
+        return combined

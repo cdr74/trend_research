@@ -149,6 +149,7 @@ class RadarRepository:
             existing.embedding = dossier.embedding
             existing.engagement_metrics = dossier.engagement_metrics
             existing.topic_id = dossier.topic_id
+            existing.topic_name = dossier.topic_name
             dossier.id = existing.id
             await self.session.flush()
             return existing
@@ -157,6 +158,7 @@ class RadarRepository:
             id=dossier.id,
             source_id=dossier.source_id,
             topic_id=dossier.topic_id,
+            topic_name=dossier.topic_name,
             name=dossier.name,
             track=track_val,
             category=dossier.category.value,
@@ -241,6 +243,7 @@ class RadarRepository:
             existing.active = item.active
             existing.evaluation_id = item.evaluation_id
             existing.topic_id = item.topic_id
+            existing.topic_name = item.topic_name
             item.id = existing.id
             await self.session.flush()
             return existing
@@ -249,6 +252,7 @@ class RadarRepository:
             id=item.id,
             evaluation_id=item.evaluation_id,
             topic_id=item.topic_id,
+            topic_name=item.topic_name,
             name=item.name,
             track=track_val,
             category=item.category.value,

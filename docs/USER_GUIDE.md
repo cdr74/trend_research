@@ -134,7 +134,7 @@ flowchart TD
     E --> F["Stage 1: Heuristic Noise Sieve (Drop Hype > 0.60)"]
     F --> G["Raw Payloads Stored in PostgreSQL"]
     G --> H["Stage 2: Deep Extractor (Embeddings & Claims)"]
-    H --> I["Stage 3: Semantic Topic Convergence (pgvector Cosine >= 0.82)"]
+    H --> I["Stage 3: Dynamic Bounded Topic Convergence (pgvector Cosine >= 0.65, <= 12 Themes)"]
     I --> J["Stage 4: Multi-Lens Adversarial Committee (Security, Ops, Rigor)"]
     J --> K["Radar Categorizer (Adopt, Trial, Assess, Hold)"]
     K --> L["Update Watermarks in 'data/.sync_state.json'"]

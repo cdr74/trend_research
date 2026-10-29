@@ -38,6 +38,7 @@ export const App: React.FC = () => {
     ])
   );
   const [selectedTrack, setSelectedTrack] = useState<"all" | "testing" | "evaluation">("all");
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [minViability, setMinViability] = useState<number>(0.0);
   const [maxHype, setMaxHype] = useState<number>(1.0);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -107,6 +108,7 @@ export const App: React.FC = () => {
     setMaxHype(1.0);
     setSearchTerm("");
     setSelectedTrack("all");
+    setSelectedTheme(null);
   };
 
   const testingCount = useMemo(
@@ -118,6 +120,15 @@ export const App: React.FC = () => {
     [data]
   );
 
+  const availableThemes = useMemo(() => {
+    if (!data) return [];
+    const themes = new Set<string>();
+    for (const it of data.items) {
+      if (it.topic_name) themes.add(it.topic_name);
+    }
+    return Array.from(themes).sort();
+  }, [data]);
+
   const filteredItems = useMemo(() => {
     if (!data) return [];
     const parsedQuery = parseSearchQuery(searchTerm);
@@ -127,6 +138,7 @@ export const App: React.FC = () => {
         const itemTrack = item.track || "testing";
         if (itemTrack !== selectedTrack) return false;
       }
+      if (selectedTheme && item.topic_name !== selectedTheme) return false;
       if (!selectedRings.has(item.recommended_ring)) return false;
       if (!selectedCategories.has(item.category)) return false;
       if (!selectedEvidenceTiers.has(item.evidence_tier)) return false;
@@ -138,6 +150,7 @@ export const App: React.FC = () => {
   }, [
     data,
     selectedTrack,
+    selectedTheme,
     selectedRings,
     selectedCategories,
     selectedEvidenceTiers,
@@ -276,6 +289,9 @@ export const App: React.FC = () => {
           searchTerm={searchTerm}
           onChangeSearchTerm={setSearchTerm}
           onResetFilters={resetFilters}
+          availableThemes={availableThemes}
+          selectedTheme={selectedTheme}
+          onSelectTheme={setSelectedTheme}
         />
 
         {/* Center Presentation View */}
@@ -292,6 +308,8 @@ export const App: React.FC = () => {
               items={filteredItems}
               selectedItem={selectedItem}
               onSelectItem={setSelectedItem}
+              selectedTheme={selectedTheme}
+              onSelectTheme={setSelectedTheme}
             />
           )}
           {activeView === "scatter" && (

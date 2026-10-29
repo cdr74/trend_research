@@ -319,3 +319,82 @@ async def test_configurable_threshold_overrides(mock_provider: MockProvider) -> 
     # Must create a separate topic because it fails the strict 0.98 threshold
     assert res2.is_new_topic is True
     assert res2.topic_id != res1.topic_id
+
+
+@pytest.mark.asyncio
+async def test_bounded_themes_condensation_under_cap(mock_provider: MockProvider) -> None:
+    """Verify that condensation merges closest topic pairs when count exceeds max_themes."""
+    engine = TopicConvergenceEngine(
+        provider=mock_provider,
+        convergence_threshold=0.90,
+        max_themes=3,
+    )
+
+    dossiers: list[SignalDossier] = []
+    # Create 5 dossiers on orthogonal indices
+    for i in range(5):
+        dossiers.append(
+            SignalDossier(
+                source_id=uuid4(),
+                name=f"Tool_{i}",
+                category=QECategory.TEST_SYNTHESIS,
+                source_url=f"https://example.com/tool_{i}",
+                evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+                key_innovation=f"Key innovation {i}",
+                embedding=make_unit_vector(1536, i),
+            )
+        )
+
+    # Add a 6th dossier very close to index 0 (weight 0.1 -> sim ~0.995)
+    dossiers.append(
+        SignalDossier(
+            source_id=uuid4(),
+            name="Tool_0_variant",
+            category=QECategory.TEST_SYNTHESIS,
+            source_url="https://example.com/tool_0_v",
+            evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+            key_innovation="Variant of key innovation 0",
+            embedding=make_blended_vector(1536, 0, 10, weight=0.1),
+        )
+    )
+
+    results = await engine.converge_batch(dossiers)
+    assert len(results) == 6
+    # engine._topics must be bounded by max_themes
+    assert len(engine._topics) <= 3
+    # Every dossier must have topic_name assigned
+    for d in engine._dossiers.values():
+        assert d.topic_name is not None
+        assert len(d.topic_name) > 0
+
+
+@pytest.mark.asyncio
+async def test_dynamic_theme_attribution_on_convergence(mock_provider: MockProvider) -> None:
+    """Verify that dossiers receive topic_name attribute matching their converged topic."""
+    engine = TopicConvergenceEngine(provider=mock_provider, convergence_threshold=0.65)
+
+    d1 = SignalDossier(
+        source_id=uuid4(),
+        name="stryker-js",
+        category=QECategory.EXECUTION_AND_OPTIMIZATION,
+        source_url="https://github.com/stryker-mutator/stryker-js",
+        evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+        key_innovation="Mutation testing for JavaScript and TypeScript.",
+        embedding=make_unit_vector(1536, 0),
+    )
+    d2 = SignalDossier(
+        source_id=uuid4(),
+        name="pitest",
+        category=QECategory.EXECUTION_AND_OPTIMIZATION,
+        source_url="https://github.com/hcoles/pitest",
+        evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+        key_innovation="Mutation testing system for Java and the JVM.",
+        embedding=make_blended_vector(1536, 0, 1, weight=0.1),
+    )
+
+    await engine.converge_dossier(d1)
+    await engine.converge_dossier(d2)
+
+    assert d1.topic_id == d2.topic_id
+    assert d1.topic_name == d2.topic_name
+    assert d1.topic_name is not None

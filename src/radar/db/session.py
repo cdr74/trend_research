@@ -94,6 +94,12 @@ async def init_db(engine: AsyncEngine | None = None) -> None:
                 "ALTER TABLE radar_items ADD COLUMN IF NOT EXISTS track VARCHAR(50) DEFAULT 'testing' NOT NULL;"
             )
         )
+        await conn.execute(
+            text("ALTER TABLE signal_dossiers ADD COLUMN IF NOT EXISTS topic_name VARCHAR(255);")
+        )
+        await conn.execute(
+            text("ALTER TABLE radar_items ADD COLUMN IF NOT EXISTS topic_name VARCHAR(255);")
+        )
 
 
 async def check_db_health(engine: AsyncEngine | None = None) -> bool:

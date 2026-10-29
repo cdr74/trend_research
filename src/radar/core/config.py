@@ -64,11 +64,17 @@ class Settings(BaseSettings):
 
     # Topic Convergence & Wrapper Detection (Stage 3 / Option 3B)
     topic_convergence_threshold: float = Field(
-        default=0.82,
+        default=0.65,
         ge=0.0,
         le=1.0,
         alias="RADAR_TOPIC_CONVERGENCE_THRESHOLD",
         description="Minimum cosine similarity threshold to merge dossiers into an existing TrendTopic",
+    )
+    max_dynamic_themes: int = Field(
+        default=12,
+        ge=1,
+        alias="RADAR_MAX_DYNAMIC_THEMES",
+        description="Upper bound on active dynamic theme clusters across an evaluated radar view",
     )
     wrapper_similarity_threshold: float = Field(
         default=0.88,

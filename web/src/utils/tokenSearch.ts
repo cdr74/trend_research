@@ -6,6 +6,7 @@ export interface ParsedQuery {
   category?: string;
   tier?: string;
   stage?: string;
+  theme?: string;
   minViability?: number;
   maxViability?: number;
   minHype?: number;
@@ -49,6 +50,8 @@ export function parseSearchQuery(query: string): ParsedQuery {
         parsed.tier = val.toLowerCase();
       } else if (key === "stage" || key === "lifecycle") {
         parsed.stage = val.toLowerCase();
+      } else if (key === "theme" || key === "topic") {
+        parsed.theme = val.toLowerCase();
       } else if (key === "risk") {
         parsed.risk = val.toLowerCase();
       } else if (key === "viability") {
@@ -112,6 +115,13 @@ export function matchesQuery(item: RadarItem, parsed: ParsedQuery): boolean {
     return false;
   }
 
+  if (
+    parsed.theme &&
+    (!item.topic_name || !item.topic_name.toLowerCase().includes(parsed.theme))
+  ) {
+    return false;
+  }
+
   if (parsed.minViability !== undefined && item.viability_score < parsed.minViability) {
     return false;
   }
@@ -138,6 +148,7 @@ export function matchesQuery(item: RadarItem, parsed: ParsedQuery): boolean {
   if (parsed.freeTerms.length > 0) {
     const searchable = [
       item.name,
+      item.topic_name || "",
       item.key_innovation,
       item.category,
       item.evidence_tier,

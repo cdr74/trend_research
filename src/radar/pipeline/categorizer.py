@@ -158,6 +158,7 @@ class RadarCategorizer:
             dossier_id=dossier.id,
             evaluation_id=evaluation.id,
             topic_id=topic.id if topic else None,
+            topic_name=topic.name if topic else None,
             name=dossier.name,
             track=dossier.track,
             category=dossier.category,

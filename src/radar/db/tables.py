@@ -79,6 +79,7 @@ class SignalDossierTable(Base):
     topic_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("trend_topics.id"), nullable=True, index=True
     )
+    topic_name: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     track: Mapped[str] = mapped_column(String(50), default="testing", index=True)
     category: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
@@ -151,6 +152,7 @@ class RadarItemTable(Base):
     topic_id: Mapped[UUID | None] = mapped_column(
         PGUUID(as_uuid=True), ForeignKey("trend_topics.id"), nullable=True, index=True
     )
+    topic_name: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     track: Mapped[str] = mapped_column(String(50), default="testing", index=True)
     category: Mapped[str] = mapped_column(String(100), nullable=False, index=True)

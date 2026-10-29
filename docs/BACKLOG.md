@@ -232,3 +232,27 @@
   - Re-run pipeline categorization and export re-ranked radar items to `web/public/radar.json`.
   - Verify static web build and test suite pass with 100% compliance.
   - *Acceptance Criteria:* Full CI test suite passes cleanly, `radar.json` presents a balanced ThoughtWorks distribution.
+
+---
+
+## Milestone 8: Dynamic Bounded Topic Convergence & Theme Attribution (Completed)
+**Goal:** Prevent ecosystem fragmentation by clustering related tools into cohesive dynamic themes (bounded below 10–12 active themes) and attributing first-class theme badges across data models, exports, and web UI.
+
+### Stories & Tasks:
+- [x] **M8-T1: Architectural Specification: Dynamic Bounded Topic Convergence (ADR-0023)**
+  - Author and approve ADR-0023 establishing dynamic theme convergence, topic centroid matching, and a maximum bound of 10–12 active themes.
+  - *Acceptance Criteria:* ADR-0023 documented with concrete clustering parameters and trade-offs.
+- [x] **M8-T2: Calibrated Theme Convergence & Bounded Centroid Clustering Engine**
+  - Update `Settings` with `topic_convergence_threshold = 0.65` and `max_dynamic_themes = 12`.
+  - Refactor `TopicConvergenceEngine` to cluster against running topic centroids and iteratively condense clusters if count exceeds 12.
+  - Weight core technique and problem claims over repository names in `DeepExtractor.extract()`.
+  - *Acceptance Criteria:* Unit tests prove tools exploring the same technique (e.g. mutation testing across Java, TS, PHP, Python) converge into a single shared topic.
+- [x] **M8-T3: First-Class Theme Attribution in Core Models, Persistence & Export**
+  - Add `topic_name: str | None` to `RadarItem` and `RadarItemTable`.
+  - Export `topic_name` in `radar.json` bundle.
+  - *Acceptance Criteria:* DB migrations and repository methods persist topic names cleanly.
+- [x] **M8-T4: Web Dashboard Theme Tagging, Filtering & Omnibar Search**
+  - Display dynamic theme pill badges in `TableView` and `ItemDetailModal`.
+  - Add Omnibar search filter `theme:<name>` and Theme facet to `FilterSidebar`.
+  - Re-export static bundle and verify web build.
+  - *Acceptance Criteria:* Static web bundle compiles with zero TypeScript errors and surfaces theme groupings.

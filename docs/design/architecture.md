@@ -82,7 +82,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    S_ACAD["Academic Paper\n(Peer-Reviewed / arXiv)"] --> CLUST{"pgvector Clustering\nCosine Distance < 0.18\n(Sim > 0.82)"}
+    S_ACAD["Academic Paper\n(Peer-Reviewed / arXiv)"] --> CLUST{"pgvector Clustering\nCosine Sim >= 0.65\n(Bounded <= 12 Themes)"}
     S_OSS["Open-Source Repo\n(GitHub Velocity)"] --> CLUST
     S_BLOG["Practitioner Post-Mortem\n(Production Engineering)"] --> CLUST
 
@@ -95,7 +95,7 @@ flowchart LR
 
 ### 4.1 Corroboration Mechanics
 When a signal is processed, the system queries historical dossiers in `pgvector`:
-1. **Convergence Condition:** If an ingested signal shares semantic similarity $> 0.82$ with existing dossiers from **different source channels or distinct authors**, the items are linked to a shared `TrendTopic`.
+1. **Convergence Condition:** If an ingested signal shares semantic similarity $\ge 0.65$ (calibrated via ADR-0023, bounded $\le 12$ active themes) with existing dossiers from **different source channels or distinct authors**, the items are linked to a shared `TrendTopic`.
 2. **Corroboration Factor:**
    $$C_{\text{factor}} = \min\left(1.0, \frac{N_{\text{sources}}}{4}\right)$$
    A positive bonus ($+0.10$ to $+0.30$) is awarded to Signal Validity based on independent source convergence.

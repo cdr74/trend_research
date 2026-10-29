@@ -39,13 +39,18 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
               </span>
             </div>
             <h2 className="text-2xl font-bold text-slate-100 mt-1">{item.name}</h2>
-            <div className="flex items-center space-x-3 mt-2">
+            <div className="flex items-center space-x-3 mt-2 flex-wrap gap-y-1">
               <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
                 Ring: {item.recommended_ring}
               </span>
               <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-md border ${trajColor}`}>
                 Trajectory: {item.lifecycle_stage}
               </span>
+              {item.topic_name && (
+                <span className="px-2.5 py-0.5 text-xs font-medium rounded-md bg-purple-900/30 text-purple-300 border border-purple-500/30">
+                  Theme: {item.topic_name}
+                </span>
+              )}
               <span className="text-xs text-slate-400">{item.evidence_tier}</span>
             </div>
           </div>

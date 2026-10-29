@@ -15,6 +15,9 @@ interface FilterSidebarProps {
   searchTerm: string;
   onChangeSearchTerm: (term: string) => void;
   onResetFilters: () => void;
+  availableThemes?: string[];
+  selectedTheme?: string | null;
+  onSelectTheme?: (theme: string | null) => void;
 }
 
 const ALL_RINGS: RadarRing[] = ["Adopt", "Trial", "Assess", "Hold"];
@@ -47,6 +50,9 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   searchTerm,
   onChangeSearchTerm,
   onResetFilters,
+  availableThemes = [],
+  selectedTheme = null,
+  onSelectTheme,
 }) => {
   return (
     <div className="w-80 bg-[#121826] border border-[#1f293d] rounded-xl p-5 shadow-2xl space-y-6">
@@ -67,13 +73,50 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           type="text"
           value={searchTerm}
           onChange={(e) => onChangeSearchTerm(e.target.value)}
-          placeholder='e.g. track:testing ring:Adopt viability:>0.8'
+          placeholder='e.g. theme:mutation ring:Adopt viability:>0.8'
           className="w-full bg-[#0b0f19] border border-[#1f293d] rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
         />
         <p className="text-[10px] text-slate-500 mt-1 leading-tight">
-          Supports: <code className="text-slate-400">track:</code>, <code className="text-slate-400">ring:</code>, <code className="text-slate-400">pillar:</code>, <code className="text-slate-400">viability:&gt;0.8</code>
+          Supports: <code className="text-slate-400">theme:</code>, <code className="text-slate-400">track:</code>, <code className="text-slate-400">ring:</code>, <code className="text-slate-400">pillar:</code>, <code className="text-slate-400">viability:&gt;0.8</code>
         </p>
       </div>
+
+      {/* Dynamic Themes */}
+      {availableThemes.length > 0 && (
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Dynamic Themes ({availableThemes.length})
+            </label>
+            {selectedTheme && (
+              <button
+                onClick={() => onSelectTheme && onSelectTheme(null)}
+                className="text-[10px] text-purple-400 hover:text-purple-300 font-semibold underline"
+              >
+                Clear Theme
+              </button>
+            )}
+          </div>
+          <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
+            {availableThemes.map((theme) => {
+              const active = selectedTheme === theme;
+              return (
+                <button
+                  key={theme}
+                  onClick={() => onSelectTheme && onSelectTheme(active ? null : theme)}
+                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    active
+                      ? "bg-purple-600/30 text-purple-200 border border-purple-500/50 shadow-sm"
+                      : "text-slate-400 hover:bg-[#161f33] border border-transparent"
+                  }`}
+                >
+                  <div className="truncate">{theme}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Ring Filter */}
       <div>

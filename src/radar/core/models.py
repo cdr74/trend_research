@@ -146,6 +146,7 @@ class SignalDossier(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     source_id: UUID
     topic_id: UUID | None = None
+    topic_name: str | None = None
     name: str
     track: TrackType = Field(default=TrackType.TESTING)
     category: QECategory
@@ -272,6 +273,7 @@ class RadarItem(BaseModel):
 
     id: UUID = Field(default_factory=uuid4)
     topic_id: UUID | None = None
+    topic_name: str | None = None
     name: str
     track: TrackType = Field(default=TrackType.TESTING)
     category: QECategory

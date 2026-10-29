@@ -53,6 +53,7 @@ class TopicConvergenceEngine:
         wrapper_threshold: float = settings.wrapper_similarity_threshold,
         wrapper_penalty: float = settings.wrapper_penalty,
         corroboration_bonus: float = settings.corroboration_consensus_bonus,
+        max_themes: int = settings.max_dynamic_themes,
         system_prompt: str = DEFAULT_TOPIC_SYNTHESIS_SYSTEM_PROMPT,
     ) -> None:
         self.provider = provider
@@ -60,6 +61,7 @@ class TopicConvergenceEngine:
         self.wrapper_threshold = wrapper_threshold
         self.wrapper_penalty = wrapper_penalty
         self.corroboration_bonus = corroboration_bonus
+        self.max_themes = max_themes
         self.system_prompt = system_prompt
 
         self._topics: dict[UUID, TrendTopic] = {}
@@ -83,6 +85,27 @@ class TopicConvergenceEngine:
             return "github"
         else:
             return "practitioner"
+
+    @staticmethod
+    def _compute_centroid(dossiers: Sequence[SignalDossier]) -> list[float]:
+        """Compute the normalized centroid vector for a cluster of dossiers."""
+        valid_embeds = [d.embedding for d in dossiers if d.embedding]
+        if not valid_embeds:
+            return []
+        dim = len(valid_embeds[0])
+        centroid = [0.0] * dim
+        for emb in valid_embeds:
+            for i in range(dim):
+                centroid[i] += emb[i]
+        n = float(len(valid_embeds))
+        norm_sq = 0.0
+        for i in range(dim):
+            centroid[i] /= n
+            norm_sq += centroid[i] * centroid[i]
+        norm = math.sqrt(norm_sq)
+        if norm > 0.0:
+            centroid = [x / norm for x in centroid]
+        return centroid
 
     async def _synthesize_topic(self, dossiers: Sequence[SignalDossier]) -> SynthesizedTopic:
         """Synthesize a unified topic name and summary across cluster dossiers using the LLM provider."""
@@ -131,10 +154,23 @@ class TopicConvergenceEngine:
                 corroboration_count=1,
             )
 
-        # Search for closest existing dossier across memory
+        # Search for closest match across running topic centroids and individual dossiers
         best_sim = 0.0
         best_match: SignalDossier | None = None
+        target_topic_id: UUID | None = None
 
+        # 1. Compare against topic centroids
+        for t_id in self._topics:
+            cluster = [d for d in self._dossiers.values() if d.topic_id == t_id and d.embedding]
+            if cluster:
+                centroid = self._compute_centroid(cluster)
+                sim = compute_cosine_similarity(dossier.embedding, centroid)
+                if sim > best_sim:
+                    best_sim = sim
+                    best_match = cluster[0]
+                    target_topic_id = t_id
+
+        # 2. Compare against individual dossiers
         for existing_id, existing in self._dossiers.items():
             if existing_id == dossier.id or not existing.embedding:
                 continue
@@ -142,9 +178,10 @@ class TopicConvergenceEngine:
             if sim > best_sim:
                 best_sim = sim
                 best_match = existing
+                target_topic_id = existing.topic_id
 
         # Case A: Below convergence threshold -> Seed new topic
-        if best_match is None or best_sim < self.convergence_threshold:
+        if best_match is None or best_sim < self.convergence_threshold or target_topic_id is None:
             synthesized = await self._synthesize_topic([dossier])
             topic = TrendTopic(
                 name=synthesized.name,
@@ -157,6 +194,7 @@ class TopicConvergenceEngine:
                 lifecycle_stage=LifecycleStage.EMERGING,
             )
             dossier.topic_id = topic.id
+            dossier.topic_name = topic.name
             self._topics[topic.id] = topic
             self._dossiers[dossier.id] = dossier
 
@@ -171,10 +209,8 @@ class TopicConvergenceEngine:
                 corroboration_count=1,
             )
 
-        # Case B: Converges into best_match cluster
-        target_topic_id = best_match.topic_id
-        if target_topic_id is None or target_topic_id not in self._topics:
-            # Fallback in case target topic was not initialized
+        # Case B: Converges into target_topic cluster
+        if target_topic_id not in self._topics:
             synthesized = await self._synthesize_topic([best_match, dossier])
             topic = TrendTopic(
                 name=synthesized.name,
@@ -188,6 +224,7 @@ class TopicConvergenceEngine:
             )
             self._topics[topic.id] = topic
             best_match.topic_id = topic.id
+            best_match.topic_name = topic.name
             target_topic_id = topic.id
         else:
             topic = self._topics[target_topic_id]
@@ -223,6 +260,8 @@ class TopicConvergenceEngine:
         topic.category = synthesized.primary_category
         topic.corroboration_count = len(cluster_dossiers)
         topic.sources = list({d.source_url for d in cluster_dossiers})
+        for cd in cluster_dossiers:
+            cd.topic_name = topic.name
 
         # Calculate adjusted validity score
         adj_validity = topic.average_validity - penalty
@@ -241,10 +280,52 @@ class TopicConvergenceEngine:
             corroboration_count=topic.corroboration_count,
         )
 
+    async def condense_topics(self) -> None:
+        """Condense topics if count exceeds max_themes by merging the most similar topic pairs."""
+        while len(self._topics) > self.max_themes:
+            topic_ids = list(self._topics.keys())
+            best_pair: tuple[UUID, UUID] | None = None
+            best_pair_sim = -1.0
+
+            for i in range(len(topic_ids)):
+                for j in range(i + 1, len(topic_ids)):
+                    t1_id, t2_id = topic_ids[i], topic_ids[j]
+                    d1 = [d for d in self._dossiers.values() if d.topic_id == t1_id]
+                    d2 = [d for d in self._dossiers.values() if d.topic_id == t2_id]
+                    c1 = self._compute_centroid(d1)
+                    c2 = self._compute_centroid(d2)
+                    sim = compute_cosine_similarity(c1, c2)
+                    if sim > best_pair_sim:
+                        best_pair_sim = sim
+                        best_pair = (t1_id, t2_id)
+
+            if best_pair is None:
+                break
+
+            keep_id, merge_id = best_pair
+            keep_topic = self._topics[keep_id]
+            self._topics.pop(merge_id)
+
+            for d in self._dossiers.values():
+                if d.topic_id == merge_id:
+                    d.topic_id = keep_id
+
+            cluster_dossiers = [d for d in self._dossiers.values() if d.topic_id == keep_id]
+            synthesized = await self._synthesize_topic(cluster_dossiers)
+            keep_topic.name = synthesized.name
+            keep_topic.summary = synthesized.summary
+            keep_topic.category = synthesized.primary_category
+            keep_topic.corroboration_count = len(cluster_dossiers)
+            keep_topic.sources = list({d.source_url for d in cluster_dossiers})
+            for cd in cluster_dossiers:
+                cd.topic_name = keep_topic.name
+
     async def converge_batch(self, dossiers: Sequence[SignalDossier]) -> list[ConvergenceResult]:
         """Sequentially process a batch of dossiers into converged topics."""
         results: list[ConvergenceResult] = []
         for d in dossiers:
             res = await self.converge_dossier(d)
             results.append(res)
+        if len(self._topics) > self.max_themes:
+            await self.condense_topics()
         return results

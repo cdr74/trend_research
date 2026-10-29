@@ -94,9 +94,12 @@ class DeepExtractor:
             self.system_prompt,
         )
 
-        # Synthesize dense semantic text representation for vector embedding
+        # Synthesize dense semantic text representation for vector embedding (prioritizing technique/domain)
         embedding_text = (
-            f"{extracted.name}: {extracted.key_innovation} {' '.join(extracted.technical_claims)}"
+            f"Domain: {extracted.category.value}. "
+            f"Technique: {extracted.key_innovation}. "
+            f"Claims: {' '.join(extracted.technical_claims)}. "
+            f"Tool: {extracted.name}"
         )
         embedding = await self.provider.embed_text(embedding_text)
 
