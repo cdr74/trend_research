@@ -92,6 +92,24 @@ class MockProvider(LLMProvider):
                     "failing test executions."
                 )
                 cat_val = QECategory.TRIAGE_AND_FIX
+            elif any(
+                k in prompt_lower
+                for k in (
+                    "property",
+                    "hypothesis",
+                    "schemathesis",
+                    "fast-check",
+                    "contract",
+                    "spec-driven",
+                    "model-based",
+                )
+            ):
+                name_val = "Model-Based & Property-Driven Testing"
+                summary_val = (
+                    "Specification-driven property testing and formal model synthesis validating "
+                    "invariants and API contracts."
+                )
+                cat_val = QECategory.SPEC_AND_MODEL
             elif any(k in prompt_lower for k in ("blast", "radius", "api", "quasar", "ads event")):
                 name_val = "API Change Impact & Blast Radius Analysis"
                 summary_val = (
@@ -170,7 +188,20 @@ class MockProvider(LLMProvider):
                         dummy_data[name] = QECategory.EXECUTION_AND_OPTIMIZATION
                     elif any(
                         k in prompt_lower
-                        for k in ("property", "fuzz", "spec", "synthesis", "keploy")
+                        for k in (
+                            "property",
+                            "hypothesis",
+                            "schemathesis",
+                            "fast-check",
+                            "contract",
+                            "model",
+                            "spec-driven",
+                        )
+                    ):
+                        dummy_data[name] = QECategory.SPEC_AND_MODEL
+                    elif any(
+                        k in prompt_lower
+                        for k in ("synthesis", "keploy", "fuzz", "test generation")
                     ):
                         dummy_data[name] = QECategory.TEST_SYNTHESIS
                     elif any(
@@ -379,6 +410,19 @@ class MockProvider(LLMProvider):
             )
         ):
             theme_seed = 3030303
+        elif any(
+            k in text_lower
+            for k in (
+                "property",
+                "hypothesis",
+                "schemathesis",
+                "fast-check",
+                "contract",
+                "spec-driven",
+                "model-based",
+            )
+        ):
+            theme_seed = 7070707
         elif any(
             k in text_lower
             for k in (

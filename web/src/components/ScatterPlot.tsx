@@ -20,6 +20,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
   onSelectItem,
 }) => {
   const [hoveredItem, setHoveredItem] = useState<RadarItem | null>(null);
+  const [showAllLabels, setShowAllLabels] = useState(false);
 
   // SVG dimensions
   const width = 760;
@@ -44,16 +45,31 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
             Quadrant analysis identifying high-viability zero-hype innovations vs. marketing wrappers.
           </p>
         </div>
-        <div className="flex items-center space-x-3 text-xs">
-          {(["Adopt", "Trial", "Assess", "Hold"] as RadarRing[]).map((ring) => (
-            <div key={ring} className="flex items-center space-x-1.5">
-              <span
-                className="w-2.5 h-2.5 rounded-full"
-                style={{ backgroundColor: RING_COLORS[ring] }}
-              />
-              <span className="text-slate-300 font-medium">{ring}</span>
-            </div>
-          ))}
+        <div className="flex items-center space-x-4 text-xs">
+          {/* Label toggle button to avoid text collisions */}
+          <button
+            onClick={() => setShowAllLabels((prev) => !prev)}
+            className={`px-2.5 py-1 rounded-md text-[11px] font-semibold border transition-all ${
+              showAllLabels
+                ? "bg-blue-600/30 text-blue-300 border-blue-500/50"
+                : "bg-[#161f33] text-slate-400 hover:text-slate-200 border-[#1f293d]"
+            }`}
+          >
+            {showAllLabels ? "Hide Text Overlays" : "Show All Labels"}
+          </button>
+
+          {/* Ring legend */}
+          <div className="flex items-center space-x-3">
+            {(["Adopt", "Trial", "Assess", "Hold"] as RadarRing[]).map((ring) => (
+              <div key={ring} className="flex items-center space-x-1.5">
+                <span
+                  className="w-2.5 h-2.5 rounded-full"
+                  style={{ backgroundColor: RING_COLORS[ring] }}
+                />
+                <span className="text-slate-300 font-medium">{ring}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -119,9 +135,10 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
               y={getY(val) + 4}
               fill="#64748b"
               fontSize="10"
+              fontFamily="monospace"
               textAnchor="end"
             >
-              {val.toFixed(1)}
+              {(val * 100).toFixed(0)}%
             </text>
 
             {/* Vertical line (hype) */}
@@ -135,17 +152,42 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
             />
             <text
               x={getX(val)}
-              y={height - padding + 18}
+              y={height - padding + 16}
               fill="#64748b"
               fontSize="10"
+              fontFamily="monospace"
               textAnchor="middle"
             >
-              {val.toFixed(1)}
+              {(val * 100).toFixed(0)}%
             </text>
           </g>
         ))}
 
-        {/* Main Axes */}
+        {/* Threshold dividing lines */}
+        {/* Adopt Viability Baseline >= 0.80 */}
+        <line
+          x1={padding}
+          y1={getY(0.8)}
+          x2={width - padding}
+          y2={getY(0.8)}
+          stroke="#10b981"
+          strokeWidth="1"
+          strokeDasharray="6 3"
+          strokeOpacity="0.5"
+        />
+        {/* Adopt Max Hype Ceiling <= 0.30 */}
+        <line
+          x1={getX(0.3)}
+          y1={padding}
+          x2={getX(0.3)}
+          y2={height - padding}
+          stroke="#10b981"
+          strokeWidth="1"
+          strokeDasharray="6 3"
+          strokeOpacity="0.5"
+        />
+
+        {/* Axes */}
         <line
           x1={padding}
           y1={height - padding}
@@ -193,6 +235,7 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
           const isSelected = selectedItem?.id === item.id;
           const isHovered = hoveredItem?.id === item.id;
           const color = RING_COLORS[item.recommended_ring] || "#94a3b8";
+          const shouldShowLabel = isSelected || isHovered || showAllLabels;
 
           return (
             <g
@@ -222,17 +265,19 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
                 strokeWidth="2"
                 className="transition-all"
               />
-              {/* Tool name label */}
-              <text
-                x={cx + 9}
-                y={cy + 4}
-                fill={isSelected || isHovered ? "#f8fafc" : "#94a3b8"}
-                fontSize="10"
-                fontWeight={isSelected || isHovered ? "700" : "500"}
-                className="pointer-events-none"
-              >
-                {item.name}
-              </text>
+              {/* Tool name label: only rendered on hover/selected or when explicitly toggled */}
+              {shouldShowLabel && (
+                <text
+                  x={cx + 9}
+                  y={cy + 4}
+                  fill={isSelected || isHovered ? "#ffffff" : "#94a3b8"}
+                  fontSize="10"
+                  fontWeight={isSelected || isHovered ? "700" : "500"}
+                  className="pointer-events-none drop-shadow-md select-none"
+                >
+                  {item.name}
+                </text>
+              )}
             </g>
           );
         })}
@@ -263,9 +308,21 @@ export const ScatterPlot: React.FC<ScatterPlotProps> = ({
             {hoveredItem.key_innovation}
           </div>
           <div className="flex justify-between text-[10px] text-slate-400 border-t border-slate-700/60 pt-1">
-            <span>Viability: <strong className="text-emerald-400">{hoveredItem.viability_score.toFixed(2)}</strong></span>
-            <span>Hype: <strong className="text-amber-400">{hoveredItem.hype_score.toFixed(2)}</strong></span>
-            <span>Corrob: <strong>{hoveredItem.corroboration_count}x</strong></span>
+            <span>
+              Viability:{" "}
+              <strong className="text-emerald-400">
+                {(hoveredItem.viability_score * 100).toFixed(0)}%
+              </strong>
+            </span>
+            <span>
+              Hype:{" "}
+              <strong className="text-amber-400">
+                {(hoveredItem.hype_score * 100).toFixed(0)}%
+              </strong>
+            </span>
+            <span>
+              Corrob: <strong>{hoveredItem.corroboration_count}x</strong>
+            </span>
           </div>
         </div>
       )}

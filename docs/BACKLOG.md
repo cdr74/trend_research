@@ -256,3 +256,30 @@
   - Add Omnibar search filter `theme:<name>` and Theme facet to `FilterSidebar`.
   - Re-export static bundle and verify web build.
   - *Acceptance Criteria:* Static web bundle compiles with zero TypeScript errors and surfaces theme groupings.
+
+---
+
+## Milestone 9: Radar View Ergonomics, Deterministic Blip Layout & Spec-Model Coverage (Completed)
+**Goal:** Deliver spreadsheet-grade per-column filtering and sorting, expand radar viewports to eliminate label clipping, make blip layout 100% deterministic (zero hopping during filter changes), clean up scatter plot text collisions, and ingest canonical property-based testing tools to populate the "Spec & Model" pillar.
+
+### Stories & Tasks:
+- [x] **M9-T1: Architectural Specification: View Ergonomics, Determinism & Domain Coverage (ADR-0024)**
+  - Document UX ergonomics, deterministic hash positioning algorithm, and Spec & Model source integration in ADR-0024.
+  - *Acceptance Criteria:* ADR-0024 approved by operator.
+- [x] **M9-T2: Matrix Table Per-Column Sort & Filter Controls**
+  - Implement column header click sorting (asc/desc/reset) with custom comparators for rings, trajectories, and scores in `TableView.tsx`.
+  - Add integrated secondary filter row for discrete dropdowns (`Track`, `Theme`, `Pillar`, `Ring`, `Trajectory`, `Evidence Tier`) and search inputs.
+  - *Acceptance Criteria:* Table supports multi-parameter filtering and responsive sorting across all columns.
+- [x] **M9-T3: Viewport Padding & Deterministic Radar Blip Layout**
+  - Expand `RadarChart` viewBox with perimeter padding (`viewBox="-60 -60 920 920"`) and tune label text anchors to eliminate truncation.
+  - Replace transient array index with deterministic FNV-1a item hash for static blip spatial coordinates.
+  - *Acceptance Criteria:* Filtering or searching preserves exact blip positions without hopping.
+- [x] **M9-T4: Scatter Matrix Collision Resolution & Interactive Focus**
+  - Render crisp glowing dots by default, hiding static text collisions in `ScatterPlot.tsx`.
+  - Display full labels and floating inspection cards on hover/selection, with an optional "Show Labels" header toggle.
+  - *Acceptance Criteria:* Dense clusters display cleanly with zero text overlap.
+- [x] **M9-T5: Spec & Model Tool Ingestion & Dynamic Theme Convergence**
+  - Ingest canonical property-based and spec-driven testing frameworks (`HypothesisWorks/hypothesis`, `schemathesis/schemathesis`, `dubzzz/fast-check`).
+  - Run Stage 1–4 pipeline to synthesize a 7th dynamic theme: `Model-Based & Property-Driven Testing` under pillar `Spec & Model`.
+  - Re-export `radar.json` and verify all 6 pillars have active blips.
+  - *Acceptance Criteria:* `radar.json` contains active blips across all 6 QE pillars; web dashboard compiles cleanly.

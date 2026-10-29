@@ -23,31 +23,45 @@ const CATEGORIES: QECategory[] = [
   "Governance & Evals",
 ];
 
+// Invariant 32-bit FNV-1a hash to guarantee static spatial placement per item
+const getItemHash = (id: string): number => {
+  let hash = 2166136261;
+  for (let i = 0; i < id.length; i++) {
+    hash ^= id.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+};
+
 export const RadarChart: React.FC<RadarChartProps> = ({ items, selectedItem, onSelectItem }) => {
   const size = 800;
   const center = size / 2;
   const [hoveredItem, setHoveredItem] = useState<RadarItem | null>(null);
 
-  // Calculate position of a blip deterministically from category and ring
-  const getBlipPosition = (item: RadarItem, index: number) => {
+  // Calculate position of a blip deterministically from item identity (100% stable across filter toggles)
+  const getBlipPosition = (item: RadarItem) => {
     const catIndex = CATEGORIES.indexOf(item.category);
+    const validCatIndex = catIndex >= 0 ? catIndex : 0;
     const sliceAngle = (2 * Math.PI) / CATEGORIES.length;
-    const baseAngle = catIndex * sliceAngle + sliceAngle / 2;
+    const baseAngle = validCatIndex * sliceAngle + sliceAngle / 2;
 
     const ringCfg = RING_CONFIG[item.recommended_ring];
     const prevRadius =
       item.recommended_ring === "Adopt"
-        ? 30
+        ? 35
         : item.recommended_ring === "Trial"
         ? 110
         : item.recommended_ring === "Assess"
         ? 200
         : 290;
 
-    // Distribute within ring band
+    const hash = getItemHash(item.id || item.name);
     const bandWidth = ringCfg.radius - prevRadius;
-    const r = prevRadius + bandWidth * 0.25 + ((index * 37) % (bandWidth * 0.5));
-    const angleOffset = (((index * 17) % 30) - 15) * (Math.PI / 180);
+    const rRatio = 0.20 + ((hash % 1000) / 1000.0) * 0.60;
+    const r = prevRadius + bandWidth * rRatio;
+
+    // Angle offset: spread within +/- 18 degrees of slice center
+    const angleOffset = ((((hash >> 8) % 360) / 10.0) - 18.0) * (Math.PI / 180.0);
     const angle = baseAngle + angleOffset;
 
     return {
@@ -56,11 +70,20 @@ export const RadarChart: React.FC<RadarChartProps> = ({ items, selectedItem, onS
     };
   };
 
-  const hoveredPos = hoveredItem ? getBlipPosition(hoveredItem, items.indexOf(hoveredItem)) : null;
+  const hoveredPos = hoveredItem ? getBlipPosition(hoveredItem) : null;
 
   return (
-    <div className="relative flex justify-center items-center bg-[#121826] border border-[#1f293d] rounded-xl p-6 shadow-2xl overflow-hidden">
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="max-w-full h-auto">
+    <div className="relative flex justify-center items-center bg-[#121826] border border-[#1f293d] rounded-xl p-8 shadow-2xl">
+      {/* 
+        viewBox extends by 65px on all four sides (-65 -65 to 930 930) 
+        to ensure category labels on top, bottom, and sides have ample breathing room.
+      */}
+      <svg
+        width={size}
+        height={size}
+        viewBox="-65 -65 930 930"
+        className="max-w-full h-auto overflow-visible select-none"
+      >
         {/* Background Concentric Rings */}
         {(Object.keys(RING_CONFIG) as RadarRing[]).reverse().map((ring) => {
           const cfg = RING_CONFIG[ring];
@@ -91,15 +114,21 @@ export const RadarChart: React.FC<RadarChartProps> = ({ items, selectedItem, onS
           );
         })}
 
-        {/* Category dividing axes */}
+        {/* Category dividing axes & un-clipped boundary labels */}
         {CATEGORIES.map((cat, i) => {
           const angle = i * ((2 * Math.PI) / CATEGORIES.length);
-          const x2 = center + 390 * Math.cos(angle);
-          const y2 = center + 390 * Math.sin(angle);
+          const x2 = center + 380 * Math.cos(angle);
+          const y2 = center + 380 * Math.sin(angle);
 
-          const labelAngle = angle + (Math.PI / CATEGORIES.length);
-          const lx = center + 400 * Math.cos(labelAngle);
-          const ly = center + 400 * Math.sin(labelAngle);
+          const labelAngle = angle + Math.PI / CATEGORIES.length;
+          const lx = center + 415 * Math.cos(labelAngle);
+          const ly = center + 415 * Math.sin(labelAngle);
+
+          // Dynamic typography anchors based on circular position
+          const dominantBaseline =
+            ly < center - 120 ? "auto" : ly > center + 120 ? "hanging" : "central";
+          const textAnchor =
+            lx > center + 50 ? "start" : lx < center - 50 ? "end" : "middle";
 
           return (
             <g key={cat}>
@@ -115,10 +144,11 @@ export const RadarChart: React.FC<RadarChartProps> = ({ items, selectedItem, onS
                 x={lx}
                 y={ly}
                 fill="#94a3b8"
-                fontSize="11"
+                fontSize="12"
                 fontWeight="600"
-                textAnchor={lx > center + 20 ? "start" : lx < center - 20 ? "end" : "middle"}
-                dominantBaseline="central"
+                textAnchor={textAnchor}
+                dominantBaseline={dominantBaseline}
+                className="select-none"
               >
                 {cat}
               </text>
@@ -126,9 +156,9 @@ export const RadarChart: React.FC<RadarChartProps> = ({ items, selectedItem, onS
           );
         })}
 
-        {/* Blips */}
-        {items.map((item, idx) => {
-          const pos = getBlipPosition(item, idx);
+        {/* Blips (100% position invariant across all filter changes) */}
+        {items.map((item) => {
+          const pos = getBlipPosition(item);
           const isSelected = selectedItem?.id === item.id;
           const isHovered = hoveredItem?.id === item.id;
           const color = RING_CONFIG[item.recommended_ring].color;
