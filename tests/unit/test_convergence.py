@@ -179,6 +179,53 @@ async def test_parasitic_wrapper_detection(mock_provider: MockProvider) -> None:
 
 
 @pytest.mark.asyncio
+async def test_post_mortem_protected_from_wrapper_penalty(
+    mock_provider: MockProvider,
+) -> None:
+    engine = TopicConvergenceEngine(provider=mock_provider)
+
+    # Root open-source innovation
+    root_vec = make_unit_vector(1536, 0)
+    root_dossier = SignalDossier(
+        source_id=uuid4(),
+        name="Quasar-API-Analysis",
+        category=QECategory.TEST_SYNTHESIS,
+        source_url="https://github.com/org/quasar",
+        evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+        key_innovation="Dependency graph API blast radius analysis.",
+        has_reproducible_benchmark=False,
+        has_open_source_repo=True,
+        is_superficial_wrapper=False,
+        embedding=root_vec,
+    )
+    res_root = await engine.converge_dossier(root_dossier)
+
+    # Engineering post-mortem with high similarity (no standalone repo or benchmark)
+    post_mortem_vec = make_blended_vector(1536, 0, 1, weight=0.1)  # sim ~ 0.995
+    post_mortem_dossier = SignalDossier(
+        source_id=uuid4(),
+        name="Netflix Engineering Blast Radius Tool Post-Mortem",
+        category=QECategory.TEST_SYNTHESIS,
+        source_url="https://netflixtechblog.com/beyond-api-compatibility",
+        evidence_tier=EvidenceTier.ENGINEERING_POST_MORTEM,
+        key_innovation="Production lessons from measuring blast radius of library changes.",
+        has_reproducible_benchmark=False,
+        has_open_source_repo=False,
+        is_superficial_wrapper=False,
+        embedding=post_mortem_vec,
+    )
+    res_post_mortem = await engine.converge_dossier(post_mortem_dossier)
+
+    assert res_post_mortem.is_new_topic is False
+    assert res_post_mortem.topic_id == res_root.topic_id
+    assert res_post_mortem.similarity_score >= 0.88
+    # Post-mortem should NOT be marked as a superficial wrapper under ADR-0022
+    assert res_post_mortem.is_wrapper is False
+    assert res_post_mortem.wrapper_penalty_applied == 0.0
+    assert post_mortem_dossier.is_superficial_wrapper is False
+
+
+@pytest.mark.asyncio
 async def test_multi_source_cross_channel_consensus_bonus(
     mock_provider: MockProvider,
 ) -> None:

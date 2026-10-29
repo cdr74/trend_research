@@ -1,7 +1,7 @@
 # ADR 0014: Stage 4 Radar Categorizer and Lifecycle Trajectory
 
 ## Status
-Accepted
+Accepted (Amended by ADR-0022: Multi-Gated Deterministic Radar Categorization and Ranking)
 
 ## Context
 In the 4-stage processing DAG established in ADR-0000, Stage 4 (Radar Categorizer) synthesizes all preceding stages:

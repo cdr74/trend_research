@@ -207,3 +207,28 @@
   - Propagate track field in bundle exports and add Track column to `TableView` and `ItemDetailModal`.
   - Fix test runner export clobbering to isolate mock sync runs from production dashboard bundles.
   - *Acceptance Criteria:* Web dashboard reflects all 23 live database signals without stale mock cache fallback.
+
+---
+
+## Milestone 7: Precision Radar Ranking & Gated Categorization (Completed)
+**Goal:** Address bimodal radar skew (20 Adopt, 3 Hold, 0 Assess, 0 Trial) by establishing multi-gated deterministic ring criteria, protecting practitioner post-mortems from wrapper penalties, and upgrading mock embeddings.
+
+### Stories & Tasks:
+- [x] **M7-T1: Architectural Specification: Multi-Gated Radar Categorization (ADR-0022)**
+  - Author and approve ADR-0022 establishing lifecycle-gated `Adopt`, widened `Trial` and `Assess` bands, and practitioner post-mortem protection.
+  - Amend ADR-0014 to reference multi-gated decision matrix.
+  - *Acceptance Criteria:* ADR-0022 committed and integrated into architecture registry.
+- [x] **M7-T2: Configurable Multi-Gated Thresholds & Precision RadarCategorizer**
+  - Update `Settings` with calibrated thresholds: `ring_adopt_min_viability = 0.80`, `ring_adopt_max_hype = 0.30`, `ring_trial_min_viability = 0.70`, `ring_trial_max_hype = 0.40`, `ring_assess_min_viability = 0.45`, `stars_consolidated_threshold = 500.0`.
+  - Refactor `RadarCategorizer.determine_ring` to accept `lifecycle_stage` and strictly enforce `LifecycleStage.CONSOLIDATED` for `Adopt`.
+  - Re-route high-viability `EMERGING` technologies into `Trial` and exploratory items into `Assess`.
+  - *Acceptance Criteria:* Unit tests verify correct ring routing across consolidated, emerging, and fading lifecycle states.
+- [x] **M7-T3: Topic Convergence Post-Mortem Protection & Pseudo-Orthogonal Mock Embeddings**
+  - Update `TopicConvergenceEngine` to exempt `EvidenceTier.ENGINEERING_POST_MORTEM` from wrapper deductions.
+  - Upgrade `MockLLMProvider.embed_text` with deterministic pseudo-orthogonal unit vectors based on text hash to eliminate artificial 1.0 cosine similarity clustering.
+  - *Acceptance Criteria:* Unit tests prove distinct mock signals generate varying similarity scores, and post-mortems retain valid standing.
+- [x] **M7-T4: End-to-End Test Suite Parity & Static Data Bundle Re-Export**
+  - Update unit and golden benchmark integration tests to match new multi-gated categorizer behavior.
+  - Re-run pipeline categorization and export re-ranked radar items to `web/public/radar.json`.
+  - Verify static web build and test suite pass with 100% compliance.
+  - *Acceptance Criteria:* Full CI test suite passes cleanly, `radar.json` presents a balanced ThoughtWorks distribution.

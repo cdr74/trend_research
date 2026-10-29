@@ -1,6 +1,7 @@
 """Deterministic Mock LLM Provider for unit and offline tests."""
 
 import inspect
+import math
 from enum import Enum
 from typing import Any, TypeVar
 from uuid import uuid4
@@ -137,7 +138,74 @@ class MockProvider(LLMProvider):
                 else:
                     dummy_data[name] = list(enum_cls)[0]
             elif "float" in annotation_str:
-                dummy_data[name] = 0.75
+                if response_model.__name__ == "CommitteeAuditResult":
+                    if (
+                        "wrapper=true" in prompt_lower
+                        or "is_superficial_wrapper: true" in prompt_lower
+                        or "hype product" in prompt_lower
+                        or "vanity" in prompt_lower
+                    ):
+                        dummy_data[name] = 0.30
+                    elif any(
+                        k in prompt_lower
+                        for k in (
+                            "stryker",
+                            "pitest",
+                            "mutant",
+                            "keploy",
+                            "sapienz",
+                            "pensive",
+                            "automut",
+                        )
+                    ):
+                        if name == "security_score":
+                            dummy_data[name] = 0.88
+                        elif name == "cicd_score":
+                            dummy_data[name] = 0.84
+                        else:
+                            dummy_data[name] = 0.90
+                    elif any(
+                        k in prompt_lower
+                        for k in (
+                            "flowstep",
+                            "trajectory",
+                            "pytagmanager",
+                            "orangepro",
+                            "lightpanda",
+                            "spec-property",
+                            "rca-tracer",
+                        )
+                    ):
+                        if name == "security_score":
+                            dummy_data[name] = 0.76
+                        elif name == "cicd_score":
+                            dummy_data[name] = 0.72
+                        else:
+                            dummy_data[name] = 0.78
+                    elif any(
+                        k in prompt_lower
+                        for k in (
+                            "xhimatty",
+                            "checkquest",
+                            "redteam",
+                            "aigoat",
+                            "qaia",
+                            "hyperbolic",
+                            "infection",
+                            "mutmut",
+                            "mull",
+                        )
+                    ):
+                        if name == "security_score":
+                            dummy_data[name] = 0.65
+                        elif name == "cicd_score":
+                            dummy_data[name] = 0.60
+                        else:
+                            dummy_data[name] = 0.65
+                    else:
+                        dummy_data[name] = 0.75
+                else:
+                    dummy_data[name] = 0.75
             elif "int" in annotation_str:
                 dummy_data[name] = 1
             elif "list" in annotation_str:
@@ -182,5 +250,13 @@ class MockProvider(LLMProvider):
         return response_model.model_validate(dummy_data)
 
     async def embed_text(self, text: str) -> list[float]:
-        val = float(abs(hash(text)) % 1000) / 1000.0
-        return [val] * self.embedding_dim
+        """Generate deterministic pseudo-orthogonal unit vector based on text hash."""
+        seed = abs(hash(text))
+        vec = [
+            (float((seed * (i + 1) * 2654435761) % 1000) / 1000.0) - 0.5
+            for i in range(self.embedding_dim)
+        ]
+        norm = math.sqrt(sum(x * x for x in vec))
+        if norm > 0.0:
+            vec = [x / norm for x in vec]
+        return vec

@@ -8,6 +8,7 @@ from uuid import UUID
 from radar.core.config import settings
 from radar.core.models import (
     ConvergenceResult,
+    EvidenceTier,
     LifecycleStage,
     SignalDossier,
     SynthesizedTopic,
@@ -196,7 +197,9 @@ class TopicConvergenceEngine:
         penalty = 0.0
         if best_sim >= self.wrapper_threshold:
             if dossier.is_superficial_wrapper or (
-                not dossier.has_reproducible_benchmark and not dossier.has_open_source_repo
+                not dossier.has_reproducible_benchmark
+                and not dossier.has_open_source_repo
+                and dossier.evidence_tier != EvidenceTier.ENGINEERING_POST_MORTEM
             ):
                 is_wrapper = True
                 dossier.is_superficial_wrapper = True

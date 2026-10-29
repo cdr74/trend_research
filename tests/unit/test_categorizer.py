@@ -171,6 +171,41 @@ def test_categorizer_assigns_hold_ring_for_wrapper() -> None:
     assert item.hype_score >= 0.70  # High hype due to deductions
 
 
+def test_categorizer_assigns_adopt_for_established_repo_with_high_stars(
+    high_signal_dossier: SignalDossier,
+    high_viability_evaluation: EnterpriseEvaluation,
+) -> None:
+    categorizer = RadarCategorizer()
+    # Corroboration=1, but stars=1500 >= 500 threshold -> CONSOLIDATED
+    high_signal_dossier.engagement_metrics["stars"] = 1500.0
+    item = categorizer.categorize(
+        dossier=high_signal_dossier,
+        evaluation=high_viability_evaluation,
+        topic=None,
+    )
+    assert item.lifecycle_stage == LifecycleStage.CONSOLIDATED
+    assert item.recommended_ring == RadarRing.ADOPT
+    assert item.viability_score == 0.88
+
+
+def test_categorizer_assigns_trial_to_high_viability_emerging_innovation(
+    high_signal_dossier: SignalDossier,
+    high_viability_evaluation: EnterpriseEvaluation,
+) -> None:
+    categorizer = RadarCategorizer()
+    # High viability (0.88), low hype (0.0), but topic=None -> corroboration=1 -> EMERGING
+    item = categorizer.categorize(
+        dossier=high_signal_dossier,
+        evaluation=high_viability_evaluation,
+        topic=None,
+    )
+
+    assert item.lifecycle_stage == LifecycleStage.EMERGING
+    # Under ADR-0022, high viability emerging items enter TRIAL (candidate pilot), NOT Adopt
+    assert item.recommended_ring == RadarRing.TRIAL
+    assert item.viability_score == 0.88
+
+
 def test_categorize_batch(
     high_signal_dossier: SignalDossier,
     high_viability_evaluation: EnterpriseEvaluation,

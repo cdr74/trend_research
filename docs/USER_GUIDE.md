@@ -466,10 +466,10 @@ Every evaluated signal is categorized into one of four rings reflecting executiv
 
 | Ring | Financial Enterprise Posture | Criteria & Viability Standard | Recommended Action |
 | :--- | :--- | :--- | :--- |
-| **Adopt** | **Established (MUST LOOK / DEPLOY)** | Viability $\ge 0.85$, Validity $\ge 0.80$, low hype, confirmed corroboration, zero compliance blockers | Immediate production implementation in target enterprise workflows. |
-| **Trial** | **High-Confidence Pilot** | Viability $\ge 0.70$, Validity $\ge 0.60$ | Approved for sandboxed, non-critical internal banking applications or staging pipelines. |
-| **Assess** | **Emerging (TEAM SHOULD TRACK)** | High technical research novelty ($\ge 0.50$); novel agent/eval proof | Track evolution for 6–18 month horizon; too early to experiment in-bank. |
-| **Hold** | **Prohibited / High Risk** | Viability $< 0.50$, excessive hype ($> 0.60$), testing in prod, or prohibitive security risk | Avoid. Incompatible with financial regulations, superficial wrapper, or unverified claims. |
+| **Adopt** | **Established (MUST LOOK / DEPLOY)** | Viability $\ge 0.80$, Hype $\le 0.30$, strictly Consolidated lifecycle ($N \ge 3$ or stars $\ge 500$), zero compliance blockers | Immediate production implementation in target enterprise workflows. |
+| **Trial** | **High-Confidence Pilot** | Viability $\ge 0.70$, Hype $\le 0.40$ (including high-viability emerging innovations) | Approved for sandboxed, non-critical internal banking applications or staging pipelines. |
+| **Assess** | **Emerging (TEAM SHOULD TRACK)** | Viability $\ge 0.45$ or Velocity $\ge 25.0$; novel agent/eval proof | Track evolution for 6–18 month horizon; too early to experiment in-bank. |
+| **Hold** | **Prohibited / High Risk** | Viability $< 0.45$, excessive hype ($> 0.60$), superficial wrapper, or prohibitive security risk | Avoid. Incompatible with financial regulations, superficial wrapper, or unverified claims. |
 
 ### 4.2 Dual-Track Taxonomy: Testing vs. Evaluation
 The radar organizes signals across two distinct tracks:

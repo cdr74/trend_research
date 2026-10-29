@@ -127,9 +127,9 @@ flowchart TD
      - *Operational Feasibility (35%):* CI footprint, determinism, maintenance overhead.
      - *Technical Rigor (30%):* Empirical benchmarks vs synthetic marketing.
 4. **Stage 4: Radar Categorizer & Decision Rings:**
-   - **Adopt (Established):** High viability (≥ 0.75), low hype (≤ 0.35), proven artifact backing. *Mandatory implementation review.*
-   - **Trial (High-Confidence Pilot):** Viability ≥ 0.65, hype ≤ 0.50. *Approved for sandboxed pilot evaluation.*
-   - **Assess (Emerging):** Viability ≥ 0.45 or high velocity. *Track for 6–18 month horizon; too early for production.*
+   - **Adopt (Industry Standard):** High viability (≥ 0.80), low hype (≤ 0.30), proven artifact backing, and strictly consolidated production track record ($N \ge 3$ or stars ≥ 500). *Mandatory implementation review.*
+   - **Trial (High-Confidence Pilot):** High viability (≥ 0.70), low-to-moderate hype (≤ 0.40) including promising emerging innovations. *Approved for sandboxed pilot evaluation.*
+   - **Assess (Emerging / Exploratory):** Viability ≥ 0.45 or high engagement velocity (≥ 25.0). *Track for 6–18 month horizon; too early for production.*
    - **Hold (Prohibited / Flawed):** Viability < 0.45, excessive hype (> 0.60), superficial wrappers, or financial red flags.
 
 ---

@@ -117,19 +117,22 @@ class Settings(BaseSettings):
 
     # Radar Ring Thresholds (Stage 4)
     ring_adopt_min_viability: float = Field(
-        default=0.75, ge=0.0, le=1.0, alias="RADAR_RING_ADOPT_MIN_VIABILITY"
+        default=0.80, ge=0.0, le=1.0, alias="RADAR_RING_ADOPT_MIN_VIABILITY"
     )
     ring_adopt_max_hype: float = Field(
-        default=0.35, ge=0.0, le=1.0, alias="RADAR_RING_ADOPT_MAX_HYPE"
+        default=0.30, ge=0.0, le=1.0, alias="RADAR_RING_ADOPT_MAX_HYPE"
     )
     ring_trial_min_viability: float = Field(
-        default=0.65, ge=0.0, le=1.0, alias="RADAR_RING_TRIAL_MIN_VIABILITY"
+        default=0.70, ge=0.0, le=1.0, alias="RADAR_RING_TRIAL_MIN_VIABILITY"
     )
     ring_trial_max_hype: float = Field(
-        default=0.50, ge=0.0, le=1.0, alias="RADAR_RING_TRIAL_MAX_HYPE"
+        default=0.40, ge=0.0, le=1.0, alias="RADAR_RING_TRIAL_MAX_HYPE"
     )
     ring_assess_min_viability: float = Field(
         default=0.45, ge=0.0, le=1.0, alias="RADAR_RING_ASSESS_MIN_VIABILITY"
+    )
+    stars_consolidated_threshold: float = Field(
+        default=500.0, ge=0.0, alias="RADAR_STARS_CONSOLIDATED_THRESHOLD"
     )
     velocity_emerging_threshold: float = Field(
         default=25.0, ge=0.0, alias="RADAR_VELOCITY_EMERGING_THRESHOLD"

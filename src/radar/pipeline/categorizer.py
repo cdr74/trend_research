@@ -30,6 +30,7 @@ class RadarCategorizer:
         assess_min_viability: float = settings.ring_assess_min_viability,
         velocity_emerging: float = settings.velocity_emerging_threshold,
         velocity_fading: float = settings.velocity_fading_threshold,
+        stars_consolidated_threshold: float = settings.stars_consolidated_threshold,
     ) -> None:
         self.adopt_min_viability = adopt_min_viability
         self.adopt_max_hype = adopt_max_hype
@@ -38,6 +39,7 @@ class RadarCategorizer:
         self.assess_min_viability = assess_min_viability
         self.velocity_emerging = velocity_emerging
         self.velocity_fading = velocity_fading
+        self.stars_consolidated = stars_consolidated_threshold
 
     def calculate_validity_and_hype(
         self, dossier: SignalDossier, topic: TrendTopic | None = None
@@ -75,8 +77,14 @@ class RadarCategorizer:
         hype = round(max(0.0, min(1.0, 1.0 - clamped_validity)), 4)
         return clamped_validity, hype
 
-    def determine_ring(self, viability: float, hype: float, dossier: SignalDossier) -> RadarRing:
-        """Assign Tech Radar ring based on multi-lens viability, hype, and artifact backing."""
+    def determine_ring(
+        self,
+        viability: float,
+        hype: float,
+        dossier: SignalDossier,
+        lifecycle_stage: LifecycleStage = LifecycleStage.EMERGING,
+    ) -> RadarRing:
+        """Assign Tech Radar ring based on multi-lens viability, hype, lifecycle stage, and artifact backing."""
         if dossier.is_superficial_wrapper or viability < self.assess_min_viability or hype > 0.60:
             return RadarRing.HOLD
 
@@ -88,6 +96,7 @@ class RadarCategorizer:
         if (
             viability >= self.adopt_min_viability
             and hype <= self.adopt_max_hype
+            and lifecycle_stage == LifecycleStage.CONSOLIDATED
             and has_proven_backing
         ):
             return RadarRing.ADOPT
@@ -106,11 +115,12 @@ class RadarCategorizer:
     def determine_lifecycle(
         self, dossier: SignalDossier, topic: TrendTopic | None = None
     ) -> LifecycleStage:
-        """Classify lifecycle trajectory from velocity and cross-channel corroboration."""
+        """Classify lifecycle trajectory from velocity, star count, and cross-channel corroboration."""
         corroboration = topic.corroboration_count if topic else 1
         velocity = dossier.engagement_metrics.get("velocity", 0.0)
+        stars = dossier.engagement_metrics.get("stars", 0.0)
 
-        if corroboration >= 3:
+        if corroboration >= 3 or stars >= self.stars_consolidated:
             return LifecycleStage.CONSOLIDATED
 
         if velocity >= self.velocity_emerging:
@@ -133,8 +143,13 @@ class RadarCategorizer:
     ) -> RadarItem:
         """Synthesize dossier, evaluation, and topic into a published RadarItem."""
         validity, hype = self.calculate_validity_and_hype(dossier, topic)
-        ring = self.determine_ring(evaluation.composite_viability_score, hype, dossier)
         trajectory = self.determine_lifecycle(dossier, topic)
+        ring = self.determine_ring(
+            evaluation.composite_viability_score,
+            hype,
+            dossier,
+            lifecycle_stage=trajectory,
+        )
 
         sources = topic.sources if topic else [dossier.source_url]
         corroboration_count = topic.corroboration_count if topic else 1
