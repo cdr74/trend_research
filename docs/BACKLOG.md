@@ -283,3 +283,26 @@
   - Run Stage 1–4 pipeline to synthesize a 7th dynamic theme: `Model-Based & Property-Driven Testing` under pillar `Spec & Model`.
   - Re-export `radar.json` and verify all 6 pillars have active blips.
   - *Acceptance Criteria:* `radar.json` contains active blips across all 6 QE pillars; web dashboard compiles cleanly.
+
+---
+
+## Milestone 10: GitHub Pages Continuous Deployment & Release Distribution Artifacts (Completed)
+**Goal:** Automate zero-install interactive radar dashboard deployment to GitHub Pages on every release and push to main, package cross-platform distribution bundles (.tar.gz and .zip) as downloadable GitHub Release assets, and preserve evaluated production data in CI.
+
+### Stories & Tasks:
+- [x] **M10-T1: Architectural Specification: GitHub Pages & Release Distribution (ADR-0025)**
+  - Author and approve ADR-0025 defining continuous deployment triggers, data preservation invariants, and release artifact packaging.
+  - *Acceptance Criteria:* ADR-0025 committed and indexed.
+- [x] **M10-T2: Automated GitHub Pages Deployment Workflow (.github/workflows/pages.yml)**
+  - Configure automated triggers: `push` to `main`, `release: [published]`, and manual `workflow_dispatch`.
+  - Verify and prioritize committed `web/public/radar.json`, skipping heavy ML dependencies for sub-30-second builds while preserving mock export fallback.
+  - Configure GitHub Pages build, artifact upload, and deployment steps.
+  - *Acceptance Criteria:* Workflow validates data bundle and builds static assets ready for GitHub Pages hosting.
+- [x] **M10-T3: Release Asset Packaging & Distribution (.github/workflows/release.yml)**
+  - Extend release packaging to build both `radar-web-dashboard.tar.gz` and `radar-web-dashboard.zip` using Python `shutil.make_archive`.
+  - Upload dashboard bundles alongside Python wheels and source distributions on each SemVer release tag.
+  - *Acceptance Criteria:* Release workflow attaches web dashboard distribution packages directly to GitHub Releases.
+- [x] **M10-T4: Documentation & Live Site Integration (README.md & docs/USER_GUIDE.md)**
+  - Add GitHub Pages live link and badge in `README.md`.
+  - Document zero-install online access and offline release asset extraction in `docs/USER_GUIDE.md`.
+  - *Acceptance Criteria:* Documentation reflects live demo URL and distribution assets.

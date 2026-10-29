@@ -449,13 +449,35 @@ Open **`http://localhost:5173`** in your browser.
 - **Semantic Cluster View:** 2D interactive spatial canvas projecting the 1536-dimensional embeddings into 2D space using UMAP. Enables visual detection of topical clustering and derivative wrappers.
 - **Search Omnibar:** Instant client-side search supporting structured tokens (`track:testing`, `track:evaluation`, `ring:Adopt`, `viability:>0.8`, `risk:egress`) and plain keywords.
 
-#### 4. Building Static Production Bundle
-To compile a static bundle ready for hosting on GitHub Pages, Nginx, or S3:
+#### 4. Live Access on GitHub Pages (Zero Installation)
+The dashboard is continuously deployed to GitHub Pages and available online at:
+👉 **[https://cdr74.github.io/trend_research/](https://cdr74.github.io/trend_research/)**
+
+Every push to `main` and every formal release triggers `.github/workflows/pages.yml`, publishing the latest evaluated data bundle and UI enhancements automatically.
+
+#### 5. Offline GitHub Release Distribution Bundles
+For air-gapped enterprise environments, internal wikis, or offline reviews, standalone static bundles are automatically built and attached to every [GitHub Release](https://github.com/cdr74/trend_research/releases):
+- `radar-web-dashboard.zip` (Windows / universal)
+- `radar-web-dashboard.tar.gz` (Linux / macOS)
+
+**Running an Offline Bundle Locally:**
+```bash
+# 1. Unzip the release artifact
+unzip radar-web-dashboard.zip
+cd dist
+
+# 2. Serve with any standard static file server (zero dependencies)
+python3 -m http.server 8080
+```
+Then navigate to `http://localhost:8080` in any web browser.
+
+#### 6. Building Static Production Bundle Locally
+To compile the static bundle locally for custom hosting (Nginx, S3, Cloudflare Pages):
 ```bash
 cd web
 npm run build
 ```
-The compiled output is emitted to `web/dist/`.
+The compiled output is emitted to `web/dist/` with relative asset links (`base: "./"`).
 
 ---
 

@@ -1,5 +1,6 @@
 # AI Test Engineering Trend Horizon Radar
 
+[![Live Radar](https://img.shields.io/badge/Live%20Radar-GitHub%20Pages-brightgreen.svg)](https://cdr74.github.io/trend_research/)
 [![CI Pipeline](https://github.com/cdr74/trend_research/actions/workflows/ci.yml/badge.svg)](https://github.com/cdr74/trend_research/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
@@ -7,6 +8,10 @@
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
 
 An autonomous intelligence platform designed for Quality Engineering (QE) leaders and test engineers operating in highly regulated, high-assurance environments. The platform continuously ingests, filters, corroborates, and evaluates emerging software testing and AI evaluation techniques, cutting through promotional hype, non-reproducible benchmarks, and superficial wrappers with mathematical rigor and auditability.
+
+> [!TIP]
+> **Live Zero-Install Radar Dashboard:** Explore the live interactive radar directly in your browser at **[https://cdr74.github.io/trend_research/](https://cdr74.github.io/trend_research/)**.
+> Self-contained offline web bundles (`radar-web-dashboard.zip` and `.tar.gz`) are automatically packaged and attached to each **[GitHub Release](https://github.com/cdr74/trend_research/releases)**.
 
 ---
 
@@ -206,6 +211,10 @@ uv run ruff check .
 | **[Local Tooling & Invariants (AGENTS.md)](AGENTS.md)** | Local development directives, verification standards, and commit invariants. |
 
 ### Key Architecture Decision Records (ADRs)
+- **[ADR 0025: GitHub Pages Continuous Deployment and Release Distribution Artifacts](docs/adr/0025-github-pages-continuous-deployment-and-release-artifacts.md)**
+- **[ADR 0024: Radar View Ergonomics, Deterministic Blip Layout, and Spec & Model Coverage](docs/adr/0024-radar-view-ergonomics-deterministic-blip-layout-and-spec-model-coverage.md)**
+- **[ADR 0023: Dynamic Bounded Topic Convergence and Theme Attribution](docs/adr/0023-dynamic-bounded-topic-convergence-and-theme-attribution.md)**
+- **[ADR 0022: Multi-Gated Deterministic Radar Categorization and Practitioner Post-Mortem Protection](docs/adr/0022-multi-gated-deterministic-radar-categorization.md)**
 - **[ADR 0021: Multi-Tiered Domain Relevance and Topic Filtering with Financial Enterprise Guardrails](docs/adr/0021-multi-tiered-domain-relevance-and-topic-filtering.md)**
 - **[ADR 0020: Interactive Database Lifecycle Probing and Container Startup](docs/adr/0020-interactive-db-startup-and-container-lifecycle.md)**
 - **[ADR 0019: Incremental Delta Sync and Watermark Tracking for On-Demand WSL Execution](docs/adr/0019-incremental-delta-sync-and-watermark-tracking.md)**
@@ -225,6 +234,10 @@ uv run ruff check .
 - [x] **Milestone 4: Presentation, CLI & Decoupled Interactive Web Dashboard**
 - [x] **Milestone 5: Continuous Delivery, Release & Ops Automation**
 - [x] **Milestone 6: Domain Relevance, Financial Guardrails & Dual-Track Architecture**
+- [x] **Milestone 7: Precision Radar Ranking & Gated Categorization**
+- [x] **Milestone 8: Dynamic Bounded Topic Convergence & Theme Attribution**
+- [x] **Milestone 9: Radar View Ergonomics, Deterministic Blip Layout & Spec-Model Coverage**
+- [x] **Milestone 10: GitHub Pages Continuous Deployment & Release Distribution Artifacts**
 
 ---
 

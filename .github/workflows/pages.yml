@@ -1,6 +1,11 @@
 name: Deploy Radar Dashboard to GitHub Pages
 
 on:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -22,20 +27,30 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup uv and Python
+      - name: Verify Radar Data Bundle
+        id: check_bundle
+        run: |
+          if [ -f "web/public/radar.json" ]; then
+            echo "bundle_exists=true" >> "$GITHUB_OUTPUT"
+            python3 -c "import json; d=json.load(open('web/public/radar.json')); print(f'Verified committed production bundle: {len(d.get(\"items\", []))} items across {len(d.get(\"categories\", []))} categories.')"
+          else
+            echo "bundle_exists=false" >> "$GITHUB_OUTPUT"
+            echo "Warning: web/public/radar.json not found in repository. Fallback generation required."
+          fi
+
+      - name: Setup uv and Python (Fallback if data bundle missing)
+        if: steps.check_bundle.outputs.bundle_exists != 'true'
         uses: astral-sh/setup-uv@v5
         with:
           version: "latest"
           enable-cache: true
 
-      - name: Install Python 3.12
-        run: uv python install 3.12
-
-      - name: Install Dependencies
-        run: uv sync --all-extras
-
-      - name: Export Latest Radar Data Bundle (Mock/Static fallback if DB offline)
-        run: uv run radar export --format json --output web/public/radar.json --mock
+      - name: Generate Fallback Mock Bundle
+        if: steps.check_bundle.outputs.bundle_exists != 'true'
+        run: |
+          uv python install 3.12
+          uv sync --all-extras
+          uv run radar export --format json --output web/public/radar.json --mock
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
