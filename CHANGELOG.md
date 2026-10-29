@@ -5,6 +5,13 @@ All notable changes to the Trend Horizon Radar platform will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1](https://github.com/cdr74/trend_research/compare/v0.5.0...v0.5.1) (2026-10-27)
+
+
+### Documentation
+
+* **github:** document Option A branch protection ruleset in user guide ([3586e2c](https://github.com/cdr74/trend_research/commit/3586e2c3169843a3936c0fb314b9df11f14bd613))
+
 ## [0.5.0](https://github.com/cdr74/trend_research/compare/v0.4.0...v0.5.0) (2026-10-27)
 
 
