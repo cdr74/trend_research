@@ -310,3 +310,30 @@
   - Remove redundant root-level `ai_test_engineering_radar_intent_architecture.md` superseded by `README.md`, `docs/design/architecture.md`, and `docs/adr/0021-multi-tiered-domain-relevance-and-topic-filtering.md`.
   - Update `README.md` documentation index to eliminate dead link and reference canonical system architecture and domain guardrails.
   - *Acceptance Criteria:* Redundant file removed, broken links eliminated, documentation hierarchy clean and unified.
+
+---
+
+## Milestone 11: Ingestion Resilience, GitHub Rate-Limit Optimization & Community Feed Integration (Completed)
+**Goal:** Fix feed failures, replace defunct source streams, stabilize GitHub search pagination to eliminate unauthenticated 403 rate limits, and implement a dedicated HackerNews Algolia community collector.
+
+### Stories & Tasks:
+- [x] **M11-T1: Architectural Specification: Robust Feed Endpoints & Community Ingestion (ADR-0026)**
+  - Author and approve ADR-0026 documenting feed replacements, GitHub search batch stabilization, and the Algolia community collector.
+  - *Acceptance Criteria:* ADR-0026 authored and indexed in README.md.
+- [x] **M11-T2: Source Catalog Endpoint Repair & Replacement (sources.yaml & data_sources.md)**
+  - Fix Software Testing Weekly endpoint URL to point to `/issues/rss/`.
+  - Mark decommissioned Uber Engineering Blog as disabled and introduce active Cloudflare Engineering Blog.
+  - *Acceptance Criteria:* Ingestion catalog validated and unit tests pass.
+- [x] **M11-T3: GitHub Ingestor Fixed Batch Pagination & Rate-Limit Protection**
+  - Refactor `GithubIngestor.fetch_records` to maintain stable `per_page` request sizes and enforce `max_pages` ceiling.
+  - Add rate-limit header parsing and graceful handling for 403/429 responses.
+  - *Acceptance Criteria:* Unit tests prove pagination does not degrade to 1 item per request and avoids 403 errors.
+- [x] **M11-T4: Dedicated HackerNews Algolia Community Collector & CLI Integration**
+  - Add `SourceType.COMMUNITY` to `radar.core.models.SourceType`.
+  - Implement `HnAlgoliaIngestor` in `src/radar/ingestion/community.py` supporting disjunctive queries, native timestamp filtering, and telemetry extraction.
+  - Wire CLI `sync` to route `community` channels to `HnAlgoliaIngestor` and pass `keywords` to `RssFeedIngestor`.
+  - *Acceptance Criteria:* Full unit test coverage with mock HTTP responses, live ingestion verified.
+- [x] **M11-T5: Test Suite Verification & Ingestion Sync Validation**
+  - Run `uv run pytest -v`, `uv run ruff check .`, `uv run mypy src tests`.
+  - Verify sync command with real endpoints.
+  - *Acceptance Criteria:* All checks pass cleanly with 100% test integrity.

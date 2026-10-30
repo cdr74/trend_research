@@ -58,6 +58,7 @@ class SourceType(StrEnum):
     ARXIV = "arxiv"
     GITHUB = "github"
     RSS = "rss"
+    COMMUNITY = "community"
     MANUAL = "manual"
 
 

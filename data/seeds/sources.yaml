@@ -121,11 +121,22 @@ sources:
     channel: "rss"
     endpoint_url: "https://www.uber.com/en-US/blog/engineering/rss/"
     authority_weight: 1.25
-    enabled: true
+    enabled: false  # Decommissioned by Uber; returns 406/404
     query_params:
       keywords: ["testing", "predictive", "flaky", "mock", "ci-cd"]
     telemetry_fields: ["views"]
-    description: "High-scale engineering on predictive test selection and flaky test management."
+    description: "High-scale engineering on predictive test selection and flaky test management (Feed decommissioned upstream)."
+
+  - id: "cloudflare-eng-blog"
+    name: "Cloudflare Engineering Blog"
+    channel: "rss"
+    endpoint_url: "https://blog.cloudflare.com/rss/"
+    authority_weight: 1.25
+    enabled: true
+    query_params:
+      keywords: ["testing", "reliability", "verification", "sandbox", "fuzzing", "canary"]
+    telemetry_fields: ["views"]
+    description: "Distributed systems reliability, sandbox testing, and edge service verification."
 
   - id: "meta-eng-blog"
     name: "Meta Engineering Developer Tools"
@@ -178,7 +189,7 @@ sources:
   - id: "software-testing-weekly"
     name: "Software Testing Weekly"
     channel: "rss"
-    endpoint_url: "https://softwaretestingweekly.com/feed"
+    endpoint_url: "https://softwaretestingweekly.com/issues/rss/"
     authority_weight: 0.9
     enabled: true
     query_params: {}

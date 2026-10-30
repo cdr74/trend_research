@@ -200,3 +200,45 @@ async def test_github_ingestor_retry_on_rate_limit() -> None:
         records = [r async for r in ingestor.fetch_records(limit=2)]
         assert len(records) == 2
         assert attempts == 2
+
+
+@pytest.mark.asyncio
+async def test_github_ingestor_rate_limit_exceeded_error_message() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        _ = request
+        headers = {"x-ratelimit-remaining": "0"}
+        return httpx.Response(403, json={"message": "rate limit exceeded"}, headers=headers)
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        ingestor = GithubIngestor(
+            client=client,
+            token=None,
+            max_retries=1,
+            rate_limit_delay=0.0,
+            retry_backoff_base=0.01,
+        )
+        with pytest.raises(RuntimeError, match="GitHub search rate limit exceeded"):
+            _ = [r async for r in ingestor.fetch_records(limit=5)]
+
+
+@pytest.mark.asyncio
+async def test_github_ingestor_batch_pagination_stability() -> None:
+    requested_params: list[dict[str, Any]] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requested_params.append(dict(request.url.params))
+        return httpx.Response(200, json=SAMPLE_GITHUB_SEARCH_RESPONSE)
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        ingestor = GithubIngestor(
+            client=client,
+            per_page=30,
+            rate_limit_delay=0.0,
+        )
+        # Limit 20 should request per_page=20, not degrade to per_page=1
+        records = [r async for r in ingestor.fetch_records(limit=20)]
+        assert len(records) == 2
+        assert len(requested_params) == 1
+        assert requested_params[0]["per_page"] == "20"

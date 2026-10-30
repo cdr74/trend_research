@@ -66,14 +66,13 @@ Case studies from high-scale engineering organizations expose practical failure 
    - *Key Focus:* Sapienz automated testing, predictive test selection at mono-repo scale.
 2. **Netflix Technology Blog** (`https://netflixtechblog.com/`)
    - *Key Focus:* Chaos engineering, automated canary analysis, continuous verification.
-3. **Uber Engineering Blog** (`https://www.uber.com/en-US/blog/engineering/`)
-   - *Key Focus:* Predictive test selection, flaky test isolation, microservice mock generation.
+3. **Cloudflare Engineering Blog** (`https://blog.cloudflare.com/rss/`)
+   - *Key Focus:* Distributed reliability, sandbox testing, API contract verification, and edge fuzzing.
 4. **Google Testing Blog Archive & Open Source Blog** (`https://testing.googleblog.com/`)
    - *Key Focus:* Hermetic testing, mutation testing at scale, test sizing conventions.
 5. **ThoughtWorks Technology Insights / Martin Fowler Bliki** (`https://martinfowler.com/`)
    - *Key Focus:* Test pyramid, architecture fitness functions, contract testing.
-6. **Cloudflare & Stripe Engineering Blogs** (`https://blog.cloudflare.com/tag/engineering/`)
-   - *Key Focus:* Distributed reliability, sandbox testing, API contract verification.
+6. **Uber Engineering Blog** (*Decommissioned upstream; formerly predictive test selection and microservice mocks*)
 
 ---
 
@@ -89,5 +88,5 @@ Captures audience attention velocity and practitioner consensus:
    - `r/softwaretesting` & `r/qualityassurance`
    - **Telemetry:** Post score, comment density.
 3. **Curated Quality Newsletters**
-   - Software Testing Weekly (`https://softwaretestingweekly.com/`)
+   - Software Testing Weekly (`https://softwaretestingweekly.com/issues/rss/`)
    - Pragmatic Engineer (`https://newsletter.pragmaticengineer.com/`)

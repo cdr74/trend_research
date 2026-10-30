@@ -177,9 +177,23 @@ class GithubIngestor(BaseIngestor):
             await self._throttle()
             resp = await client.get(self.endpoint_url, params=params, headers=headers)
             if resp.status_code in (403, 429) and attempt < self.max_retries:
-                wait_time = self.retry_backoff_base * (2**attempt)
+                retry_after = resp.headers.get("retry-after")
+                if retry_after and retry_after.isdigit():
+                    wait_time = float(retry_after)
+                else:
+                    wait_time = self.retry_backoff_base * (2**attempt)
                 await asyncio.sleep(wait_time)
                 continue
+
+            if resp.status_code in (403, 429):
+                remaining = resp.headers.get("x-ratelimit-remaining")
+                if remaining == "0" and not self.token:
+                    raise RuntimeError(
+                        f"GitHub search rate limit exceeded ({resp.status_code}). "
+                        "Unauthenticated requests are limited to 10 queries/min. "
+                        "Configure GITHUB_TOKEN in your environment or .env for higher quota."
+                    )
+
             resp.raise_for_status()
             return resp
 
@@ -190,10 +204,14 @@ class GithubIngestor(BaseIngestor):
         since: datetime | None = None,
         limit: int = 50,
     ) -> AsyncGenerator[SourcePayload, None]:
-        """Fetch and yield normalized GitHub repository signals."""
+        """Fetch and yield normalized GitHub repository signals with stable batch sizes."""
         page = 1
         total_yielded = 0
-        batch_size = min(limit, self.per_page)
+        request_per_page = min(max(limit, 10), self.per_page)
+        is_sorted_by_date = (
+            "sort:updated" in self.search_query or "sort:committer-date" in self.search_query
+        )
+        max_pages = 5
 
         owns_client = self._client is None
         client = (
@@ -203,11 +221,10 @@ class GithubIngestor(BaseIngestor):
         )
 
         try:
-            while total_yielded < limit:
-                current_per_page = min(batch_size, limit - total_yielded)
+            while total_yielded < limit and page <= max_pages:
                 params: dict[str, str | int] = {
                     "q": self.search_query,
-                    "per_page": current_per_page,
+                    "per_page": request_per_page,
                     "page": page,
                 }
 
@@ -225,6 +242,9 @@ class GithubIngestor(BaseIngestor):
                         and record.published_date is not None
                         and record.published_date < since
                     ):
+                        if is_sorted_by_date:
+                            # Results are chronological; all subsequent items are older than cutoff
+                            return
                         continue
 
                     yield record
@@ -233,7 +253,7 @@ class GithubIngestor(BaseIngestor):
                         return
 
                 page += 1
-                if len(records) < current_per_page:
+                if len(records) < request_per_page:
                     break
         finally:
             if owns_client:

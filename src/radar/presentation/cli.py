@@ -25,6 +25,7 @@ from radar.core.models import (
 )
 from radar.core.watermark import DEFAULT_INITIAL_LOOKBACK_DAYS, WatermarkManager
 from radar.ingestion.arxiv import ArxivIngestor
+from radar.ingestion.community import HnAlgoliaIngestor
 from radar.ingestion.github import GithubIngestor
 from radar.ingestion.rss import RssFeedIngestor
 from radar.ingestion.sources import load_source_catalog
@@ -1518,12 +1519,29 @@ async def _run_sync(
                         since=src_since, limit=limit_per_source
                     ):
                         src_records.append(payload)
-                elif src.channel in ("rss", "community"):
+                elif src.channel == "rss":
+                    keywords = src.query_params.get("keywords")
                     rss_ingestor = RssFeedIngestor(
                         endpoint_url=src.endpoint_url,
                         authority_weight=src.authority_weight,
+                        keywords=keywords,
                     )
                     async for payload in rss_ingestor.fetch_records(
+                        since=src_since, limit=limit_per_source
+                    ):
+                        src_records.append(payload)
+                elif src.channel == "community":
+                    query = src.query_params.get(
+                        "query", "mutation testing OR test generation OR flaky tests OR LLM evals"
+                    )
+                    tags = src.query_params.get("tags", "story")
+                    hn_ingestor = HnAlgoliaIngestor(
+                        endpoint_url=src.endpoint_url,
+                        search_query=query,
+                        tags=tags,
+                        authority_weight=src.authority_weight,
+                    )
+                    async for payload in hn_ingestor.fetch_records(
                         since=src_since, limit=limit_per_source
                     ):
                         src_records.append(payload)
