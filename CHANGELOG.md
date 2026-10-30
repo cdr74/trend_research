@@ -5,6 +5,19 @@ All notable changes to the Trend Horizon Radar platform will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0](https://github.com/cdr74/trend_research/compare/v0.7.0...v0.8.0) (2026-10-30)
+
+
+### Features
+
+* **ingestion:** stabilize feed endpoints, github pagination and hn community collector (Ref: ADR-0026, Backlog M11) ([b36d685](https://github.com/cdr74/trend_research/commit/b36d685dcdc1d1b312312be72a2eac5ff99da253))
+
+
+### Documentation
+
+* **architecture:** remove redundant intent spec and update doc index (Ref: ADR-0021, Backlog M10-T5) ([5c81cfd](https://github.com/cdr74/trend_research/commit/5c81cfdc33e6566423e803fc05e355b452ed3a49))
+* **guide:** document limit-per-source parameter and tuning (Ref: ADR-0026, Backlog M11-T6) ([3b69bf0](https://github.com/cdr74/trend_research/commit/3b69bf0b7d91430ad70dd5dcfd1ca4cfeb3c3534))
+
 ## [0.7.0](https://github.com/cdr74/trend_research/compare/v0.6.0...v0.7.0) (2026-10-29)
 
 
