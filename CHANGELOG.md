@@ -5,6 +5,13 @@ All notable changes to the Trend Horizon Radar platform will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0](https://github.com/cdr74/trend_research/compare/v0.8.0...v0.9.0) (2026-10-30)
+
+
+### Features
+
+* **ui:** streamline to 3-view layout and add svg pan-and-zoom (Ref: ADR-0027, Backlog M12) ([e62b415](https://github.com/cdr74/trend_research/commit/e62b4150fdfaabbdbcbe8d24b9cd8ec888262713))
+
 ## [0.8.0](https://github.com/cdr74/trend_research/compare/v0.7.0...v0.8.0) (2026-10-30)
 
 
