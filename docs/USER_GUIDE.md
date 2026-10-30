@@ -459,10 +459,12 @@ npm run dev
 Open **`http://localhost:5173`** in your browser.
 
 #### 3. Dashboard Features & Views:
+- **Executive Radar vs. All Signals Perspective Switcher (ADR-0028):** Prominent pill toggle in the sub-header allowing operators to switch between **Executive Radar (Top Canonical Exemplars)** and **Full Intelligence (All Signals)**. In Executive Mode, the radar displays the top 3–5 industry standard frameworks per dynamic theme (e.g. Pitest for JVM, Stryker for TS/.NET, Mutant for Ruby) and rolls the long-tail of plugins and coursework repos into corroborating evidence attached to each exemplar.
 - **Dual-Track Domain Switcher:** Sub-header tab bar allowing instant switching between **All Tracks**, **Software Testing (Deterministic)**, and **AI Evaluation (Non-Deterministic)** with live signal counts.
 - **Radar Quadrant View:** Polar visualization across 4 concentric rings (Adopt, Trial, Assess, Hold) partitioned into 6 Software Quality Engineering pillars. Features **smooth mouse-wheel zoom, click-and-drag pan**, and floating HUD controls (`[+]`, `[-]`, `[Reset]`) to inspect dense clusters without label overlap.
 - **Matrix Table View:** Comprehensive tabular data grid with column header click-sorting, inline dropdown filters, and dedicated **Track** and **Theme** badges. Click any row to expand the Committee Audit Drawer.
 - **Semantic Cluster View:** 2D interactive spatial canvas projecting 1536-dimensional embeddings into 2D space using UMAP. Equipped with full **mouse-wheel zoom and drag-to-pan** to explore co-located entity clusters.
+- **Minimum Velocity Floor & Curation Sidebar Controls:** Fine-grained sliders for Viability, Anti-Hype ceiling, and Community Velocity Floor ($\ge 0$ to $\ge 100$) plus an explicit Canonical Exemplar checkbox in the filter sidebar.
 - **Search Omnibar:** Instant client-side search supporting structured tokens (`track:testing`, `track:evaluation`, `ring:Adopt`, `viability:>0.8`, `theme:<name>`, `risk:egress`) and plain keywords.
 
 #### 4. Live Access on GitHub Pages (Zero Installation)

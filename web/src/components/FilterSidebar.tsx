@@ -18,6 +18,10 @@ interface FilterSidebarProps {
   availableThemes?: string[];
   selectedTheme?: string | null;
   onSelectTheme?: (theme: string | null) => void;
+  showCanonicalOnly?: boolean;
+  onChangeShowCanonicalOnly?: (val: boolean) => void;
+  minVelocity?: number;
+  onChangeMinVelocity?: (val: number) => void;
 }
 
 const ALL_RINGS: RadarRing[] = ["Adopt", "Trial", "Assess", "Hold"];
@@ -53,6 +57,10 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   availableThemes = [],
   selectedTheme = null,
   onSelectTheme,
+  showCanonicalOnly = true,
+  onChangeShowCanonicalOnly,
+  minVelocity = 0,
+  onChangeMinVelocity,
 }) => {
   return (
     <div className="w-80 bg-[#121826] border border-[#1f293d] rounded-xl p-5 shadow-2xl space-y-6">
@@ -80,6 +88,24 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           Supports: <code className="text-slate-400">theme:</code>, <code className="text-slate-400">track:</code>, <code className="text-slate-400">ring:</code>, <code className="text-slate-400">pillar:</code>, <code className="text-slate-400">viability:&gt;0.8</code>
         </p>
       </div>
+
+      {/* Executive Curation Toggle */}
+      {onChangeShowCanonicalOnly && (
+        <div className="bg-[#0b0f19] border border-[#1f293d] rounded-lg p-3">
+          <label className="flex items-center space-x-2 text-xs font-semibold text-amber-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showCanonicalOnly}
+              onChange={(e) => onChangeShowCanonicalOnly(e.target.checked)}
+              className="rounded border-[#1f293d] text-amber-500 focus:ring-0"
+            />
+            <span>★ Canonical Exemplars Only</span>
+          </label>
+          <p className="text-[10px] text-slate-400 mt-1 pl-5">
+            Curates top 3–5 standards per theme; rolls remainder into evidence.
+          </p>
+        </div>
+      )}
 
       {/* Dynamic Themes */}
       {availableThemes.length > 0 && (
@@ -185,6 +211,26 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
             className="w-full accent-amber-500 cursor-pointer"
           />
         </div>
+
+        {onChangeMinVelocity && (
+          <div>
+            <div className="flex justify-between text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+              <span>Min Velocity Floor</span>
+              <span className="font-mono text-sky-400">
+                {minVelocity > 0 ? `≥ ${minVelocity}` : "All"}
+              </span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              value={minVelocity}
+              onChange={(e) => onChangeMinVelocity(parseFloat(e.target.value))}
+              className="w-full accent-sky-500 cursor-pointer"
+            />
+          </div>
+        )}
       </div>
 
       {/* Categories Filter */}

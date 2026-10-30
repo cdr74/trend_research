@@ -62,6 +62,20 @@ class Settings(BaseSettings):
     batch_size: int = Field(default=20, alias="RADAR_BATCH_SIZE")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
 
+    # Stage 1 Open-Source Traction Gate (ADR-0028)
+    github_min_stars: float = Field(
+        default=25.0,
+        ge=0.0,
+        alias="RADAR_GITHUB_MIN_STARS",
+        description="Minimum star threshold required for GitHub repositories at Stage 1",
+    )
+    github_min_velocity: float = Field(
+        default=5.0,
+        ge=0.0,
+        alias="RADAR_GITHUB_MIN_VELOCITY",
+        description="Minimum engagement velocity required for GitHub repositories at Stage 1",
+    )
+
     # Topic Convergence & Wrapper Detection (Stage 3 / Option 3B)
     topic_convergence_threshold: float = Field(
         default=0.65,
@@ -145,6 +159,13 @@ class Settings(BaseSettings):
     )
     velocity_fading_threshold: float = Field(
         default=5.0, ge=0.0, alias="RADAR_VELOCITY_FADING_THRESHOLD"
+    )
+    # Stage 4 Canonical Exemplar Settings (ADR-0028)
+    max_exemplars_per_topic: int = Field(
+        default=4,
+        ge=1,
+        alias="RADAR_MAX_EXEMPLARS_PER_TOPIC",
+        description="Maximum number of canonical exemplars elected per converged trend topic",
     )
 
     # Data paths

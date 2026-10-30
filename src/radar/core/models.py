@@ -291,6 +291,10 @@ class RadarItem(BaseModel):
     key_innovation: str
     enterprise_risks: list[str] = Field(default_factory=list)
     prerequisites: list[str] = Field(default_factory=list)
+    is_canonical: bool = Field(
+        default=True,
+        description="True if selected as a canonical exemplar for the dynamic topic cluster in executive views",
+    )
     dossier_id: UUID | None = None
     evaluation_id: UUID | None = None
     published_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

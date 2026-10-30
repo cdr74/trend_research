@@ -368,3 +368,47 @@
   - Streamline navigation bar to Radar Quadrant, Matrix Table, and Semantic Clusters.
   - Update `docs/USER_GUIDE.md` and verify static compilation.
   - *Acceptance Criteria:* `npm run build` succeeds with zero errors, bundle size reduced.
+
+---
+
+## Milestone 13: Canonical Exemplar Consolidation & Open-Source Traction Sieve (Completed)
+**Goal:** Address information density and visual clutter across the radar by implementing a Stage 1 minimum traction/viability gate for open-source repositories, dynamic canonical exemplar election in Stage 4 / export with corroborating evidence aggregation, and an Executive Radar vs Full Intelligence dual-perspective toggle in the web dashboard.
+
+### Stories & Tasks:
+- [x] **M13-T1: Architectural Specification: Canonical Exemplar Consolidation & Traction Sieve (ADR-0028)**
+  - Author and formalize ADR-0028 documenting the three-tiered deduplication and curation architecture.
+  - *Acceptance Criteria:* ADR-0028 authored and indexed in README.md.
+- [x] **M13-T2: Stage 1 Minimum Traction Gate for Open-Source Repositories (`src/radar/pipeline/noise_sieve.py`)**
+  - Implement heuristic traction gate in `NoiseSieve.evaluate()` for `SourceType.GITHUB` payloads.
+  - Require baseline traction (`stars >= 25` OR `velocity >= 5.0`) unless academic peer-reviewed authority is present.
+  - Add rejection audit reason for insufficient open-source traction.
+  - Configure via `settings.github_min_stars` (25) and `settings.github_min_velocity` (5.0).
+  - Add unit tests in `tests/unit/test_noise_sieve.py`.
+  - *Acceptance Criteria:* 0-star repos and unmaintained experiments rejected deterministically at Stage 1; unit tests pass.
+- [x] **M13-T3: Domain Models & Database Schema for Canonical Exemplars (`models.py`, `tables.py`, `repository.py`)**
+  - Add `is_canonical: bool = Field(default=True)` to `RadarItem` domain model.
+  - Add `is_canonical: Mapped[bool] = mapped_column(Boolean, default=True, index=True)` to `RadarItemTable`.
+  - Update repository queries and export logic to preserve canonical status.
+  - *Acceptance Criteria:* `mypy --strict` passes cleanly; DB schema reflects `is_canonical` column.
+- [x] **M13-T4: Stage 4 Canonical Exemplar Selection & Corroborating Evidence Aggregation (`src/radar/pipeline/categorizer.py`)**
+  - Implement dynamic exemplar ranking per converged `TrendTopic` based on Ring priority, Viability, and Velocity.
+  - Elect top $K$ (3–5) exemplars per topic cluster as canonical (`is_canonical = True`).
+  - Mark long-tail cluster members as non-canonical (`is_canonical = False`).
+  - Aggregate non-canonical tool names and URLs into the canonical exemplars' `corroborating_sources` and increment `corroboration_count`.
+  - Update static bundle export in `src/radar/presentation/cli.py` to output `is_canonical`.
+  - Add unit tests in `tests/unit/test_categorizer.py`.
+  - *Acceptance Criteria:* Topics with dozens of blips elect top 3–5 canonical exemplars and rollup long-tail evidence cleanly.
+- [x] **M13-T5: Web Dashboard Executive Radar Toggle & Velocity Filtering (`web/src/`)**
+  - Update `web/src/types.ts` to include `is_canonical?: boolean`.
+  - Add Executive Radar (`[★ Executive Radar (Top Exemplars)]`) vs Full Intelligence (`[🌐 All Signals]`) toggle in `App.tsx` (defaulting to Executive).
+  - Filter radar items by `item.is_canonical !== false` in Executive mode.
+  - Update sub-header stats display to show: "Showing X Canonical Exemplars (filtered from Y total signals)".
+  - Add minimum velocity filter option in `FilterSidebar.tsx`.
+  - Display rolled-up corroborating tools cleanly in `ItemDetailModal.tsx`.
+  - *Acceptance Criteria:* Dashboard defaults to ~40 crisp canonical blips; operator can toggle to see all 300+ items seamlessly; `npm run build` succeeds.
+- [x] **M13-T6: Test Suite Verification & Export Parity**
+  - Run full test suite (`uv run pytest -v`).
+  - Run `uv run ruff check .` and `uv run mypy src tests`.
+  - Verify static web compilation (`npm run build`).
+  - Run re-export / evaluation on corpus to update `web/public/radar.json`.
+  - *Acceptance Criteria:* 100% test integrity, zero type errors, clean production bundle.

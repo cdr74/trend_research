@@ -2,6 +2,7 @@
 
 import logging
 from collections.abc import Sequence
+from typing import Any
 from uuid import UUID
 
 from radar.core.config import settings
@@ -31,6 +32,7 @@ class RadarCategorizer:
         velocity_emerging: float = settings.velocity_emerging_threshold,
         velocity_fading: float = settings.velocity_fading_threshold,
         stars_consolidated_threshold: float = settings.stars_consolidated_threshold,
+        max_exemplars_per_topic: int = settings.max_exemplars_per_topic,
     ) -> None:
         self.adopt_min_viability = adopt_min_viability
         self.adopt_max_hype = adopt_max_hype
@@ -40,6 +42,7 @@ class RadarCategorizer:
         self.velocity_emerging = velocity_emerging
         self.velocity_fading = velocity_fading
         self.stars_consolidated = stars_consolidated_threshold
+        self.max_exemplars_per_topic = max_exemplars_per_topic
 
     def calculate_validity_and_hype(
         self, dossier: SignalDossier, topic: TrendTopic | None = None
@@ -177,7 +180,112 @@ class RadarCategorizer:
             enterprise_risks=evaluation.enterprise_risks,
             prerequisites=evaluation.prerequisites,
             active=True,
+            is_canonical=True,
         )
+
+    @staticmethod
+    def _extract_namespace(item: Any) -> str:
+        """Extract owner or organization namespace from repository URL or entity name."""
+        url = str(getattr(item, "source_url", "")).lower()
+        if "github.com/" in url:
+            parts = url.split("github.com/")[-1].split("/")
+            if len(parts) >= 2:
+                return parts[0]
+        name = str(getattr(item, "name", "")).lower()
+        if "/" in name:
+            return name.split("/")[0].strip()
+        return name
+
+    def consolidate_canonical_exemplars(
+        self, items: Sequence[Any], max_exemplars_per_topic: int | None = None
+    ) -> list[Any]:
+        """Elect canonical exemplars per topic cluster and roll long-tail evidence into corroborating sources (ADR-0028)."""
+        limit = max_exemplars_per_topic or self.max_exemplars_per_topic
+        if not items:
+            return []
+
+        # Group items by topic (id or name)
+        grouped: dict[str, list[Any]] = {}
+        for it in items:
+            topic_id = getattr(it, "topic_id", None)
+            topic_name = getattr(it, "topic_name", None)
+            key = str(topic_id) if topic_id else (topic_name or "Independent Innovation")
+            grouped.setdefault(key, []).append(it)
+
+        ring_weights: dict[Any, float] = {
+            RadarRing.ADOPT: 1.0,
+            RadarRing.TRIAL: 0.75,
+            RadarRing.ASSESS: 0.50,
+            RadarRing.HOLD: 0.25,
+            "Adopt": 1.0,
+            "Trial": 0.75,
+            "Assess": 0.50,
+            "Hold": 0.25,
+        }
+
+        output: list[Any] = []
+
+        for _topic_key, topic_items in grouped.items():
+            if len(topic_items) <= limit:
+                for it in topic_items:
+                    it.is_canonical = True
+                    output.append(it)
+                continue
+
+            # Compute exemplar composite score for each item
+            def _score_item(it: Any, selected_namespaces: set[str]) -> float:
+                ring_val = getattr(it, "recommended_ring", RadarRing.HOLD)
+                ring_wt = ring_weights.get(ring_val, 0.25)
+                viab = float(getattr(it, "viability_score", 0.0))
+                vel = float(getattr(it, "velocity_score", 0.0))
+                vel_norm = min(1.0, vel / 100.0)
+                base_score = (ring_wt * 0.40) + (viab * 0.35) + (vel_norm * 0.25)
+                ns = self._extract_namespace(it)
+                # Apply diversity penalty if namespace already has an elected exemplar
+                if ns in selected_namespaces:
+                    base_score -= 0.30
+                return base_score
+
+            # Iteratively select top K diverse exemplars
+            candidates = list(topic_items)
+            canonical_exemplars: list[Any] = []
+            selected_namespaces: set[str] = set()
+
+            for _ in range(limit):
+                if not candidates:
+                    break
+                best_item = max(candidates, key=lambda it: _score_item(it, selected_namespaces))
+                candidates.remove(best_item)
+                canonical_exemplars.append(best_item)
+                selected_namespaces.add(self._extract_namespace(best_item))
+
+            non_canonical_items = candidates
+
+            # Gather corroborating evidence from non-canonical cluster members
+            additional_sources: list[str] = []
+            for nci in non_canonical_items:
+                s_url = getattr(nci, "source_url", "")
+                if s_url and s_url not in additional_sources:
+                    additional_sources.append(s_url)
+
+            # Mark canonical items and roll up corroborating sources
+            for cit in canonical_exemplars:
+                cit.is_canonical = True
+                existing_sources = list(getattr(cit, "corroborating_sources", []))
+                for s in additional_sources:
+                    if s not in existing_sources:
+                        existing_sources.append(s)
+                cit.corroborating_sources = existing_sources
+                curr_count = int(getattr(cit, "corroboration_count", 1))
+                cit.corroboration_count = max(curr_count, len(existing_sources))
+                output.append(cit)
+
+            # Mark non-canonical items
+            for nci in non_canonical_items:
+                nci.is_canonical = False
+                output.append(nci)
+
+        return output
 
     def categorize_batch(
         self,
@@ -195,4 +303,4 @@ class RadarCategorizer:
                 item = self.categorize(d, eval_map[d.id], topic)
                 items.append(item)
 
-        return items
+        return self.consolidate_canonical_exemplars(items)

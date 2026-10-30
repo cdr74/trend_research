@@ -211,6 +211,7 @@ uv run ruff check .
 | **[Local Tooling & Invariants (AGENTS.md)](AGENTS.md)** | Local development directives, verification standards, and commit invariants. |
 
 ### Key Architecture Decision Records (ADRs)
+- **[ADR 0028: Canonical Exemplar Consolidation and Open-Source Traction Sieve](docs/adr/0028-canonical-exemplar-consolidation-and-open-source-traction-sieve.md)**
 - **[ADR 0027: Streamlined Three-View Navigation and SVG Pan-Zoom Interaction](docs/adr/0027-streamlined-three-view-navigation-and-svg-pan-zoom-interaction.md)**
 - **[ADR 0026: Robust Feed Endpoints, GitHub Pagination, and Community Ingestion](docs/adr/0026-robust-feed-endpoints-github-pagination-and-community-ingestion.md)**
 - **[ADR 0025: GitHub Pages Continuous Deployment and Release Distribution Artifacts](docs/adr/0025-github-pages-continuous-deployment-and-release-artifacts.md)**
@@ -240,6 +241,9 @@ uv run ruff check .
 - [x] **Milestone 8: Dynamic Bounded Topic Convergence & Theme Attribution**
 - [x] **Milestone 9: Radar View Ergonomics, Deterministic Blip Layout & Spec-Model Coverage**
 - [x] **Milestone 10: GitHub Pages Continuous Deployment & Release Distribution Artifacts**
+- [x] **Milestone 11: Robust Community Ingestion & Incremental Sync Hardening**
+- [x] **Milestone 12: Streamlined 3-View Navigation & Interactive SVG Pan-Zoom Interactions**
+- [x] **Milestone 13: Canonical Exemplar Consolidation & Open-Source Traction Sieve**
 
 ---
 

@@ -37,6 +37,7 @@ export interface RadarItem {
   enterprise_risks: string[];
   prerequisites: string[];
   source_url: string;
+  is_canonical?: boolean;
   cluster_x?: number;
   cluster_y?: number;
 }

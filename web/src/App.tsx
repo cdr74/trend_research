@@ -40,6 +40,8 @@ export const App: React.FC = () => {
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [minViability, setMinViability] = useState<number>(0.0);
   const [maxHype, setMaxHype] = useState<number>(1.0);
+  const [showCanonicalOnly, setShowCanonicalOnly] = useState<boolean>(true);
+  const [minVelocity, setMinVelocity] = useState<number>(0);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedItem, setSelectedItem] = useState<RadarItem | null>(null);
 
@@ -105,6 +107,7 @@ export const App: React.FC = () => {
     );
     setMinViability(0.0);
     setMaxHype(1.0);
+    setMinVelocity(0);
     setSearchTerm("");
     setSelectedTrack("all");
     setSelectedTheme(null);
@@ -143,6 +146,8 @@ export const App: React.FC = () => {
       if (!selectedEvidenceTiers.has(item.evidence_tier)) return false;
       if (item.viability_score < minViability) return false;
       if (item.hype_score > maxHype) return false;
+      if (showCanonicalOnly && item.is_canonical === false) return false;
+      if (minVelocity > 0 && (item.velocity_score || 0) < minVelocity) return false;
       if (!matchesQuery(item, parsedQuery)) return false;
       return true;
     });
@@ -155,6 +160,8 @@ export const App: React.FC = () => {
     selectedEvidenceTiers,
     minViability,
     maxHype,
+    showCanonicalOnly,
+    minVelocity,
     searchTerm,
   ]);
 
@@ -217,47 +224,87 @@ export const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Sub-Header / Dual-Track Switcher Bar */}
-      <div className="border-b border-[#1f293d] bg-[#101622] px-8 py-2.5 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <span className="text-xs uppercase font-bold text-slate-400 tracking-wider mr-2">
-            Domain Track:
-          </span>
-          <button
-            onClick={() => setSelectedTrack("all")}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-              selectedTrack === "all"
-                ? "bg-slate-700 text-white shadow"
-                : "text-slate-400 hover:text-slate-200 hover:bg-[#1a233a]"
-            }`}
-          >
-            All Tracks ({data?.items.length ?? 0})
-          </button>
-          <button
-            onClick={() => setSelectedTrack("testing")}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-              selectedTrack === "testing"
-                ? "bg-blue-600 text-white shadow"
-                : "text-slate-400 hover:text-slate-200 hover:bg-[#1a233a]"
-            }`}
-          >
-            Software Testing ({testingCount})
-          </button>
-          <button
-            onClick={() => setSelectedTrack("evaluation")}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-              selectedTrack === "evaluation"
-                ? "bg-purple-600 text-white shadow"
-                : "text-slate-400 hover:text-slate-200 hover:bg-[#1a233a]"
-            }`}
-          >
-            AI Evaluation ({evaluationCount})
-          </button>
+      {/* Sub-Header / Dual-Track & Curation Switcher Bar */}
+      <div className="border-b border-[#1f293d] bg-[#101622] px-8 py-2.5 flex items-center justify-between flex-wrap gap-y-2">
+        <div className="flex items-center space-x-5 flex-wrap gap-y-2">
+          {/* Curation Mode Switcher */}
+          <div className="flex items-center space-x-1 bg-[#0b0f19] p-1 rounded-xl border border-[#1f293d]">
+            <button
+              onClick={() => setShowCanonicalOnly(true)}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center space-x-1.5 ${
+                showCanonicalOnly
+                  ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow"
+                  : "text-slate-400 hover:text-slate-200 border border-transparent"
+              }`}
+            >
+              <span>★</span>
+              <span>Executive Radar</span>
+            </button>
+            <button
+              onClick={() => setShowCanonicalOnly(false)}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center space-x-1.5 ${
+                !showCanonicalOnly
+                  ? "bg-blue-600/20 text-blue-300 border border-blue-500/40 shadow"
+                  : "text-slate-400 hover:text-slate-200 border border-transparent"
+              }`}
+            >
+              <span>🌐</span>
+              <span>All Signals</span>
+            </button>
+          </div>
+
+          {/* Domain Track Switcher */}
+          <div className="flex items-center space-x-2">
+            <span className="text-xs uppercase font-bold text-slate-400 tracking-wider mr-1">
+              Track:
+            </span>
+            <button
+              onClick={() => setSelectedTrack("all")}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                selectedTrack === "all"
+                  ? "bg-slate-700 text-white shadow"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-[#1a233a]"
+              }`}
+            >
+              All ({data?.items.length ?? 0})
+            </button>
+            <button
+              onClick={() => setSelectedTrack("testing")}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                selectedTrack === "testing"
+                  ? "bg-blue-600 text-white shadow"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-[#1a233a]"
+              }`}
+            >
+              Testing ({testingCount})
+            </button>
+            <button
+              onClick={() => setSelectedTrack("evaluation")}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                selectedTrack === "evaluation"
+                  ? "bg-purple-600 text-white shadow"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-[#1a233a]"
+              }`}
+            >
+              AI Evaluation ({evaluationCount})
+            </button>
+          </div>
         </div>
 
-        <div className="text-xs text-slate-400">
-          Showing <span className="font-semibold text-slate-200">{filteredItems.length}</span> of{" "}
-          <span className="font-semibold text-slate-200">{data?.items.length ?? 0}</span> evaluated signals
+        <div className="text-xs text-slate-400 flex items-center space-x-2">
+          <span>
+            Showing <span className="font-semibold text-slate-200">{filteredItems.length}</span>{" "}
+            {showCanonicalOnly ? "Canonical Exemplars" : "Signals"} of{" "}
+            <span className="font-semibold text-slate-200">{data?.items.length ?? 0}</span> total
+          </span>
+          {showCanonicalOnly && (
+            <button
+              onClick={() => setShowCanonicalOnly(false)}
+              className="text-[11px] text-blue-400 hover:text-blue-300 underline font-medium"
+            >
+              (Show Full Dataset)
+            </button>
+          )}
         </div>
       </div>
 
@@ -275,6 +322,10 @@ export const App: React.FC = () => {
           onChangeMinViability={setMinViability}
           maxHype={maxHype}
           onChangeMaxHype={setMaxHype}
+          minVelocity={minVelocity}
+          onChangeMinVelocity={setMinVelocity}
+          showCanonicalOnly={showCanonicalOnly}
+          onChangeShowCanonicalOnly={setShowCanonicalOnly}
           searchTerm={searchTerm}
           onChangeSearchTerm={setSearchTerm}
           onResetFilters={resetFilters}

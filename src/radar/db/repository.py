@@ -241,6 +241,7 @@ class RadarRepository:
             existing.enterprise_risks = item.enterprise_risks
             existing.prerequisites = item.prerequisites
             existing.active = item.active
+            existing.is_canonical = item.is_canonical
             existing.evaluation_id = item.evaluation_id
             existing.topic_id = item.topic_id
             existing.topic_name = item.topic_name
@@ -270,6 +271,7 @@ class RadarRepository:
             enterprise_risks=item.enterprise_risks,
             prerequisites=item.prerequisites,
             active=item.active,
+            is_canonical=item.is_canonical,
         )
         self.session.add(record)
         await self.session.flush()
@@ -282,6 +284,7 @@ class RadarRepository:
         lifecycle_stage: LifecycleStage | None = None,
         min_viability: float = 0.0,
         max_hype: float = 1.0,
+        is_canonical: bool | None = None,
     ) -> list[RadarItemTable]:
         """Query active radar items with multi-criteria filters."""
         stmt = (
@@ -296,6 +299,8 @@ class RadarRepository:
             stmt = stmt.where(RadarItemTable.category == category.value)
         if lifecycle_stage is not None:
             stmt = stmt.where(RadarItemTable.lifecycle_stage == lifecycle_stage.value)
+        if is_canonical is not None:
+            stmt = stmt.where(RadarItemTable.is_canonical.is_(is_canonical))
 
         stmt = stmt.order_by(RadarItemTable.viability_score.desc())
         result = await self.session.execute(stmt)

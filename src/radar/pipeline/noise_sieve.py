@@ -2,7 +2,8 @@
 
 import re
 
-from radar.core.models import NoiseFilterResult, QualifiedSignal, SourcePayload
+from radar.core.config import settings
+from radar.core.models import NoiseFilterResult, QualifiedSignal, SourcePayload, SourceType
 
 # Hype indicators: (compiled_regex, penalty_weight, description)
 HYPE_RULES: list[tuple[re.Pattern[str], float, str]] = [
@@ -229,17 +230,21 @@ DOMAIN_RELEVANCE_RULES: list[tuple[re.Pattern[str], float, str]] = [
 
 
 class NoiseSieve:
-    """Stage 1 rule-based classifier evaluating marketing noise, financial red flags, and domain relevance (Ref: ADR-0021)."""
+    """Stage 1 rule-based classifier evaluating marketing noise, financial red flags, and domain relevance (Ref: ADR-0021, ADR-0028)."""
 
     def __init__(
         self,
         drop_threshold: float = 0.60,
         base_noise: float = 0.20,
         relevance_threshold: float = 0.35,
+        min_github_stars: float = settings.github_min_stars,
+        min_github_velocity: float = settings.github_min_velocity,
     ) -> None:
         self.drop_threshold = drop_threshold
         self.base_noise = base_noise
         self.relevance_threshold = relevance_threshold
+        self.min_github_stars = min_github_stars
+        self.min_github_velocity = min_github_velocity
 
     def evaluate(
         self, payload: SourcePayload, authority_weight: float = 1.0
@@ -287,12 +292,31 @@ class NoiseSieve:
         raw_score = self.base_noise + hype_penalty - credibility_credit - authority_discount
         noise_score = round(max(0.0, min(1.0, raw_score)), 2)
 
+        rejection_reasons: list[str] = []
+
+        # Open-source traction gate for GitHub repositories (ADR-0028)
+        is_viable_opensource = True
+        if payload.source_type == SourceType.GITHUB and payload.engagement_metrics:
+            stars = payload.engagement_metrics.get("stars", 0.0)
+            velocity = payload.engagement_metrics.get("velocity", 0.0)
+            is_academically_backed = authority_weight >= 1.5 or any(
+                "Empirical study" in c or "Statistical" in c or "Reproducible" in c
+                for c in matched_credibility
+            )
+            if not is_academically_backed and (
+                stars < self.min_github_stars and velocity < self.min_github_velocity
+            ):
+                is_viable_opensource = False
+                rejection_reasons.append(
+                    f"Insufficient open-source traction: GitHub repository has {int(stars)} stars and "
+                    f"{velocity:.1f} velocity (requires >= {int(self.min_github_stars)} stars or >= {self.min_github_velocity:.1f} velocity)"
+                )
+
         has_red_flags = len(matched_financial_red_flags) > 0
         is_low_noise = (noise_score <= self.drop_threshold) and not has_red_flags
         is_relevant = domain_relevance_score >= self.relevance_threshold
-        passed = is_low_noise and is_relevant
+        passed = is_low_noise and is_relevant and is_viable_opensource
 
-        rejection_reasons: list[str] = []
         if has_red_flags:
             for flag in matched_financial_red_flags:
                 rejection_reasons.append(f"Financial enterprise red flag triggered: {flag}")

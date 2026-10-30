@@ -173,6 +173,7 @@ class RadarItemTable(Base):
         DateTime(timezone=True), default=lambda: datetime.now(UTC), index=True
     )
     active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    is_canonical: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
 
     evaluation: Mapped[EnterpriseEvaluationTable | None] = relationship(
         "EnterpriseEvaluationTable", back_populates="radar_item"

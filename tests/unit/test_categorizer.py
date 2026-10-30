@@ -255,3 +255,141 @@ def test_categorizer_inherits_topic_consensus_category(
         topic=None,
     )
     assert item_without_topic.category == QECategory.TEST_SYNTHESIS
+
+
+def test_consolidate_canonical_exemplars_under_limit() -> None:
+    categorizer = RadarCategorizer(max_exemplars_per_topic=4)
+    items = [
+        RadarItem(
+            name=f"Tool-{i}",
+            topic_name="Property-Based Testing",
+            category=QECategory.SPEC_AND_MODEL,
+            source_url=f"https://github.com/org/tool-{i}",
+            evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+            hype_score=0.2,
+            viability_score=0.8,
+            validity_score=0.8,
+            recommended_ring=RadarRing.TRIAL,
+            key_innovation="Property testing",
+        )
+        for i in range(3)
+    ]
+    consolidated = categorizer.consolidate_canonical_exemplars(items)
+    assert len(consolidated) == 3
+    assert all(it.is_canonical is True for it in consolidated)
+
+
+def test_consolidate_canonical_exemplars_oversaturated_topic() -> None:
+    categorizer = RadarCategorizer(max_exemplars_per_topic=3)
+    # 7 items in the same topic with multi-variants from stryker and pitest
+    raw_items = [
+        RadarItem(
+            name="stryker-mutator/stryker-js",
+            topic_name="Automated Mutation Testing",
+            category=QECategory.EXECUTION_AND_OPTIMIZATION,
+            source_url="https://github.com/stryker-mutator/stryker-js",
+            evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+            hype_score=0.1,
+            viability_score=0.92,
+            validity_score=0.9,
+            recommended_ring=RadarRing.ADOPT,
+            velocity_score=80.0,
+            key_innovation="Stryker JS mutation runner",
+        ),
+        RadarItem(
+            name="stryker-mutator/stryker-net",
+            topic_name="Automated Mutation Testing",
+            category=QECategory.EXECUTION_AND_OPTIMIZATION,
+            source_url="https://github.com/stryker-mutator/stryker-net",
+            evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+            hype_score=0.15,
+            viability_score=0.88,
+            validity_score=0.85,
+            recommended_ring=RadarRing.ADOPT,
+            velocity_score=70.0,
+            key_innovation="Stryker .NET mutation runner",
+        ),
+        RadarItem(
+            name="hcoles/pitest",
+            topic_name="Automated Mutation Testing",
+            category=QECategory.EXECUTION_AND_OPTIMIZATION,
+            source_url="https://github.com/hcoles/pitest",
+            evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+            hype_score=0.15,
+            viability_score=0.89,
+            validity_score=0.85,
+            recommended_ring=RadarRing.ADOPT,
+            velocity_score=50.0,
+            key_innovation="PIT Mutation testing for Java",
+        ),
+        RadarItem(
+            name="mbj/mutant",
+            topic_name="Automated Mutation Testing",
+            category=QECategory.EXECUTION_AND_OPTIMIZATION,
+            source_url="https://github.com/mbj/mutant",
+            evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+            hype_score=0.2,
+            viability_score=0.85,
+            validity_score=0.8,
+            recommended_ring=RadarRing.TRIAL,
+            velocity_score=60.0,
+            key_innovation="Mutant for Ruby",
+        ),
+        RadarItem(
+            name="szpak/gradle-pitest-plugin",
+            topic_name="Automated Mutation Testing",
+            category=QECategory.EXECUTION_AND_OPTIMIZATION,
+            source_url="https://github.com/szpak/gradle-pitest-plugin",
+            evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+            hype_score=0.3,
+            viability_score=0.75,
+            validity_score=0.7,
+            recommended_ring=RadarRing.TRIAL,
+            velocity_score=15.0,
+            key_innovation="Gradle plugin for PIT",
+        ),
+        RadarItem(
+            name="student/mutation-demo",
+            topic_name="Automated Mutation Testing",
+            category=QECategory.EXECUTION_AND_OPTIMIZATION,
+            source_url="https://github.com/student/mutation-demo",
+            evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+            hype_score=0.4,
+            viability_score=0.5,
+            validity_score=0.5,
+            recommended_ring=RadarRing.HOLD,
+            velocity_score=1.0,
+            key_innovation="Class experiment",
+        ),
+        RadarItem(
+            name="boxed/mutmut",
+            topic_name="Automated Mutation Testing",
+            category=QECategory.EXECUTION_AND_OPTIMIZATION,
+            source_url="https://github.com/boxed/mutmut",
+            evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+            hype_score=0.2,
+            viability_score=0.84,
+            validity_score=0.8,
+            recommended_ring=RadarRing.TRIAL,
+            velocity_score=40.0,
+            key_innovation="Mutmut Python mutation testing",
+        ),
+    ]
+
+    consolidated = categorizer.consolidate_canonical_exemplars(raw_items, max_exemplars_per_topic=3)
+    canonical = [it for it in consolidated if it.is_canonical]
+    non_canonical = [it for it in consolidated if not it.is_canonical]
+
+    assert len(canonical) == 3
+    assert len(non_canonical) == 4
+
+    # Verify namespace diversity: stryker-js was chosen, so stryker-net was penalized and not elected in top 3
+    canonical_names = [it.name for it in canonical]
+    assert "stryker-mutator/stryker-js" in canonical_names
+    assert "hcoles/pitest" in canonical_names
+    assert "stryker-mutator/stryker-net" not in canonical_names
+
+    # Corroborating sources roll-up: each canonical exemplar must contain non-canonical URLs
+    for cit in canonical:
+        assert len(cit.corroborating_sources) >= 4
+        assert "https://github.com/student/mutation-demo" in cit.corroborating_sources

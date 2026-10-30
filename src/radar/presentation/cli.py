@@ -916,6 +916,11 @@ async def _run_export(export_format: str, output: str, mock: bool = False) -> No
         else:
             console.print(f"[yellow]Could not fetch records from database: {e}[/yellow]")
 
+    if db_items:
+        from radar.pipeline.categorizer import RadarCategorizer
+
+        db_items = RadarCategorizer().consolidate_canonical_exemplars(db_items)
+
     # Compute 2D spatial coordinates via UMAP / PCA
     from radar.presentation.projection import project_embeddings_to_2d
 
@@ -963,6 +968,7 @@ async def _run_export(export_format: str, output: str, mock: bool = False) -> No
                 "key_innovation": it.key_innovation,
                 "enterprise_risks": it.enterprise_risks,
                 "prerequisites": it.prerequisites,
+                "is_canonical": bool(getattr(it, "is_canonical", True)),
                 "cluster_x": cx,
                 "cluster_y": cy,
             }

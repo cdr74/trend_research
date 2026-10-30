@@ -335,3 +335,49 @@ def test_noise_sieve_non_se_domain_relevance_drops() -> None:
     assert qual is None
     assert res.domain_relevance_score < 0.35
     assert any("insufficient domain relevance" in r.lower() for r in res.rejection_reasons)
+
+
+def test_noise_sieve_low_traction_github_repo_drops() -> None:
+    """Validate that low-traction GitHub repositories (< 25 stars and < 5 velocity) are dropped (ADR-0028)."""
+    sieve = NoiseSieve(min_github_stars=25.0, min_github_velocity=5.0)
+    payload = SourcePayload(
+        source_type=SourceType.GITHUB,
+        source_url="https://github.com/student/mutation-study",
+        title="student/mutation-study",
+        raw_content="A coursework study on mutation testing and automated unit test suites.",
+        engagement_metrics={"stars": 3.0, "velocity": 0.5},
+    )
+    res, qual = sieve.evaluate(payload, authority_weight=1.0)
+    assert res.passed is False
+    assert qual is None
+    assert any("insufficient open-source traction" in r.lower() for r in res.rejection_reasons)
+
+
+def test_noise_sieve_high_traction_github_repo_passes() -> None:
+    """Validate that viable GitHub repositories with sufficient traction pass Stage 1 (ADR-0028)."""
+    sieve = NoiseSieve(min_github_stars=25.0, min_github_velocity=5.0)
+    payload = SourcePayload(
+        source_type=SourceType.GITHUB,
+        source_url="https://github.com/stryker-mutator/stryker-js",
+        title="stryker-mutator/stryker-js",
+        raw_content="Mutation testing for JavaScript and TypeScript. Calculates mutant killed percentage with precision.",
+        engagement_metrics={"stars": 2400.0, "velocity": 45.0},
+    )
+    res, qual = sieve.evaluate(payload, authority_weight=1.1)
+    assert res.passed is True
+    assert qual is not None
+
+
+def test_noise_sieve_academic_github_repo_is_exempt() -> None:
+    """Validate that research repositories with academic authority are exempt from star gates (ADR-0028)."""
+    sieve = NoiseSieve(min_github_stars=25.0, min_github_velocity=5.0)
+    payload = SourcePayload(
+        source_type=SourceType.GITHUB,
+        source_url="https://github.com/lab/circuit-mutation",
+        title="lab/circuit-mutation",
+        raw_content="Replication package for empirical study on circuit-aware mutation testing with controlled experiment.",
+        engagement_metrics={"stars": 4.0, "velocity": 0.8},
+    )
+    res, qual = sieve.evaluate(payload, authority_weight=1.5)
+    assert res.passed is True
+    assert qual is not None

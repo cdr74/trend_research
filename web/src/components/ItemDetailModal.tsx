@@ -46,6 +46,12 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
               <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-md border ${trajColor}`}>
                 Trajectory: {item.lifecycle_stage}
               </span>
+              {item.is_canonical !== false && (
+                <span className="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center space-x-1">
+                  <span>★</span>
+                  <span>Canonical Exemplar</span>
+                </span>
+              )}
               {item.topic_name && (
                 <span className="px-2.5 py-0.5 text-xs font-medium rounded-md bg-purple-900/30 text-purple-300 border border-purple-500/30">
                   Theme: {item.topic_name}
@@ -102,20 +108,24 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
             </p>
           </div>
 
-          {/* Independent Corroborating Sources */}
+          {/* Independent Corroborating Sources & Rolled-up Evidence */}
           {item.corroborating_sources && item.corroborating_sources.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-sky-400 mb-2">
-                Multi-Source Topic Convergence ({item.corroborating_sources.length} sources)
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-sky-400 mb-2 flex items-center justify-between">
+                <span>Multi-Source Topic Convergence</span>
+                <span className="text-xs text-slate-400 font-normal">
+                  {item.corroborating_sources.length} sources & related tools
+                </span>
               </h3>
-              <ul className="space-y-1.5 bg-[#0b0f19] p-3 rounded-xl border border-[#1f293d]">
+              <ul className="space-y-1.5 bg-[#0b0f19] p-3 rounded-xl border border-[#1f293d] max-h-48 overflow-y-auto">
                 {item.corroborating_sources.map((url, i) => (
-                  <li key={i} className="text-xs truncate">
+                  <li key={i} className="text-xs truncate flex items-center space-x-2">
+                    <span className="text-slate-500">•</span>
                     <a
                       href={url}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-blue-400 hover:text-blue-300 underline"
+                      className="text-blue-400 hover:text-blue-300 underline truncate"
                     >
                       {url}
                     </a>
