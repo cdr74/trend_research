@@ -337,3 +337,7 @@
   - Run `uv run pytest -v`, `uv run ruff check .`, `uv run mypy src tests`.
   - Verify sync command with real endpoints.
   - *Acceptance Criteria:* All checks pass cleanly with 100% test integrity.
+- [x] **M11-T6: User Guide Ingestion Limit & Stream Batching Documentation (docs/USER_GUIDE.md)**
+  - Document `--limit-per-source` parameter, default cap of 20 items, LLM token budget rationale, and deep bootstrap recipes.
+  - Fix erroneous `--limit` flags in sync examples in `docs/USER_GUIDE.md` to match actual CLI syntax.
+  - *Acceptance Criteria:* Documentation clearly guides operators on tuning ingestion volumes.

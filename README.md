@@ -183,8 +183,8 @@ uv run radar query --ring Adopt --min-viability 0.8
 # Delta sync: ingest and evaluate only newly published signals since last watermark
 uv run radar sync
 
-# Force complete 365-day re-baseline and open UI
-uv run radar sync --days 365 --reset --ui
+# Force complete 365-day re-baseline and open UI (optional: tune --limit-per-source, default: 20)
+uv run radar sync --days 365 --limit-per-source 50 --reset --ui
 ```
 
 ### 5. Hermetic Verification Suite

@@ -116,7 +116,7 @@ The platform is designed around a **local-first, on-demand execution model**:
 5. **Verify Installation with an Offline Smoke Test:**
    Execute a dry run using the mock provider:
    ```bash
-   RADAR_LLM_PROVIDER=mock uv run radar sync --mock --limit 1
+   RADAR_LLM_PROVIDER=mock uv run radar sync --mock --limit-per-source 1
    ```
    If this completes with a green summary table, your local environment is fully configured!
 
@@ -153,11 +153,14 @@ Emerging engineering paradigms and tools do not emerge in a vacuum; they build u
 
 #### Execution Command
 ```bash
-# Full 365-day initial baseline across all active catalog sources:
+# Full 365-day initial baseline across all active catalog sources (default: 20 records/source):
 uv run radar sync --days 365
 
+# Deeper baseline for high-volume streams (arXiv, GitHub, HackerNews):
+uv run radar sync --days 365 --limit-per-source 50
+
 # Or cap records per source for a faster initial trial:
-uv run radar sync --days 365 --limit 10
+uv run radar sync --days 365 --limit-per-source 10
 ```
 
 #### What Happens Behind the Scenes:
@@ -187,8 +190,8 @@ uv run radar sync
 
 #### Useful Flags:
 ```bash
-# Limit the batch size per source to process updates quickly
-uv run radar sync --limit-per-source 15
+# Limit or expand records ingested per source stream (default: 20)
+uv run radar sync --limit-per-source 50
 
 # Automatically start PostgreSQL container without interactive prompt if offline
 uv run radar sync --auto-start-db
@@ -199,6 +202,21 @@ uv run radar sync --no-db
 # Run using offline mock LLM (ideal when checking pipeline mechanics without using API tokens)
 uv run radar sync --mock
 ```
+
+##### Command-Line Flags Reference (`radar sync`)
+| Flag | Default | Description |
+| :--- | :---: | :--- |
+| **`--limit-per-source`** | `20` | Maximum candidate records fetched per source stream. Limits LLM token cost and prevents hitting GitHub unauthenticated rate limits. |
+| **`--days`** | *N/A* | Override lookback window in days (e.g. `--days 365` for initial bootstrap). |
+| **`--since`** | *N/A* | Explicit ISO-8601 timestamp cutoff (`YYYY-MM-DD`). |
+| **`--reset`** | `false` | Clear all recorded watermarks and force re-ingestion across all active channels. |
+| **`--reset-source`** | *N/A* | Reset watermark for a single specific source ID from `sources.yaml`. |
+| **`--no-eval`** | `false` | Ingest raw sources into PostgreSQL but skip running LLM Stages 2–4. |
+| **`--no-export`** | `false` | Ingest and evaluate without rewriting `web/public/radar.json`. |
+| **`--ui`** | `false` | Launch local web dashboard automatically upon sync completion. |
+| **`--mock`** | `false` | Run with offline deterministic mock payloads and mock evaluation responses. |
+| **`--auto-start-db`** | `false` | Automatically launch `podman compose up -d` without prompting. |
+| **`--no-db`** | `false` | Run without connecting to or writing to PostgreSQL. |
 
 ---
 
@@ -578,4 +596,19 @@ The default branch (`main`) is governed by an active GitHub Repository Ruleset (
 - **Fix:** Re-export the data bundle from the root directory:
   ```bash
   uv run radar export --format json --output web/public/radar.json
+  ```
+
+### 6. Why do high-volume feeds (arXiv, GitHub, HackerNews) only ingest 20 records?
+- **Cause:** By default, `radar sync` enforces a batch cap of `--limit-per-source 20` across each enabled channel.
+- **Why is there a default cap?**
+  1. **LLM Cost & Token Budget:** Every signal that passes the Stage 1 Heuristic Sieve is sent through Stage 2 (Deep Extraction) and Stage 3 (Adversarial Evaluator Committee). Ingesting hundreds of items in a single run would trigger hundreds of multi-lens LLM API calls and consume significant token budgets.
+  2. **API Rate-Limit Protection:** Unauthenticated GitHub search is strictly capped at 10 requests per minute. Limiting to 20 records per topic ensures all 6 GitHub streams complete within quota without hitting HTTP 403 errors.
+  3. **Incremental Delta Velocity:** The radar is designed for routine WSL / desktop operation. Once an initial baseline is established, routine delta runs rarely encounter more than 5–15 new articles per channel.
+- **Fix:** To ingest a deeper historical batch, pass `--limit-per-source <N>`:
+  ```bash
+  # Ingest up to 50 records per source stream
+  uv run radar sync --days 365 --limit-per-source 50
+
+  # Ingest up to 100 records per source stream without running LLM evals immediately:
+  uv run radar sync --days 365 --limit-per-source 100 --no-eval
   ```
