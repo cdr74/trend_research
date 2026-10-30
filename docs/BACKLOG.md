@@ -306,3 +306,7 @@
   - Add GitHub Pages live link and badge in `README.md`.
   - Document zero-install online access and offline release asset extraction in `docs/USER_GUIDE.md`.
   - *Acceptance Criteria:* Documentation reflects live demo URL and distribution assets.
+- [x] **M10-T5: Documentation Consolidation & Redundant Intent Spec Removal (Ref: ADR-0021)**
+  - Remove redundant root-level `ai_test_engineering_radar_intent_architecture.md` superseded by `README.md`, `docs/design/architecture.md`, and `docs/adr/0021-multi-tiered-domain-relevance-and-topic-filtering.md`.
+  - Update `README.md` documentation index to eliminate dead link and reference canonical system architecture and domain guardrails.
+  - *Acceptance Criteria:* Redundant file removed, broken links eliminated, documentation hierarchy clean and unified.

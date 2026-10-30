@@ -204,8 +204,8 @@ uv run ruff check .
 | Document | Purpose |
 | :--- | :--- |
 | **[User Guide & Operator Manual](docs/USER_GUIDE.md)** | Step-by-step operator workflows, cheatsheet recipes, CLI commands, and troubleshooting FAQ. |
-| **[Intent & Architecture Specification](ai_test_engineering_radar_intent_architecture.md)** | Deep architectural deliberation of high-assurance enterprise intent, Dual-Track taxonomy, and adequacy rubrics. |
 | **[System Design & Architecture](docs/design/architecture.md)** | Detailed component boundaries, schemas, state models, and persistence topology. |
+| **[Domain Guardrails & Relevance (ADR-0021)](docs/adr/0021-multi-tiered-domain-relevance-and-topic-filtering.md)** | Architectural specification of high-assurance enterprise intent, Dual-Track taxonomy, and adequacy rubrics. |
 | **[Curated Data Sources Registry](docs/data_sources.md)** | Catalog of active arXiv categories, GitHub topic streams, and engineering RSS feeds. |
 | **[Product & Engineering Backlog](docs/BACKLOG.md)** | Milestone roadmaps, user stories, and completed delivery tasks. |
 | **[Local Tooling & Invariants (AGENTS.md)](AGENTS.md)** | Local development directives, verification standards, and commit invariants. |
