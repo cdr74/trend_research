@@ -439,10 +439,9 @@ The web dashboard is a modern Vite + React + TypeScript single-page application 
 flowchart LR
     A["PostgreSQL Database"] -->|"uv run radar export"| B["web/public/radar.json\n(with 2D UMAP Projections)"]
     B --> C["Vite Dev Server\n(http://localhost:5173)"]
-    C --> D["Quadrant Polar Radar"]
+    C --> D["Quadrant Polar Radar (with Pan & Zoom)"]
     C --> E["Filterable Matrix Table"]
-    C --> F["Scatter Matrix (Viability vs Hype)"]
-    C --> G["Semantic UMAP Clusters"]
+    C --> G["Semantic UMAP Clusters (with Pan & Zoom)"]
 ```
 
 #### 1. Export Latest Database Bundle
@@ -461,11 +460,10 @@ Open **`http://localhost:5173`** in your browser.
 
 #### 3. Dashboard Features & Views:
 - **Dual-Track Domain Switcher:** Sub-header tab bar allowing instant switching between **All Tracks**, **Software Testing (Deterministic)**, and **AI Evaluation (Non-Deterministic)** with live signal counts.
-- **Radar Quadrant View:** Polar visualization across 4 concentric rings (Adopt, Trial, Assess, Hold) partitioned into 6 Software Quality Engineering pillars. Hover over any blip for instant score breakdowns.
-- **Matrix Table View:** Comprehensive tabular data grid with a dedicated **Track** column. Click any row to expand the Committee Audit Drawer featuring skeptic critiques and risk tags.
-- **Scatter Matrix View:** Interactive 2-axis scatter chart plotting Viability ($E_v$) vs. Hype Score ($H$). Helps immediately spot genuine enterprise innovations in the "High Viability / Low Hype" quadrant.
-- **Semantic Cluster View:** 2D interactive spatial canvas projecting the 1536-dimensional embeddings into 2D space using UMAP. Enables visual detection of topical clustering and derivative wrappers.
-- **Search Omnibar:** Instant client-side search supporting structured tokens (`track:testing`, `track:evaluation`, `ring:Adopt`, `viability:>0.8`, `risk:egress`) and plain keywords.
+- **Radar Quadrant View:** Polar visualization across 4 concentric rings (Adopt, Trial, Assess, Hold) partitioned into 6 Software Quality Engineering pillars. Features **smooth mouse-wheel zoom, click-and-drag pan**, and floating HUD controls (`[+]`, `[-]`, `[Reset]`) to inspect dense clusters without label overlap.
+- **Matrix Table View:** Comprehensive tabular data grid with column header click-sorting, inline dropdown filters, and dedicated **Track** and **Theme** badges. Click any row to expand the Committee Audit Drawer.
+- **Semantic Cluster View:** 2D interactive spatial canvas projecting 1536-dimensional embeddings into 2D space using UMAP. Equipped with full **mouse-wheel zoom and drag-to-pan** to explore co-located entity clusters.
+- **Search Omnibar:** Instant client-side search supporting structured tokens (`track:testing`, `track:evaluation`, `ring:Adopt`, `viability:>0.8`, `theme:<name>`, `risk:egress`) and plain keywords.
 
 #### 4. Live Access on GitHub Pages (Zero Installation)
 The dashboard is continuously deployed to GitHub Pages and available online at:

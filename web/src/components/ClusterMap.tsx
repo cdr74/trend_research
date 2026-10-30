@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { RadarItem, QECategory } from "../types";
+import { useZoomPan } from "../hooks/useZoomPan";
+import { ZoomControls } from "./ZoomControls";
 
 interface ClusterMapProps {
   items: RadarItem[];
@@ -30,6 +32,16 @@ export const ClusterMap: React.FC<ClusterMapProps> = ({
   const innerWidth = width - padding * 2;
   const innerHeight = height - padding * 2;
 
+  const {
+    svgRef,
+    transform,
+    zoomIn,
+    zoomOut,
+    resetZoom,
+    hasDraggedRef,
+    handlers,
+  } = useZoomPan({ minZoom: 0.6, maxZoom: 6.0 });
+
   // Convert normalized [-1.0, 1.0] coordinate to canvas space
   const getCanvasCoords = (item: RadarItem, index: number): { x: number; y: number } => {
     let nx = item.cluster_x;
@@ -47,8 +59,12 @@ export const ClusterMap: React.FC<ClusterMapProps> = ({
     return { x, y };
   };
 
+  const scalePow = Math.pow(transform.k, 0.45);
+  const hoveredIdx = hoveredItem ? items.findIndex((it) => it.id === hoveredItem.id) : -1;
+  const hoveredCoords = hoveredItem && hoveredIdx >= 0 ? getCanvasCoords(hoveredItem, hoveredIdx) : null;
+
   return (
-    <div className="relative flex flex-col items-center select-none bg-[#121826] border border-[#1f293d] rounded-2xl p-6 shadow-2xl">
+    <div className="relative flex flex-col items-center select-none bg-[#121826] border border-[#1f293d] rounded-2xl p-6 shadow-2xl overflow-hidden">
       <div className="w-full flex justify-between items-center mb-4 px-2">
         <div>
           <h2 className="text-sm font-semibold text-slate-200">
@@ -68,66 +84,98 @@ export const ClusterMap: React.FC<ClusterMapProps> = ({
         </div>
       </div>
 
-      <svg width={width} height={height} className="overflow-visible bg-[#0d121f] rounded-xl border border-[#1f293d]/50">
-        {/* Subtle coordinate grid lines */}
-        <line x1={width / 2} y1={padding / 2} x2={width / 2} y2={height - padding / 2} stroke="#1e293b" strokeDasharray="3 3" />
-        <line x1={padding / 2} y1={height / 2} x2={width - padding / 2} y2={height / 2} stroke="#1e293b" strokeDasharray="3 3" />
+      <div className="relative w-full flex justify-center overflow-hidden rounded-xl border border-[#1f293d]/50 bg-[#0d121f]">
+        <svg
+          ref={svgRef}
+          {...handlers}
+          width={width}
+          height={height}
+          className="cursor-grab active:cursor-grabbing max-w-full h-auto"
+        >
+          <g transform={`translate(${transform.x}, ${transform.y}) scale(${transform.k})`}>
+            {/* Subtle coordinate grid lines */}
+            <line x1={width / 2} y1={padding / 2} x2={width / 2} y2={height - padding / 2} stroke="#1e293b" strokeDasharray="3 3" />
+            <line x1={padding / 2} y1={height / 2} x2={width - padding / 2} y2={height / 2} stroke="#1e293b" strokeDasharray="3 3" />
 
-        {/* Semantic Nodes */}
-        {items.map((item, idx) => {
-          const { x, y } = getCanvasCoords(item, idx);
-          const isSelected = selectedItem?.id === item.id;
-          const isHovered = hoveredItem?.id === item.id;
-          const color = CATEGORY_COLORS[item.category] || "#94a3b8";
+            {/* Semantic Nodes with scale-invariant radius */}
+            {items.map((item, idx) => {
+              const { x, y } = getCanvasCoords(item, idx);
+              const isSelected = selectedItem?.id === item.id;
+              const isHovered = hoveredItem?.id === item.id;
+              const color = CATEGORY_COLORS[item.category] || "#94a3b8";
 
-          return (
-            <g
-              key={item.id}
-              className="cursor-pointer transition-transform duration-150"
-              onClick={() => onSelectItem(item)}
-              onMouseEnter={() => setHoveredItem(item)}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              {(isSelected || isHovered) && (
-                <circle
-                  cx={x}
-                  cy={y}
-                  r="16"
-                  fill={color}
-                  fillOpacity="0.2"
-                  className="animate-pulse"
-                />
-              )}
-              <circle
-                cx={x}
-                cy={y}
-                r={isSelected || isHovered ? "8" : "6"}
-                fill={color}
-                stroke="#0b0f19"
-                strokeWidth="2"
-              />
-              <text
-                x={x + 10}
-                y={y + 4}
-                fill={isSelected || isHovered ? "#ffffff" : "#94a3b8"}
-                fontSize="10"
-                fontWeight={isSelected || isHovered ? "700" : "500"}
-                className="pointer-events-none"
-              >
-                {item.name}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
+              const baseRadius = isSelected || isHovered ? 7.5 : 5.5;
+              const nodeRadius = Math.max(3.0, baseRadius / scalePow);
+              const haloRadius = Math.max(7.0, 14.0 / scalePow);
+              const fontSize = Math.max(7.5, (isSelected || isHovered ? 10.5 : 9.0) / scalePow);
+              const labelOffset = Math.max(6.0, 8.0 / scalePow);
 
-      {/* Floating Tooltip */}
-      {hoveredItem && (
+              return (
+                <g
+                  key={item.id}
+                  className="cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (hasDraggedRef.current) return;
+                    onSelectItem(item);
+                  }}
+                  onMouseEnter={() => setHoveredItem(item)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                >
+                  {(isSelected || isHovered) && (
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r={haloRadius}
+                      fill={color}
+                      fillOpacity="0.25"
+                      className="pointer-events-none animate-pulse"
+                    />
+                  )}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={nodeRadius}
+                    fill={color}
+                    stroke="#0b0f19"
+                    strokeWidth="1.5"
+                    className="transition-all duration-150"
+                  />
+                  <text
+                    x={x + labelOffset}
+                    y={y + 3 / scalePow}
+                    fill={isSelected || isHovered ? "#ffffff" : "#94a3b8"}
+                    fontSize={fontSize}
+                    fontWeight={isSelected || isHovered ? "700" : "500"}
+                    className="pointer-events-none drop-shadow-sm select-none"
+                  >
+                    {item.name}
+                  </text>
+                </g>
+              );
+            })}
+          </g>
+        </svg>
+
+        {/* Floating Pan/Zoom HUD Controls */}
+        <ZoomControls
+          zoomLevel={transform.k}
+          onZoomIn={zoomIn}
+          onZoomOut={zoomOut}
+          onReset={resetZoom}
+        />
+      </div>
+
+      {/* Floating Tooltip mapped through active transform */}
+      {hoveredItem && hoveredCoords && (
         <div
           className="absolute z-50 bg-[#1e293b] border border-slate-700 text-slate-100 rounded-xl p-3 shadow-2xl pointer-events-none max-w-xs transition-opacity duration-150"
           style={{
-            left: Math.min(Math.max(getCanvasCoords(hoveredItem, 0).x - 40, 20), width - 200),
-            top: Math.max(getCanvasCoords(hoveredItem, 0).y - 80, 20),
+            left: Math.min(
+              Math.max(hoveredCoords.x * transform.k + transform.x - 40, 20),
+              width - 200
+            ),
+            top: Math.max(hoveredCoords.y * transform.k + transform.y - 80, 20),
           }}
         >
           <div className="flex items-center justify-between mb-1">

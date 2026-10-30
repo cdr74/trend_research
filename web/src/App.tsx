@@ -2,13 +2,12 @@ import React, { useEffect, useState, useMemo } from "react";
 import { RadarData, RadarItem, RadarRing, QECategory, EvidenceTier } from "./types";
 import { RadarChart } from "./components/RadarChart";
 import { TableView } from "./components/TableView";
-import { ScatterPlot } from "./components/ScatterPlot";
 import { ClusterMap } from "./components/ClusterMap";
 import { FilterSidebar } from "./components/FilterSidebar";
 import { ItemDetailModal } from "./components/ItemDetailModal";
 import { parseSearchQuery, matchesQuery } from "./utils/tokenSearch";
 
-type ViewMode = "radar" | "table" | "scatter" | "cluster";
+type ViewMode = "radar" | "table" | "cluster";
 
 export const App: React.FC = () => {
   const [data, setData] = useState<RadarData | null>(null);
@@ -183,7 +182,7 @@ export const App: React.FC = () => {
           </p>
         </div>
 
-        {/* 4 View Modes Switcher */}
+        {/* 3 View Modes Switcher */}
         <div className="flex items-center space-x-1.5 bg-[#0b0f19] p-1 rounded-xl border border-[#1f293d]">
           <button
             onClick={() => setActiveView("radar")}
@@ -204,16 +203,6 @@ export const App: React.FC = () => {
             }`}
           >
             Matrix Table ({filteredItems.length})
-          </button>
-          <button
-            onClick={() => setActiveView("scatter")}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-              activeView === "scatter"
-                ? "bg-blue-600 text-white shadow"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            Scatter Matrix
           </button>
           <button
             onClick={() => setActiveView("cluster")}
@@ -310,13 +299,6 @@ export const App: React.FC = () => {
               onSelectItem={setSelectedItem}
               selectedTheme={selectedTheme}
               onSelectTheme={setSelectedTheme}
-            />
-          )}
-          {activeView === "scatter" && (
-            <ScatterPlot
-              items={filteredItems}
-              selectedItem={selectedItem}
-              onSelectItem={setSelectedItem}
             />
           )}
           {activeView === "cluster" && (

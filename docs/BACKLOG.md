@@ -341,3 +341,30 @@
   - Document `--limit-per-source` parameter, default cap of 20 items, LLM token budget rationale, and deep bootstrap recipes.
   - Fix erroneous `--limit` flags in sync examples in `docs/USER_GUIDE.md` to match actual CLI syntax.
   - *Acceptance Criteria:* Documentation clearly guides operators on tuning ingestion volumes.
+
+---
+
+## Milestone 12: Streamlined 3-View Navigation & Interactive SVG Pan-Zoom Capabilities (Completed)
+**Goal:** Deprecate the redundant Scatter Matrix view, streamline dashboard navigation to three primary perspectives (Radar Quadrant, Matrix Table, Semantic Clusters), and implement high-performance, scale-invariant SVG pan-and-zoom capabilities with floating HUD controls for dense cluster inspection.
+
+### Stories & Tasks:
+- [x] **M12-T1: Architectural Specification: View Streamlining & Pan-Zoom Interaction (ADR-0027)**
+  - Author and approve ADR-0027 documenting view simplification and SVG transform pan-zoom architecture.
+  - *Acceptance Criteria:* ADR-0027 authored and indexed in README.md.
+- [x] **M12-T2: Reusable Zero-Dependency SVG Pan & Zoom Hook (`web/src/hooks/useZoomPan.ts`)**
+  - Implement custom hook handling cursor-centered mouse wheel zooming, drag panning, bounding constraints (0.6x to 6.0x), and programmatic controls.
+  - *Acceptance Criteria:* Hook exposes transform coordinates, event listeners, scale percentage, and reset functions cleanly.
+- [x] **M12-T3: Pan & Zoom Integration in Radar Chart with Floating HUD Controls (`web/src/components/RadarChart.tsx`)**
+  - Wrap SVG rendering in transform group and wire mouse wheel / drag interaction.
+  - Render floating HUD buttons (`[+]`, `[-]`, `[Reset]`, and zoom level display).
+  - Apply inverse scale factor to blip markers and labels so text remains legible and blips do not swell.
+  - *Acceptance Criteria:* Operator can smoothly zoom into and pan across dense ring quadrants with 300+ items.
+- [x] **M12-T4: Pan & Zoom Integration in Semantic Cluster Map (`web/src/components/ClusterMap.tsx`)**
+  - Wire `useZoomPan` into ClusterMap SVG and add floating HUD controls.
+  - Apply inverse scaling to cluster dots and labels.
+  - *Acceptance Criteria:* Operators can zoom in on tight UMAP semantic clusters and inspect co-located entities.
+- [x] **M12-T5: View Navigation Streamlining (Option A: Deprecate Scatter Matrix)**
+  - Remove Scatter Matrix tab from `App.tsx` and delete `web/src/components/ScatterPlot.tsx`.
+  - Streamline navigation bar to Radar Quadrant, Matrix Table, and Semantic Clusters.
+  - Update `docs/USER_GUIDE.md` and verify static compilation.
+  - *Acceptance Criteria:* `npm run build` succeeds with zero errors, bundle size reduced.
