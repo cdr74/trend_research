@@ -221,13 +221,14 @@ def test_categorize_batch(
     assert items[0].active is True
 
 
-def test_categorizer_inherits_topic_consensus_category(
+def test_categorizer_preserves_native_dossier_category_with_topic_theme(
     high_signal_dossier: SignalDossier,
     high_viability_evaluation: EnterpriseEvaluation,
 ) -> None:
+    """Verify ADR-0029 Option B: categorizer preserves dossier's native domain pillar while tagging topic theme."""
     categorizer = RadarCategorizer()
 
-    # Dossier has initial noisy category
+    # Dossier has specific functional pillar (e.g. Test Synthesis)
     high_signal_dossier.category = QECategory.TEST_SYNTHESIS
 
     # Topic consensus category is TRIAGE_AND_FIX
@@ -245,7 +246,8 @@ def test_categorizer_inherits_topic_consensus_category(
         evaluation=high_viability_evaluation,
         topic=topic,
     )
-    assert item_with_topic.category == QECategory.TRIAGE_AND_FIX
+    # Native functional pillar must be strictly preserved (ADR-0029)
+    assert item_with_topic.category == QECategory.TEST_SYNTHESIS
     assert item_with_topic.topic_name == "Automated Failure Diagnosis & Self-Healing"
 
     # Without topic, falls back to dossier category
@@ -393,3 +395,49 @@ def test_consolidate_canonical_exemplars_oversaturated_topic() -> None:
     for cit in canonical:
         assert len(cit.corroborating_sources) >= 4
         assert "https://github.com/student/mutation-demo" in cit.corroborating_sources
+
+
+def test_categorizer_preserves_native_dossier_category_across_differing_topic_category() -> None:
+    """Verify ADR-0029 Option B: An item retains its native QE domain pillar even if clustered under a cross-pillar topic."""
+    categorizer = RadarCategorizer()
+    dossier = SignalDossier(
+        source_id=uuid4(),
+        name="rohanpadhye/JQF",
+        category=QECategory.TEST_SYNTHESIS,  # Native pillar: Test Synthesis (fuzzing)
+        source_url="https://github.com/rohanpadhye/JQF",
+        evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+        key_innovation="Coverage-guided semantic fuzzing for Java.",
+        technical_claims=["Guided input generator"],
+        has_reproducible_benchmark=True,
+        has_open_source_repo=True,
+        is_superficial_wrapper=False,
+        engagement_metrics={"velocity": 20.0, "stars": 1200.0},
+    )
+    topic = TrendTopic(
+        name="Automated Failure Diagnosis & Self-Healing",
+        category=QECategory.TRIAGE_AND_FIX,  # Topic synthesized as Triage
+        summary="Automated triage and failure diagnostic systems.",
+        corroboration_count=5,
+        sources=["https://netflixtechblog.com/pensive", "https://github.com/rohanpadhye/JQF"],
+        average_viability=0.85,
+        average_validity=0.85,
+        lifecycle_stage=LifecycleStage.CONSOLIDATED,
+    )
+    evaluation = EnterpriseEvaluation(
+        dossier_id=dossier.id,
+        security_score=0.88,
+        cicd_score=0.84,
+        qe_score=0.90,
+        composite_viability_score=0.87,
+        enterprise_risks=[],
+        prerequisites=[],
+        skeptic_critique="Solid fuzzing engine.",
+    )
+
+    item = categorizer.categorize(dossier=dossier, evaluation=evaluation, topic=topic)
+
+    # Native pillar must be strictly preserved
+    assert item.category == QECategory.TEST_SYNTHESIS
+    # Cross-pillar dynamic theme name must be preserved
+    assert item.topic_name == "Automated Failure Diagnosis & Self-Healing"
+    assert item.recommended_ring == RadarRing.ADOPT

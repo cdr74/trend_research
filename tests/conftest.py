@@ -1,9 +1,22 @@
 """Pytest fixtures and configuration."""
 
 import pytest
+from pydantic_settings import SettingsConfigDict
 
-from radar.core.config import LLMProviderType, Settings
+from radar.core.config import LLMProviderType, Settings, settings
 from radar.providers.mock import MockProvider
+
+
+@pytest.fixture(autouse=True)
+def isolate_test_settings(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Ensure global settings are isolated from developer local .env files during tests."""
+    monkeypatch.setattr(settings, "github_token", None)
+    monkeypatch.setattr(settings, "batch_size", 20)
+    monkeypatch.setattr(
+        Settings,
+        "model_config",
+        SettingsConfigDict(env_file=None, extra="ignore"),
+    )
 
 
 @pytest.fixture

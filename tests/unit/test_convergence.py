@@ -328,6 +328,7 @@ async def test_bounded_themes_condensation_under_cap(mock_provider: MockProvider
         provider=mock_provider,
         convergence_threshold=0.90,
         max_themes=3,
+        merge_min_similarity=0.0,
     )
 
     dossiers: list[SignalDossier] = []
@@ -398,3 +399,31 @@ async def test_dynamic_theme_attribution_on_convergence(mock_provider: MockProvi
     assert d1.topic_id == d2.topic_id
     assert d1.topic_name == d2.topic_name
     assert d1.topic_name is not None
+
+
+@pytest.mark.asyncio
+async def test_condensation_halts_at_similarity_floor(mock_provider: MockProvider) -> None:
+    """Verify ADR-0029: Condensation halts when closest centroids have similarity below floor."""
+    engine = TopicConvergenceEngine(
+        provider=mock_provider,
+        convergence_threshold=0.90,
+        max_themes=2,
+        merge_min_similarity=0.50,
+    )
+
+    dossiers = [
+        SignalDossier(
+            source_id=uuid4(),
+            name=f"Orthogonal_Tool_{i}",
+            category=QECategory.TEST_SYNTHESIS,
+            source_url=f"https://example.com/tool_{i}",
+            evidence_tier=EvidenceTier.OPEN_SOURCE_REPO,
+            key_innovation=f"Key innovation {i}",
+            embedding=make_unit_vector(1536, i),
+        )
+        for i in range(4)
+    ]
+
+    await engine.converge_batch(dossiers)
+    # Since orthogonal vectors have similarity 0.0 < 0.50, condensation stops and leaves 4 distinct topics
+    assert len(engine._topics) == 4

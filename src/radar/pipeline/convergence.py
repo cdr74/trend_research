@@ -54,6 +54,7 @@ class TopicConvergenceEngine:
         wrapper_penalty: float = settings.wrapper_penalty,
         corroboration_bonus: float = settings.corroboration_consensus_bonus,
         max_themes: int = settings.max_dynamic_themes,
+        merge_min_similarity: float = settings.topic_merge_min_similarity,
         system_prompt: str = DEFAULT_TOPIC_SYNTHESIS_SYSTEM_PROMPT,
     ) -> None:
         self.provider = provider
@@ -62,6 +63,7 @@ class TopicConvergenceEngine:
         self.wrapper_penalty = wrapper_penalty
         self.corroboration_bonus = corroboration_bonus
         self.max_themes = max_themes
+        self.merge_min_similarity = merge_min_similarity
         self.system_prompt = system_prompt
 
         self._topics: dict[UUID, TrendTopic] = {}
@@ -299,7 +301,7 @@ class TopicConvergenceEngine:
                         best_pair_sim = sim
                         best_pair = (t1_id, t2_id)
 
-            if best_pair is None:
+            if best_pair is None or best_pair_sim < self.merge_min_similarity:
                 break
 
             keep_id, merge_id = best_pair

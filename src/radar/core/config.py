@@ -90,6 +90,13 @@ class Settings(BaseSettings):
         alias="RADAR_MAX_DYNAMIC_THEMES",
         description="Upper bound on active dynamic theme clusters across an evaluated radar view",
     )
+    topic_merge_min_similarity: float = Field(
+        default=0.50,
+        ge=0.0,
+        le=1.0,
+        alias="RADAR_TOPIC_MERGE_MIN_SIMILARITY",
+        description="Minimum cosine similarity required to merge topic clusters during Stage 3 condensation",
+    )
     wrapper_similarity_threshold: float = Field(
         default=0.88,
         ge=0.0,

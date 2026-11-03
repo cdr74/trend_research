@@ -42,6 +42,8 @@ Open-source repositories provide live telemetry on actual adoption and technical
    - `https://github.com/topics/test-generation`
    - `https://github.com/topics/mutation-testing`
    - `https://github.com/topics/flaky-tests`
+   - `https://github.com/topics/test-triage`
+   - `https://github.com/topics/fuzzing`
    - `https://github.com/topics/browser-automation`
    - `https://github.com/topics/evals`
    - `https://github.com/topics/agentic-testing`

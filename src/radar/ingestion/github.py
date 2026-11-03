@@ -187,11 +187,17 @@ class GithubIngestor(BaseIngestor):
 
             if resp.status_code in (403, 429):
                 remaining = resp.headers.get("x-ratelimit-remaining")
-                if remaining == "0" and not self.token:
+                if remaining == "0":
+                    if not self.token:
+                        raise RuntimeError(
+                            f"GitHub search rate limit exceeded ({resp.status_code}). "
+                            "Unauthenticated requests are limited to 10 queries/min. "
+                            "Configure GITHUB_TOKEN in your environment or .env for higher quota."
+                        )
                     raise RuntimeError(
                         f"GitHub search rate limit exceeded ({resp.status_code}). "
-                        "Unauthenticated requests are limited to 10 queries/min. "
-                        "Configure GITHUB_TOKEN in your environment or .env for higher quota."
+                        "Authenticated requests are limited to 30 search queries/min. "
+                        "Please wait before retrying."
                     )
 
             resp.raise_for_status()

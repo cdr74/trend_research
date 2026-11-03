@@ -156,7 +156,8 @@ class RadarCategorizer:
 
         sources = topic.sources if topic else [dossier.source_url]
         corroboration_count = topic.corroboration_count if topic else 1
-        category = topic.category if topic else dossier.category
+        # Retain the extractor's specific QE domain pillar classification (ADR-0029 Option B)
+        category = dossier.category
 
         return RadarItem(
             dossier_id=dossier.id,

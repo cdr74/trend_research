@@ -102,6 +102,39 @@ sources:
     telemetry_fields: ["stars", "forks"]
     description: "Generative and property-based test synthesis frameworks and automated invariant discovery tools."
 
+  - id: "github-topic-test-triage"
+    name: "GitHub Topic: Test Triage & Failure Analysis"
+    channel: "github"
+    endpoint_url: "https://api.github.com/search/repositories"
+    authority_weight: 1.15
+    enabled: true
+    query_params:
+      q: "topic:test-triage OR topic:failure-analysis OR topic:root-cause-analysis sort:updated"
+    telemetry_fields: ["stars", "forks", "open_issues"]
+    description: "Automated root-cause analysis, defect triage, and failure diagnostic tools."
+
+  - id: "github-topic-flaky-tests"
+    name: "GitHub Topic: Flaky Tests & Self-Healing"
+    channel: "github"
+    endpoint_url: "https://api.github.com/search/repositories"
+    authority_weight: 1.1
+    enabled: true
+    query_params:
+      q: "topic:flaky-tests OR topic:flaky-test-detection sort:updated"
+    telemetry_fields: ["stars", "forks"]
+    description: "Flaky test detection, quarantine strategies, and automated repair runners."
+
+  - id: "github-topic-fuzzing"
+    name: "GitHub Topic: Fuzzing & Dynamic Program Analysis"
+    channel: "github"
+    endpoint_url: "https://api.github.com/search/repositories"
+    authority_weight: 1.15
+    enabled: true
+    query_params:
+      q: "topic:fuzzing OR topic:fuzz-testing sort:stars"
+    telemetry_fields: ["stars", "forks"]
+    description: "Coverage-guided fuzzing, grammar-based fuzzing, and invariant exploration engines."
+
   # ==========================================
   # Practitioner Engineering Blogs (Weight: 1.2)
   # ==========================================

@@ -43,3 +43,47 @@ async def test_mock_provider_embed_text_thematic_clustering(mock_provider: MockP
 
     assert sim_same > 0.80
     assert sim_diff < 0.40
+
+
+@pytest.mark.asyncio
+async def test_mock_provider_fuzzing_and_triage_alignment(mock_provider: MockProvider) -> None:
+    from radar.core.models import ExtractedInnovation, QECategory, SynthesizedTopic
+
+    # Test Fuzzing / JQF extraction & topic synthesis
+    fuzz_extracted = await mock_provider.generate_structured(
+        prompt="Title: rohanpadhye/JQF\nContent Body / Abstract: Coverage-guided semantic fuzzing for Java.",
+        response_model=ExtractedInnovation,
+    )
+    assert fuzz_extracted.category == QECategory.TEST_SYNTHESIS
+
+    fuzz_topic = await mock_provider.generate_structured(
+        prompt="Convergent Innovations:\n- Name: rohanpadhye/JQF | Key Innovation: JQF + Zest fuzzing.",
+        response_model=SynthesizedTopic,
+    )
+    assert fuzz_topic.name == "Coverage-Guided Fuzzing & Dynamic Test Generation"
+    assert fuzz_topic.primary_category == QECategory.TEST_SYNTHESIS
+
+    # Test Triage / ReportPortal extraction & topic synthesis
+    triage_extracted = await mock_provider.generate_structured(
+        prompt="Title: reportportal/reportportal\nContent Body / Abstract: AI-based test automation dashboard and failure triage.",
+        response_model=ExtractedInnovation,
+    )
+    assert triage_extracted.category == QECategory.TRIAGE_AND_FIX
+
+    triage_topic = await mock_provider.generate_structured(
+        prompt="Convergent Innovations:\n- Name: reportportal | Key Innovation: Automated triage and defect classification.",
+        response_model=SynthesizedTopic,
+    )
+    assert triage_topic.name == "Automated Failure Diagnosis & Self-Healing"
+    assert triage_topic.primary_category == QECategory.TRIAGE_AND_FIX
+
+    # Test Fuzzing vs Triage embedding discrimination
+    vec_fuzz1 = await mock_provider.embed_text("rohanpadhye/JQF coverage-guided fuzzing")
+    vec_fuzz2 = await mock_provider.embed_text("fuzzcheck-rs evolutionary fuzzer")
+    vec_triage = await mock_provider.embed_text("reportportal automated triage and log root cause")
+
+    sim_fuzz = sum(a * b for a, b in zip(vec_fuzz1, vec_fuzz2, strict=False))
+    sim_cross = sum(a * b for a, b in zip(vec_fuzz1, vec_triage, strict=False))
+
+    assert sim_fuzz > 0.80
+    assert sim_cross < 0.40

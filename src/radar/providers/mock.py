@@ -65,6 +65,26 @@ class MockProvider(LLMProvider):
             elif any(
                 k in prompt_lower
                 for k in (
+                    "fuzz",
+                    "fuzzing",
+                    "jqf",
+                    "fuzzcheck",
+                    "zest",
+                    "afl",
+                    "jazzer",
+                    "sapienz",
+                    "libfuzzer",
+                )
+            ):
+                name_val = "Coverage-Guided Fuzzing & Dynamic Test Generation"
+                summary_val = (
+                    "Automated coverage-guided fuzzing, evolutionary input generation, and "
+                    "dynamic invariant testing."
+                )
+                cat_val = QECategory.TEST_SYNTHESIS
+            elif any(
+                k in prompt_lower
+                for k in (
                     "browser",
                     "mcp",
                     "agent",
@@ -84,11 +104,21 @@ class MockProvider(LLMProvider):
                 cat_val = QECategory.AGENT_SYSTEMS
             elif any(
                 k in prompt_lower
-                for k in ("pensive", "diagnosis", "failure", "sapienz", "heal", "rca")
+                for k in (
+                    "pensive",
+                    "diagnosis",
+                    "failure",
+                    "heal",
+                    "rca",
+                    "root cause",
+                    "triage",
+                    "reportportal",
+                    "flaky",
+                )
             ):
                 name_val = "Automated Failure Diagnosis & Self-Healing"
                 summary_val = (
-                    "Production-grade root cause analysis and automated test repair for flaky and "
+                    "Production-grade root cause analysis, automated triage, and test repair for flaky and "
                     "failing test executions."
                 )
                 cat_val = QECategory.TRIAGE_AND_FIX
@@ -102,6 +132,10 @@ class MockProvider(LLMProvider):
                     "contract",
                     "spec-driven",
                     "model-based",
+                    "discipline",
+                    "law checking",
+                    "scalacheck",
+                    "quickcheck",
                 )
             ):
                 name_val = "Model-Based & Property-Driven Testing"
@@ -196,12 +230,28 @@ class MockProvider(LLMProvider):
                             "contract",
                             "model",
                             "spec-driven",
+                            "discipline",
+                            "law checking",
+                            "scalacheck",
+                            "quickcheck",
                         )
                     ):
                         dummy_data[name] = QECategory.SPEC_AND_MODEL
                     elif any(
                         k in prompt_lower
-                        for k in ("synthesis", "keploy", "fuzz", "test generation")
+                        for k in (
+                            "synthesis",
+                            "keploy",
+                            "fuzz",
+                            "fuzzing",
+                            "jqf",
+                            "fuzzcheck",
+                            "zest",
+                            "afl",
+                            "jazzer",
+                            "sapienz",
+                            "test generation",
+                        )
                     ):
                         dummy_data[name] = QECategory.TEST_SYNTHESIS
                     elif any(
@@ -218,7 +268,16 @@ class MockProvider(LLMProvider):
                         dummy_data[name] = QECategory.GOVERNANCE_AND_EVALS
                     elif any(
                         k in prompt_lower
-                        for k in ("flaky", "heal", "diagnosis", "repair", "pensive")
+                        for k in (
+                            "flaky",
+                            "heal",
+                            "diagnosis",
+                            "repair",
+                            "pensive",
+                            "triage",
+                            "reportportal",
+                            "root cause",
+                        )
                     ):
                         dummy_data[name] = QECategory.TRIAGE_AND_FIX
                     elif any(k in prompt_lower for k in ("agent", "autonomous", "mcp")):
@@ -266,6 +325,8 @@ class MockProvider(LLMProvider):
                             "sapienz",
                             "pensive",
                             "automut",
+                            "jqf",
+                            "reportportal",
                         )
                     ):
                         if name == "security_score":
@@ -382,6 +443,21 @@ class MockProvider(LLMProvider):
         elif any(
             k in text_lower
             for k in (
+                "fuzz",
+                "fuzzing",
+                "jqf",
+                "fuzzcheck",
+                "zest",
+                "afl",
+                "jazzer",
+                "sapienz",
+                "libfuzzer",
+            )
+        ):
+            theme_seed = 8080808
+        elif any(
+            k in text_lower
+            for k in (
                 "browser",
                 "mcp",
                 "agent",
@@ -402,11 +478,12 @@ class MockProvider(LLMProvider):
                 "pensive",
                 "diagnosis",
                 "failure",
-                "sapienz",
                 "heal",
                 "rca",
                 "root cause",
                 "flaky",
+                "triage",
+                "reportportal",
             )
         ):
             theme_seed = 3030303
@@ -420,6 +497,10 @@ class MockProvider(LLMProvider):
                 "contract",
                 "spec-driven",
                 "model-based",
+                "discipline",
+                "law checking",
+                "scalacheck",
+                "quickcheck",
             )
         ):
             theme_seed = 7070707

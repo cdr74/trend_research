@@ -321,6 +321,9 @@ def test_cli_sync_ui_flag() -> None:
             "radar.presentation.cli._ensure_db_ready", new_callable=AsyncMock, return_value=False
         ),
     ):
-        res = runner.invoke(main, ["sync", "--mock", "--ui", "--no-db", "--limit-per-source", "1"])
+        res = runner.invoke(
+            main,
+            ["sync", "--mock", "--ui", "--no-db", "--limit-per-source", "1", "--no-export"],
+        )
         assert res.exit_code == 0
         assert "Web dashboard is live" in res.output

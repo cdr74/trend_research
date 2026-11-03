@@ -211,6 +211,7 @@ uv run ruff check .
 | **[Local Tooling & Invariants (AGENTS.md)](AGENTS.md)** | Local development directives, verification standards, and commit invariants. |
 
 ### Key Architecture Decision Records (ADRs)
+- **[ADR 0029: Discovery Stream Expansion, Semantic Convergence Floor, and Pillar Integrity Guardrails](docs/adr/0029-discovery-stream-expansion-and-pillar-integrity-guardrails.md)**
 - **[ADR 0028: Canonical Exemplar Consolidation and Open-Source Traction Sieve](docs/adr/0028-canonical-exemplar-consolidation-and-open-source-traction-sieve.md)**
 - **[ADR 0027: Streamlined Three-View Navigation and SVG Pan-Zoom Interaction](docs/adr/0027-streamlined-three-view-navigation-and-svg-pan-zoom-interaction.md)**
 - **[ADR 0026: Robust Feed Endpoints, GitHub Pagination, and Community Ingestion](docs/adr/0026-robust-feed-endpoints-github-pagination-and-community-ingestion.md)**

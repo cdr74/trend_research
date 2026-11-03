@@ -412,3 +412,41 @@
   - Verify static web compilation (`npm run build`).
   - Run re-export / evaluation on corpus to update `web/public/radar.json`.
   - *Acceptance Criteria:* 100% test integrity, zero type errors, clean production bundle.
+
+---
+
+## Milestone 14: Discovery Stream Expansion, Semantic Convergence Floor & Pillar Preservation (Completed)
+**Goal:** Eliminate taxonomic bleeding and cross-pillar misclassification (such as fuzzing tools appearing in Triage) while expanding targeted discovery of emerging AI auto-triage and failure analysis solutions without polluting the radar with legacy tools.
+
+### Stories & Tasks:
+- [x] **M14-T1: Architectural Specification: Discovery Stream Expansion & Pillar Integrity (ADR-0029)**
+  - Author and formalize ADR-0029 documenting the native pillar preservation contract (Option B), the Stage 3 condensation similarity floor ($\tau \ge 0.50$), and targeted discovery streams.
+  - *Acceptance Criteria:* ADR-0029 authored, linked in `README.md`, and indexed in backlog.
+- [x] **M14-T2: Native Pillar Preservation in Stage 4 Categorizer (`src/radar/pipeline/categorizer.py`)**
+  - Update `RadarCategorizer.categorize()` to preserve `item.category = dossier.category`, removing the blind topic category override.
+  - Retain `item.topic_name` for cross-cutting thematic grouping and search tokens.
+  - Add unit tests verifying an item in `Test Synthesis` retains its category even when clustered under a multi-pillar topic.
+  - *Acceptance Criteria:* `mypy --strict` passes; unit tests verify pillar preservation.
+- [x] **M14-T3: Guardrailed Similarity Floor in Stage 3 Topic Condensation (`convergence.py`, `config.py`)**
+  - Add `topic_merge_min_similarity: float = Field(default=0.50)` to `Settings`.
+  - In `TopicConvergenceEngine.condense_topics()`, halt pairwise merges if `best_pair_sim < self.merge_min_similarity`.
+  - Add unit tests verifying that clusters with cosine similarity below 0.50 are never forcibly merged.
+  - *Acceptance Criteria:* Disparate topic clusters remain distinct; unit tests pass.
+- [x] **M14-T4: Targeted Discovery Streams for Triage, Flaky Tests, and Fuzzing (`sources.yaml`, `data_sources.md`)**
+  - Expand `data/seeds/sources.yaml` with GitHub topic discovery feeds:
+    - `github-topic-test-triage` (`topic:test-triage OR topic:failure-analysis OR topic:root-cause-analysis`)
+    - `github-topic-flaky-tests` (`topic:flaky-tests OR topic:flaky-test-detection`)
+    - `github-topic-fuzzing` (`topic:fuzzing OR topic:fuzz-testing`)
+  - Update `docs/data_sources.md` reflecting the new stream specifications.
+  - *Acceptance Criteria:* Catalog validation passes; `uv run radar ingest --dry-run` acknowledges new sources.
+- [x] **M14-T5: Mock LLM Alignment & Fuzzing/Triage Thematic Recognition (`src/radar/providers/mock.py`)**
+  - Add dedicated theme seed `8080808` for fuzzing keywords (`fuzz`, `jqf`, `fuzzcheck`, `zest`, `afl`, `jazzer`).
+  - Add mock topic synthesis and category extraction for `"Coverage-Guided Fuzzing & Dynamic Test Generation"` (`Test Synthesis`).
+  - Re-align Meta's `Sapienz` under `Test Synthesis` rather than Triage.
+  - *Acceptance Criteria:* Offline pipeline evaluation correctly places JQF in Test Synthesis and Pensive in Triage & Self-Healing.
+- [x] **M14-T6: Verification, Golden Benchmark Tests & Re-Evaluation Parity**
+  - Run full test suite (`uv run pytest -v`).
+  - Run strict typing (`uv run mypy src tests`) and linting (`uv run ruff check .`).
+  - Re-run pipeline evaluation to update `web/public/radar.json`, ensuring JQF is correctly positioned in `Test Synthesis`.
+  - Verify static web compilation (`cd web && npm run build`).
+  - *Acceptance Criteria:* 100% test integrity, JQF accurately placed in Test Synthesis on radar view, clean build.
